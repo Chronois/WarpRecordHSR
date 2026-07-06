@@ -109,10 +109,153 @@
     </div>
   </section>
 
+  <!-- MANAGE DATA -->
+  <section class="section" id="manageSection">
+    <div class="section-head">
+      <span class="eyebrow">06 — Kelola Data</span>
+      <h2>Ruang Kendali Trailblazer</h2>
+      <p class="manage-desc">Tambahkan pull baru langsung dari sini — tidak perlu buka <code>data.js</code> lagi. Perubahan otomatis tersimpan di browser ini. Kalau mau perubahan tampil juga buat orang lain yang buka link publiknya, klik <strong>Export data.js</strong> lalu upload ulang file itu ke GitHub (menimpa yang lama).</p>
+      <div class="tabs" id="manageTabs">
+        <button class="tab active" data-manage="limited">Warp Limited</button>
+        <button class="tab" data-manage="standard">Warp Standard</button>
+        <button class="tab" data-manage="freebies">Hadiah Gratis</button>
+        <button class="tab" data-manage="roster">Roster</button>
+      </div>
+    </div>
+
+    <div class="manage-toolbar">
+      <span class="save-status" id="saveStatus">—</span>
+      <div class="manage-actions">
+        <button type="button" class="btn-ghost" id="btnExport">⬇ Export data.js</button>
+        <label class="btn-ghost" for="importFile">⬆ Import data.js</label>
+        <input type="file" id="importFile" accept=".js,.json,application/json,text/javascript" hidden>
+        <button type="button" class="btn-ghost danger" id="btnReset">↺ Reset ke Bawaan</button>
+      </div>
+    </div>
+
+    <form class="manage-form" id="form-limited" data-section="limited">
+      <div class="field">
+        <label>Tanggal</label>
+        <input type="date" name="date" required>
+      </div>
+      <div class="field">
+        <label>Jenis</label>
+        <select name="category" required>
+          <option value="Character">Karakter</option>
+          <option value="Light Cone">Light Cone</option>
+        </select>
+      </div>
+      <div class="field field-grow">
+        <label>Nama</label>
+        <input type="text" name="name" required placeholder="mis. Feixiao">
+      </div>
+      <div class="field field-narrow">
+        <label>Pity</label>
+        <input type="number" name="pity" min="1" max="90" required>
+      </div>
+      <div class="field">
+        <label>Hasil 50/50</label>
+        <select name="result" required>
+          <option value="W">Menang</option>
+          <option value="L">Kalah</option>
+          <option value="G">Guaranteed</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-add">+ Tambah Pull</button>
+    </form>
+
+    <form class="manage-form" id="form-standard" data-section="standard" hidden>
+      <div class="field">
+        <label>Tanggal</label>
+        <input type="date" name="date" required>
+      </div>
+      <div class="field">
+        <label>Jenis</label>
+        <select name="category" required>
+          <option value="Character">Karakter</option>
+          <option value="Light Cone">Light Cone</option>
+        </select>
+      </div>
+      <div class="field field-grow">
+        <label>Nama</label>
+        <input type="text" name="name" required placeholder="mis. Gepard">
+      </div>
+      <div class="field field-narrow">
+        <label>Pity</label>
+        <input type="number" name="pity" min="1" max="80" required>
+      </div>
+      <button type="submit" class="btn-add">+ Tambah Pull</button>
+    </form>
+
+    <form class="manage-form" id="form-freebies" data-section="freebies" hidden>
+      <div class="field">
+        <label>Tanggal</label>
+        <input type="date" name="date" required>
+      </div>
+      <div class="field">
+        <label>Jenis</label>
+        <select name="category" required>
+          <option value="Character">Karakter</option>
+          <option value="Light Cone">Light Cone</option>
+        </select>
+      </div>
+      <div class="field field-grow">
+        <label>Nama</label>
+        <input type="text" name="name" required placeholder="mis. Dr. Ratio">
+      </div>
+      <div class="field field-grow">
+        <label>Event</label>
+        <input type="text" name="event" required placeholder="mis. Golden Companion Spirit">
+      </div>
+      <button type="submit" class="btn-add">+ Tambah Hadiah</button>
+    </form>
+
+    <form class="manage-form" id="form-roster" data-section="roster" hidden>
+      <div class="field field-grow">
+        <label>Nama</label>
+        <input type="text" name="name" required placeholder="mis. Feixiao">
+      </div>
+      <div class="field field-grow">
+        <label>Sumber</label>
+        <input type="text" name="source" required placeholder="Limited / Standard" list="sourceOptions">
+        <datalist id="sourceOptions">
+          <option value="Limited">
+          <option value="Standard">
+          <option value="Celestial Invitation">
+          <option value="Golden Companion Spirit">
+        </datalist>
+      </div>
+      <div class="field field-narrow">
+        <label>Eidolon</label>
+        <input type="text" name="eidolon" required placeholder="E0 / NoE">
+      </div>
+      <div class="field field-narrow">
+        <label>Signature</label>
+        <input type="text" name="signature" required placeholder="S0 / NoS">
+      </div>
+      <div class="field field-narrow">
+        <label>Nilai Eidolon</label>
+        <input type="number" name="pullValueEidolon" min="0" step="1" value="0">
+      </div>
+      <div class="field field-narrow">
+        <label>Nilai Signature</label>
+        <input type="number" name="pullValueSignature" min="0" step="1" value="0">
+      </div>
+      <button type="submit" class="btn-add">+ Tambah Roster</button>
+    </form>
+
+    <div class="manage-table-wrap">
+      <table class="manage-table" id="manageTable">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
 </main>
 
 <footer class="site-footer">
-  <p>Warp Ledger — dibuat dari data pribadi Trailblazer. Update <code>data.js</code> tiap habis warp untuk memperbarui statistik.</p>
+  <p>Warp Ledger — dibuat dari data pribadi Trailblazer. Isi lewat panel <strong>Kelola Data</strong> di atas, atau update <code>data.js</code> manual tiap habis warp.</p>
 </footer>
 
 <script src="data.js"></script>
