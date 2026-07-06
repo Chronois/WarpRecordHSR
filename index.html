@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warp Log · Astral Express Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<header class="hero">
+  <div class="hero-eyebrow">TRAILBLAZE LOG // ASTRAL EXPRESS</div>
+  <h1 class="hero-title">Warp Ledger</h1>
+  <p class="hero-sub">Setiap warp adalah satu perhentian. Ini rekam jejak perjalanan pull kamu — dari stasiun ke stasiun, kemenangan dan kekalahan 50/50, sampai ke jade terakhir yang tersisa.</p>
+  <div class="hero-meta">
+    <span id="metaGenerated">—</span>
+    <span class="dot">·</span>
+    <span id="metaTotalWarps">—</span> warp tercatat
+  </div>
+</header>
+
+<main>
+
+  <!-- OVERVIEW -->
+  <section class="section" id="overview">
+    <div class="section-head">
+      <span class="eyebrow">01 — Ringkasan</span>
+      <h2>Status Perjalanan</h2>
+    </div>
+    <div class="stat-grid" id="statGrid"></div>
+  </section>
+
+  <!-- LIMITED BANNER -->
+  <section class="section" id="limitedSection">
+    <div class="section-head">
+      <span class="eyebrow">02 — Banner Kejar (Limited)</span>
+      <h2>Jalur Warp Utama</h2>
+      <div class="tabs" id="limitedTabs">
+        <button class="tab active" data-cat="Character">Karakter</button>
+        <button class="tab" data-cat="Light Cone">Light Cone</button>
+      </div>
+    </div>
+
+    <div class="banner-stats" id="limitedStats"></div>
+
+    <div class="track-wrap">
+      <div class="track-scroll" id="limitedTrack"></div>
+      <div class="legend">
+        <span><i style="background:var(--win)"></i>Menang 50/50</span>
+        <span><i style="background:var(--loss)"></i>Kalah 50/50</span>
+        <span><i style="background:var(--guaranteed)"></i>Guaranteed</span>
+      </div>
+    </div>
+    <p class="track-hint">Geser ke samping untuk menyusuri linimasa &nbsp;→&nbsp; jarak antar stasiun merepresentasikan lamanya penantian (hari)</p>
+  </section>
+
+  <!-- STANDARD BANNER -->
+  <section class="section" id="standardSection">
+    <div class="section-head">
+      <span class="eyebrow">03 — Banner Standar</span>
+      <h2>Jalur Cadangan</h2>
+    </div>
+    <div class="banner-stats" id="standardStats"></div>
+    <div class="track-wrap">
+      <div class="track-scroll" id="standardTrack"></div>
+    </div>
+  </section>
+
+  <!-- FREEBIES -->
+  <section class="section" id="freebiesSection">
+    <div class="section-head">
+      <span class="eyebrow">04 — Hadiah Cuma-Cuma</span>
+      <h2>Titipan dari Herta Space Station</h2>
+    </div>
+    <div class="freebie-row" id="freebieRow"></div>
+  </section>
+
+  <!-- ROSTER -->
+  <section class="section" id="rosterSection">
+    <div class="section-head">
+      <span class="eyebrow">05 — Kabin Penumpang</span>
+      <h2>Roster Terkumpul</h2>
+      <div class="tabs" id="rosterTabs">
+        <button class="tab active" data-filter="all">Semua</button>
+        <button class="tab" data-filter="Limited">Limited</button>
+        <button class="tab" data-filter="Standard">Standard</button>
+        <button class="tab" data-filter="other">Lainnya</button>
+      </div>
+    </div>
+    <div class="roster-table-wrap">
+      <table class="roster-table" id="rosterTable">
+        <thead>
+          <tr>
+            <th data-sort="name">Nama</th>
+            <th data-sort="source">Sumber</th>
+            <th data-sort="eidolon">Eidolon</th>
+            <th data-sort="signature">Signature</th>
+            <th data-sort="totalPullValue">Nilai Pull</th>
+            <th data-sort="pullPercent">% dari Total</th>
+          </tr>
+        </thead>
+        <tbody id="rosterBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Warp Ledger — dibuat dari data pribadi Trailblazer. Update <code>data.js</code> tiap habis warp untuk memperbarui statistik.</p>
+</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
