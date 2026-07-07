@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Warp Ledger · Astral Express Companion</title>
+<title>Warp Record HSR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -13,76 +13,59 @@
 
 <div class="stars" id="stars"></div>
 
-<nav class="main-nav" id="mainNav" aria-label="Main sections">
-  <button class="nav-item" data-page="characters" style="--accent:var(--gold)">
-    <span class="nav-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="10" r="3"/><path d="M6 19c1.1-3 3.3-4.6 6-4.6s4.9 1.6 6 4.6"/></svg>
-    </span>
-    <span class="nav-label">Characters</span>
-  </button>
-  <button class="nav-item" data-page="databank" style="--accent:var(--cyan)">
-    <span class="nav-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7.5" ry="3"/><path d="M4.5 5.5v6.3c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V5.5"/><path d="M4.5 11.8v6.2c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6.2"/></svg>
-    </span>
-    <span class="nav-label">Data Bank</span>
-  </button>
-  <button class="nav-item active" data-page="warptracker" style="--accent:var(--nebula)">
-    <span class="nav-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1.8v2.4M12 19.8v2.4M1.8 12h2.4M19.8 12h2.4"/></svg>
-    </span>
-    <span class="nav-label">Warp Tracker</span>
-  </button>
-  <button class="nav-item" data-page="ascension" style="--accent:var(--win)">
-    <span class="nav-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-4h4v-4h4v-4h4v-4h4"/></svg>
-    </span>
-    <span class="nav-label">Ascension Planner</span>
-  </button>
-  <button class="nav-item" data-page="achievements" style="--accent:var(--gold-soft)">
-    <span class="nav-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4.2a4 4 0 0 1-8 0V4z"/><path d="M8 4.8H5.3a2.8 2.8 0 0 0 2.8 3.6M16 4.8h2.7a2.8 2.8 0 0 1-2.8 3.6"/><path d="M12 12.2v3M9 19.5h6M9.8 19.5v-2.1h4.4v2.1"/></svg>
-    </span>
-    <span class="nav-label">Achievements</span>
-  </button>
+<nav class="main-nav" id="mainNav" aria-label="Sheets">
+  <button class="nav-item active" data-page="limitedhistory">LimitedHistory<span class="nav-caret">▾</span></button>
+  <button class="nav-item" data-page="standardhistory">StandardHistory<span class="nav-caret">▾</span></button>
+  <button class="nav-item" data-page="freebies">Freebies<span class="nav-caret">▾</span></button>
+  <button class="nav-item" data-page="calc">Calc<span class="nav-caret">▾</span></button>
+  <button class="nav-item" data-page="priority">Priority<span class="nav-caret">▾</span></button>
+  <button class="nav-item" data-page="team">Team<span class="nav-caret">▾</span></button>
+  <button class="nav-item" data-page="character">Character<span class="nav-caret">▾</span></button>
+  <button class="nav-item" data-page="stellarjade">StellarJade<span class="nav-caret">▾</span></button>
 </nav>
 
-<div class="page" id="page-warptracker">
+<div class="util-bar">
+  <span class="save-status" id="saveStatus">—</span>
+  <div class="util-actions">
+    <button type="button" class="btn-ghost" id="btnExport">⬇ Export data.js</button>
+    <label class="btn-ghost" for="importFile">⬆ Import data.js</label>
+    <input type="file" id="importFile" accept=".js,.json,application/json,text/javascript" hidden>
+    <button type="button" class="btn-ghost danger" id="btnReset">↺ Reset to Default</button>
+  </div>
+</div>
 
-  <header class="hero">
-    <div class="hero-eyebrow">TRAILBLAZE LOG // ASTRAL EXPRESS</div>
-    <h1 class="hero-title">Warp Ledger</h1>
-    <p class="hero-sub">Every warp is a stop along the line. This is the record of your pull journey — station to station, every 50/50 win and loss, down to the last Stellar Jade.</p>
-    <div class="hero-meta">
-      <span id="metaGenerated">—</span>
-      <span class="dot">·</span>
-      <span id="metaTotalWarps">—</span> warps logged
-    </div>
-  </header>
+<header class="hero">
+  <div class="hero-eyebrow">TRAILBLAZE LOG // ASTRAL EXPRESS</div>
+  <h1 class="hero-title">Warp Record HSR</h1>
+  <p class="hero-sub">Every warp is a stop along the line. This is the record of your pull journey — station to station, every 50/50 win and loss, down to the last Stellar Jade.</p>
+  <div class="hero-meta">
+    <span id="metaGenerated">—</span>
+    <span class="dot">·</span>
+    <span id="metaTotalWarps">—</span> warps logged
+  </div>
+</header>
 
+<!-- LIMITED HISTORY -->
+<div class="page" id="page-limitedhistory">
   <main>
-
-    <!-- OVERVIEW -->
-    <section class="section" id="overview">
+    <section class="section">
       <div class="section-head">
-        <span class="eyebrow">01 — Overview</span>
+        <span class="eyebrow">Overview</span>
         <h2>Journey Status</h2>
       </div>
       <div class="stat-grid" id="statGrid"></div>
     </section>
 
-    <!-- LIMITED BANNER -->
-    <section class="section" id="limitedSection">
+    <section class="section">
       <div class="section-head">
-        <span class="eyebrow">02 — Featured Banner (Limited)</span>
+        <span class="eyebrow">Featured Banner · Limited</span>
         <h2>Main Warp Line</h2>
         <div class="tabs" id="limitedTabs">
           <button class="tab active" data-cat="Character">Character</button>
           <button class="tab" data-cat="Light Cone">Light Cone</button>
         </div>
       </div>
-
       <div class="banner-stats" id="limitedStats"></div>
-
       <div class="track-wrap">
         <div class="track-scroll" id="limitedTrack"></div>
         <div class="legend">
@@ -94,80 +77,11 @@
       <p class="track-hint">Scroll sideways to follow the timeline &nbsp;→&nbsp; the distance between stations represents how long the wait was (in days)</p>
     </section>
 
-    <!-- STANDARD BANNER -->
-    <section class="section" id="standardSection">
+    <section class="section">
       <div class="section-head">
-        <span class="eyebrow">03 — Standard Banner</span>
-        <h2>Reserve Line</h2>
+        <span class="eyebrow">Log a Pull</span>
+        <h2>Add to LimitedHistory</h2>
       </div>
-      <div class="banner-stats" id="standardStats"></div>
-      <div class="track-wrap">
-        <div class="track-scroll" id="standardTrack"></div>
-      </div>
-    </section>
-
-    <!-- FREEBIES -->
-    <section class="section" id="freebiesSection">
-      <div class="section-head">
-        <span class="eyebrow">04 — Free Rewards</span>
-        <h2>Parcels from Herta Space Station</h2>
-      </div>
-      <div class="freebie-row" id="freebieRow"></div>
-    </section>
-
-    <!-- ROSTER -->
-    <section class="section" id="rosterSection">
-      <div class="section-head">
-        <span class="eyebrow">05 — Passenger Cabin</span>
-        <h2>Collected Roster</h2>
-        <div class="tabs" id="rosterTabs">
-          <button class="tab active" data-filter="all">All</button>
-          <button class="tab" data-filter="Limited">Limited</button>
-          <button class="tab" data-filter="Standard">Standard</button>
-          <button class="tab" data-filter="other">Other</button>
-        </div>
-      </div>
-      <div class="roster-table-wrap">
-        <table class="roster-table" id="rosterTable">
-          <thead>
-            <tr>
-              <th data-sort="name">Name</th>
-              <th data-sort="source">Source</th>
-              <th data-sort="eidolon">Eidolon</th>
-              <th data-sort="signature">Signature</th>
-              <th data-sort="totalPullValue">Pull Value</th>
-              <th data-sort="pullPercent">% of Total</th>
-            </tr>
-          </thead>
-          <tbody id="rosterBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- MANAGE DATA -->
-    <section class="section" id="manageSection">
-      <div class="section-head">
-        <span class="eyebrow">06 — Manage Data</span>
-        <h2>Trailblazer Control Room</h2>
-        <p class="manage-desc">Add new pulls right here — no need to open <code>data.js</code> anymore. Changes are saved automatically in this browser. To make your changes show up for anyone visiting the public link, click <strong>Export data.js</strong>, then upload that file to GitHub (overwriting the old one).</p>
-        <div class="tabs" id="manageTabs">
-          <button class="tab active" data-manage="limited">Limited Warps</button>
-          <button class="tab" data-manage="standard">Standard Warps</button>
-          <button class="tab" data-manage="freebies">Free Rewards</button>
-          <button class="tab" data-manage="roster">Roster</button>
-        </div>
-      </div>
-
-      <div class="manage-toolbar">
-        <span class="save-status" id="saveStatus">—</span>
-        <div class="manage-actions">
-          <button type="button" class="btn-ghost" id="btnExport">⬇ Export data.js</button>
-          <label class="btn-ghost" for="importFile">⬆ Import data.js</label>
-          <input type="file" id="importFile" accept=".js,.json,application/json,text/javascript" hidden>
-          <button type="button" class="btn-ghost danger" id="btnReset">↺ Reset to Default</button>
-        </div>
-      </div>
-
       <form class="manage-form" id="form-limited" data-section="limited">
         <div class="field">
           <label>Date</label>
@@ -198,8 +112,33 @@
         </div>
         <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable-limited"><thead></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
 
-      <form class="manage-form" id="form-standard" data-section="standard" hidden>
+<!-- STANDARD HISTORY -->
+<div class="page" id="page-standardhistory" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Standard Banner</span>
+        <h2>Reserve Line</h2>
+      </div>
+      <div class="banner-stats" id="standardStats"></div>
+      <div class="track-wrap">
+        <div class="track-scroll" id="standardTrack"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Log a Pull</span>
+        <h2>Add to StandardHistory</h2>
+      </div>
+      <form class="manage-form" id="form-standard" data-section="standard">
         <div class="field">
           <label>Date</label>
           <input type="date" name="date" required>
@@ -221,8 +160,30 @@
         </div>
         <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable-standard"><thead></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
 
-      <form class="manage-form" id="form-freebies" data-section="freebies" hidden>
+<!-- FREEBIES -->
+<div class="page" id="page-freebies" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Free Rewards</span>
+        <h2>Parcels from Herta Space Station</h2>
+      </div>
+      <div class="freebie-row" id="freebieRow"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Log a Reward</span>
+        <h2>Add to Freebies</h2>
+      </div>
+      <form class="manage-form" id="form-freebies" data-section="freebies">
         <div class="field">
           <label>Date</label>
           <input type="date" name="date" required>
@@ -244,8 +205,167 @@
         </div>
         <button type="submit" class="btn-add">+ Add Reward</button>
       </form>
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable-freebies"><thead></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
 
-      <form class="manage-form" id="form-roster" data-section="roster" hidden>
+<!-- CALC -->
+<div class="page" id="page-calc" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Derived Stats</span>
+        <h2>The Numbers Behind the Warps</h2>
+      </div>
+      <div class="calc-grid" id="calcGrid"></div>
+    </section>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Streaks</span>
+        <h2>Best 50/50 Win Streak</h2>
+      </div>
+      <div class="banner-stats" id="streakGrid"></div>
+    </section>
+  </main>
+</div>
+
+<!-- PRIORITY -->
+<div class="page" id="page-priority" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Wishlist</span>
+        <h2>Next Up, in Order</h2>
+      </div>
+      <form class="manage-form" id="form-priority" data-section="priority">
+        <div class="field field-narrow">
+          <label>Priority</label>
+          <input type="number" name="priority" min="1" required>
+        </div>
+        <div class="field field-grow">
+          <label>Name</label>
+          <input type="text" name="name" required placeholder="e.g. Feixiao E1">
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select name="type" required>
+            <option value="Character">Character</option>
+            <option value="Light Cone">Light Cone</option>
+          </select>
+        </div>
+        <div class="field field-grow">
+          <label>Archetype</label>
+          <input type="text" name="archetype" required placeholder="e.g. Break">
+        </div>
+        <div class="field field-narrow">
+          <label>Min Pulls</label>
+          <input type="number" name="minPulls" min="0" required>
+        </div>
+        <div class="field field-narrow">
+          <label>Median Pulls</label>
+          <input type="number" name="medianPulls" min="0" step="0.5" required>
+        </div>
+        <div class="field field-narrow">
+          <label>Max Pulls</label>
+          <input type="number" name="maxPulls" min="0" required>
+        </div>
+        <button type="submit" class="btn-add">+ Add to Wishlist</button>
+      </form>
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable-priority"><thead></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- TEAM -->
+<div class="page" id="page-team" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Compositions</span>
+        <h2>Teams You've Built</h2>
+      </div>
+      <form class="manage-form" id="form-team" data-section="team">
+        <div class="field field-grow">
+          <label>Archetype</label>
+          <input type="text" name="archetype" required placeholder="e.g. Break">
+        </div>
+        <div class="field field-grow">
+          <label>Main DPS</label>
+          <input type="text" name="mainDps" placeholder="e.g. Firefly E1S1">
+        </div>
+        <div class="field field-grow">
+          <label>Sub DPS</label>
+          <input type="text" name="subDps" placeholder="e.g. Kafka E2S1">
+        </div>
+        <div class="field field-grow">
+          <label>Support</label>
+          <input type="text" name="support" placeholder="e.g. Ruan Mei E2S0">
+        </div>
+        <div class="field field-grow">
+          <label>Sustain</label>
+          <input type="text" name="sustain" placeholder="e.g. Lingsha E0S0">
+        </div>
+        <div class="field field-grow">
+          <label>Cost</label>
+          <input type="text" name="cost" required placeholder="e.g. 6 Limited + 2 Freebies">
+        </div>
+        <div class="field field-narrow">
+          <label>Pull Value</label>
+          <input type="number" name="pullValue" min="0" required>
+        </div>
+        <button type="submit" class="btn-add">+ Add Team</button>
+      </form>
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable-team"><thead></thead><tbody></tbody></table>
+      </div>
+      <p class="track-hint">% of Total Pulls is each team's Pull Value against every Stellar Jade spent on the LimitedHistory banner so far.</p>
+    </section>
+  </main>
+</div>
+
+<!-- CHARACTER -->
+<div class="page" id="page-character" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Passenger Cabin</span>
+        <h2>Collected Roster</h2>
+        <div class="tabs" id="rosterTabs">
+          <button class="tab active" data-filter="all">All</button>
+          <button class="tab" data-filter="Limited">Limited</button>
+          <button class="tab" data-filter="Standard">Standard</button>
+          <button class="tab" data-filter="other">Other</button>
+        </div>
+      </div>
+      <div class="roster-table-wrap">
+        <table class="roster-table" id="rosterTable">
+          <thead>
+            <tr>
+              <th data-sort="name">Name</th>
+              <th data-sort="source">Source</th>
+              <th data-sort="eidolon">Eidolon</th>
+              <th data-sort="signature">Signature</th>
+              <th data-sort="totalPullValue">Pull Value</th>
+              <th data-sort="pullPercent">% of Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rosterBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Log a Character</span>
+        <h2>Add to Character</h2>
+      </div>
+      <form class="manage-form" id="form-character" data-section="roster">
         <div class="field field-grow">
           <label>Name</label>
           <input type="text" name="name" required placeholder="e.g. Feixiao">
@@ -276,76 +396,76 @@
           <label>Signature Value</label>
           <input type="number" name="pullValueSignature" min="0" step="1" value="0">
         </div>
-        <button type="submit" class="btn-add">+ Add Roster Entry</button>
+        <button type="submit" class="btn-add">+ Add Character</button>
       </form>
+    </section>
+  </main>
+</div>
 
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="manageTable">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
+<!-- STELLAR JADE -->
+<div class="page" id="page-stellarjade" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Income Ledger</span>
+        <h2>Stellar Jade &amp; Passes</h2>
       </div>
+      <div class="banner-stats" id="jadeStats"></div>
     </section>
 
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Log Income</span>
+        <h2>Add a Transaction</h2>
+      </div>
+      <form class="manage-form" id="form-stellarjade" data-section="stellarJade">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="field field-grow">
+          <label>Activity / Event</label>
+          <input type="text" name="activity" required placeholder="e.g. Daily + Express" list="activityOptions">
+          <datalist id="activityOptions">
+            <option value="Daily + Express">
+            <option value="Weekly CW/DU Reset">
+            <option value="Character Dialog">
+            <option value="Character Trial">
+            <option value="Event">
+            <option value="Memory of Chaos">
+            <option value="Pure Fiction">
+            <option value="Apocalyptic Shadow">
+            <option value="Nameless Glory">
+            <option value="Birthday Gift">
+            <option value="Gift of Odysses">
+            <option value="Hoyolab Login">
+            <option value="Maintenance">
+            <option value="Maps">
+            <option value="Missions">
+            <option value="Shop Reset">
+            <option value="Special Program Redeem Code">
+          </datalist>
+        </div>
+        <div class="field field-narrow">
+          <label>Stellar Jade</label>
+          <input type="number" name="jade" min="0" step="1" value="0">
+        </div>
+        <div class="field field-narrow">
+          <label>Star Rail Pass</label>
+          <input type="number" name="passes" min="0" step="1" value="0">
+        </div>
+        <button type="submit" class="btn-add">+ Add Transaction</button>
+      </form>
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable-stellarjade"><thead></thead><tbody></tbody></table>
+      </div>
+    </section>
   </main>
-
-  <footer class="site-footer">
-    <p>Warp Ledger — built from a Trailblazer's own pull data. Fill it in through the <strong>Manage Data</strong> panel above, or update <code>data.js</code> by hand after every warp session.</p>
-  </footer>
-
 </div>
 
-<!-- CHARACTERS (placeholder) -->
-<div class="page placeholder-page" id="page-characters" hidden>
-  <div class="placeholder-content">
-    <div class="placeholder-icon" style="--accent:var(--gold)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="10" r="3"/><path d="M6 19c1.1-3 3.3-4.6 6-4.6s4.9 1.6 6 4.6"/></svg>
-    </div>
-    <span class="eyebrow">DECK UNDER CONSTRUCTION</span>
-    <h2>Characters</h2>
-    <p>A full showcase of every Trailblazer's roster — builds, traces, and light cones side by side — is still boarding. This deck isn't open yet.</p>
-    <button class="btn-add placeholder-cta" data-goto="warptracker">Open Warp Tracker</button>
-  </div>
-</div>
-
-<!-- DATA BANK (placeholder) -->
-<div class="page placeholder-page" id="page-databank" hidden>
-  <div class="placeholder-content">
-    <div class="placeholder-icon" style="--accent:var(--cyan)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7.5" ry="3"/><path d="M4.5 5.5v6.3c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V5.5"/><path d="M4.5 11.8v6.2c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6.2"/></svg>
-    </div>
-    <span class="eyebrow">DECK UNDER CONSTRUCTION</span>
-    <h2>Data Bank</h2>
-    <p>A searchable archive of every character, light cone, and relic set is being catalogued. This deck isn't open yet.</p>
-    <button class="btn-add placeholder-cta" data-goto="warptracker">Open Warp Tracker</button>
-  </div>
-</div>
-
-<!-- ASCENSION PLANNER (placeholder) -->
-<div class="page placeholder-page" id="page-ascension" hidden>
-  <div class="placeholder-content">
-    <div class="placeholder-icon" style="--accent:var(--win)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-4h4v-4h4v-4h4v-4h4"/></svg>
-    </div>
-    <span class="eyebrow">DECK UNDER CONSTRUCTION</span>
-    <h2>Ascension Planner</h2>
-    <p>Plan level-up materials and ascension costs for your whole roster here. This deck isn't open yet.</p>
-    <button class="btn-add placeholder-cta" data-goto="warptracker">Open Warp Tracker</button>
-  </div>
-</div>
-
-<!-- ACHIEVEMENTS (placeholder) -->
-<div class="page placeholder-page" id="page-achievements" hidden>
-  <div class="placeholder-content">
-    <div class="placeholder-icon" style="--accent:var(--gold-soft)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4.2a4 4 0 0 1-8 0V4z"/><path d="M8 4.8H5.3a2.8 2.8 0 0 0 2.8 3.6M16 4.8h2.7a2.8 2.8 0 0 1-2.8 3.6"/><path d="M12 12.2v3M9 19.5h6M9.8 19.5v-2.1h4.4v2.1"/></svg>
-    </div>
-    <span class="eyebrow">DECK UNDER CONSTRUCTION</span>
-    <h2>Achievements</h2>
-    <p>Track your Trailblaze completion and rare milestones here. This deck isn't open yet.</p>
-    <button class="btn-add placeholder-cta" data-goto="warptracker">Open Warp Tracker</button>
-  </div>
-</div>
+<footer class="site-footer">
+  <p>Warp Record HSR — built from a Trailblazer's own pull data. Add entries right on each tab above, or edit <code>data.js</code> by hand after every warp session.</p>
+</footer>
 
 <script src="data.js"></script>
 <script src="script.js"></script>

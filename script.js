@@ -21,10 +21,6 @@ document.getElementById('mainNav').addEventListener('click', (e) => {
   goToPage(btn.dataset.page);
 });
 
-document.querySelectorAll('.placeholder-cta').forEach(btn => {
-  btn.addEventListener('click', () => goToPage(btn.dataset.goto));
-});
-
 function goToPage(page) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
   document.querySelectorAll('.page').forEach(p => { p.hidden = p.id !== 'page-' + page; });
@@ -32,7 +28,7 @@ function goToPage(page) {
 }
 
 // ============ Working data (default HSR_DATA from data.js + browser overrides) ============
-const STORAGE_KEY = 'warpLedgerData_v1';
+const STORAGE_KEY = 'warpRecordHsrData_v2';
 let DATA = loadWorkingData();
 
 function loadWorkingData() {
@@ -104,6 +100,56 @@ function computeBannerStats(rows, maxPity) {
   return { total, totalWarps, avgPity, wins, losses, guaranteed, winRate, luckMultiplier, pityRoad };
 }
 
+function bestWinStreak(rows) {
+  let best = 0, cur = 0;
+  [...rows].sort((a, b) => a.date.localeCompare(b.date)).forEach(r => {
+    if (r.result === 'W') { cur++; best = Math.max(best, cur); }
+    else if (r.result === 'L') { cur = 0; }
+  });
+  return best;
+}
+
+// ============ Generic delete-capable table renderer ============
+function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const thead = table.querySelector('thead');
+  const tbody = table.querySelector('tbody');
+  const rows = DATA[section];
+  thead.innerHTML = `<tr>${columnLabels.map(c => `<th>${c}</th>`).join('')}<th></th></tr>`;
+  if (!rows.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="${columnLabels.length + 1}">No entries yet. Add one using the form above.</td></tr>`;
+    return;
+  }
+  let indexed = rows.map((r, idx) => ({ r, idx }));
+  if (sortFn) indexed = indexed.sort(sortFn);
+  tbody.innerHTML = indexed.map(({ r, idx }) => `
+    <tr>
+      ${rowToCells(r).map(c => `<td>${c}</td>`).join('')}
+      <td><button class="btn-del" data-section="${section}" data-idx="${idx}" title="Delete">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-del');
+  if (!btn) return;
+  deleteEntry(btn.dataset.section, Number(btn.dataset.idx));
+});
+
+function deleteEntry(section, idx) {
+  DATA[section].splice(idx, 1);
+  if (section === 'limited' || section === 'standard' || section === 'freebies') {
+    recomputeDaysSince(DATA[section]);
+  }
+  if (section === 'roster') {
+    recomputeRosterPercent();
+  }
+  saveWorkingData();
+  renderAll();
+}
+
+// ============ LimitedHistory page ============
 function buildOverview() {
   const limChar = DATA.limited.filter(r => r.category === 'Character');
   const limLC = DATA.limited.filter(r => r.category === 'Light Cone');
@@ -140,7 +186,6 @@ function buildOverview() {
     (DATA.limited.length ? formatDate(DATA.limited[DATA.limited.length - 1].date) : '—');
 }
 
-// ============ Track (signature timeline) ============
 function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
   if (!rows.length) {
@@ -172,7 +217,7 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
   `;
 }
 
-function renderBannerStats(containerId, stats, label) {
+function renderBannerStats(containerId, stats) {
   const container = document.getElementById(containerId);
   const items = [
     { label: 'Total 5★', value: fmt(stats.total, 0) },
@@ -194,13 +239,12 @@ function renderBannerStats(containerId, stats, label) {
   `).join('');
 }
 
-// ============ Limited banner (tabbed) ============
 let currentLimitedCat = 'Character';
 function renderLimited() {
   const rows = DATA.limited.filter(r => r.category === currentLimitedCat);
   const maxPity = currentLimitedCat === 'Character' ? 90 : 80;
   const stats = computeBannerStats(rows, maxPity);
-  renderBannerStats('limitedStats', stats, currentLimitedCat);
+  renderBannerStats('limitedStats', stats);
   renderTrack('limitedTrack', rows, maxPity, true);
 }
 
@@ -213,15 +257,57 @@ document.getElementById('limitedTabs').addEventListener('click', (e) => {
   renderLimited();
 });
 
-// ============ Standard banner ============
+function renderManageLimited() {
+  renderDeleteTable('manageTable-limited', 'limited',
+    ['Date', 'Type', 'Name', 'Pity', 'Result', 'Days Since'],
+    r => [formatDate(r.date), r.category, r.name, r.pity, r.result === 'W' ? 'Win' : r.result === 'L' ? 'Loss' : 'Guaranteed', r.daysSince],
+    (a, b) => b.r.date.localeCompare(a.r.date));
+}
+
+document.getElementById('form-limited').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  DATA.limited.push({
+    date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(),
+    pity: Number(fd.get('pity')), result: fd.get('result'), daysSince: 0,
+  });
+  sortByDate(DATA.limited);
+  recomputeDaysSince(DATA.limited);
+  saveWorkingData();
+  renderAll();
+  e.target.reset();
+});
+
+// ============ StandardHistory page ============
 function renderStandard() {
   const rows = DATA.standard;
   const stats = computeBannerStats(rows, 80);
-  renderBannerStats('standardStats', stats, 'Standard');
+  renderBannerStats('standardStats', stats);
   renderTrack('standardTrack', rows, 80, false);
 }
 
-// ============ Freebies ============
+function renderManageStandard() {
+  renderDeleteTable('manageTable-standard', 'standard',
+    ['Date', 'Type', 'Name', 'Pity', 'Days Since'],
+    r => [formatDate(r.date), r.category, r.name, r.pity, r.daysSince],
+    (a, b) => b.r.date.localeCompare(a.r.date));
+}
+
+document.getElementById('form-standard').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  DATA.standard.push({
+    date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(),
+    pity: Number(fd.get('pity')), daysSince: 0,
+  });
+  sortByDate(DATA.standard);
+  recomputeDaysSince(DATA.standard);
+  saveWorkingData();
+  renderAll();
+  e.target.reset();
+});
+
+// ============ Freebies page ============
 function renderFreebies() {
   const container = document.getElementById('freebieRow');
   if (!DATA.freebies.length) {
@@ -237,12 +323,140 @@ function renderFreebies() {
   `).join('');
 }
 
-// ============ Roster ============
+function renderManageFreebies() {
+  renderDeleteTable('manageTable-freebies', 'freebies',
+    ['Date', 'Type', 'Name', 'Event'],
+    r => [formatDate(r.date), r.category, r.name, r.event],
+    (a, b) => b.r.date.localeCompare(a.r.date));
+}
+
+document.getElementById('form-freebies').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  DATA.freebies.push({
+    date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(),
+    event: fd.get('event').trim(), daysSince: 0,
+  });
+  sortByDate(DATA.freebies);
+  recomputeDaysSince(DATA.freebies);
+  saveWorkingData();
+  renderAll();
+  e.target.reset();
+});
+
+// ============ Calc page ============
+function renderCalc() {
+  const limChar = DATA.limited.filter(r => r.category === 'Character');
+  const limLC = DATA.limited.filter(r => r.category === 'Light Cone');
+  const combined = DATA.limited;
+
+  const buckets = [
+    { label: 'Character', rows: limChar, maxPity: 90 },
+    { label: 'Light Cone', rows: limLC, maxPity: 80 },
+    { label: 'Total (Limited)', rows: combined, maxPity: null },
+  ];
+
+  const grid = document.getElementById('calcGrid');
+  grid.innerHTML = buckets.map(b => {
+    const s = computeBannerStats(b.rows, b.maxPity);
+    const rows = [
+      ['Total Pulls', fmt(s.total, 0)],
+      ['Total Warps', fmt(s.totalWarps, 0)],
+      ['Average 5★', fmt(s.avgPity, 1)],
+    ];
+    if (s.pityRoad !== null) rows.push(['Pity Road', pct(s.pityRoad)]);
+    if (s.winRate !== null) {
+      rows.push(['Win Rate', pct(s.winRate)]);
+      rows.push(['Luck Multiplier', fmt(s.luckMultiplier, 2) + '×']);
+      rows.push(['W / L / G', `${s.wins} / ${s.losses} / ${s.guaranteed}`]);
+    }
+    return `
+      <div class="calc-col">
+        <h3>${b.label}</h3>
+        ${rows.map(([label, value]) => `
+          <div class="bstat">
+            <div class="stat-label">${label}</div>
+            <div class="stat-value">${value}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+
+  const streaks = [
+    { label: 'Character', value: bestWinStreak(limChar) },
+    { label: 'Light Cone', value: bestWinStreak(limLC) },
+    { label: 'Combined', value: bestWinStreak(combined) },
+  ];
+  document.getElementById('streakGrid').innerHTML = streaks.map(s => `
+    <div class="bstat">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${fmt(s.value, 0)}</div>
+    </div>
+  `).join('');
+}
+
+// ============ Priority page ============
+function renderPriority() {
+  renderDeleteTable('manageTable-priority', 'priority',
+    ['Priority', 'Name', 'Type', 'Archetype', 'Min Pulls', 'Median Pulls', 'Max Pulls', 'Patch (min–max)'],
+    r => [r.priority, r.name, r.type, r.archetype, fmt(r.minPulls, 0), fmt(r.medianPulls, 1), fmt(r.maxPulls, 0), `${fmt(r.minPulls / 105, 2)}–${fmt(r.maxPulls / 105, 2)}`],
+    (a, b) => a.r.priority - b.r.priority);
+}
+
+document.getElementById('form-priority').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  DATA.priority.push({
+    priority: Number(fd.get('priority')),
+    name: fd.get('name').trim(),
+    type: fd.get('type'),
+    archetype: fd.get('archetype').trim(),
+    minPulls: Number(fd.get('minPulls')),
+    medianPulls: Number(fd.get('medianPulls')),
+    maxPulls: Number(fd.get('maxPulls')),
+  });
+  saveWorkingData();
+  renderAll();
+  e.target.reset();
+});
+
+// ============ Team page ============
+function renderTeam() {
+  const limitedTotalWarps = DATA.limited.reduce((s, r) => s + r.pity, 0);
+  renderDeleteTable('manageTable-team', 'team',
+    ['Archetype', 'Main DPS', 'Sub DPS', 'Support', 'Sustain', 'Cost', 'Pull Value', '% of Total Pulls'],
+    r => [
+      r.archetype, r.mainDps || '—', r.subDps || '—', r.support || '—', r.sustain || '—', r.cost,
+      fmt(r.pullValue, 0),
+      pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2),
+    ],
+    (a, b) => b.r.pullValue - a.r.pullValue);
+}
+
+document.getElementById('form-team').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  DATA.team.push({
+    archetype: fd.get('archetype').trim(),
+    mainDps: fd.get('mainDps').trim(),
+    subDps: fd.get('subDps').trim(),
+    support: fd.get('support').trim(),
+    sustain: fd.get('sustain').trim(),
+    cost: fd.get('cost').trim(),
+    pullValue: Number(fd.get('pullValue')),
+  });
+  saveWorkingData();
+  renderAll();
+  e.target.reset();
+});
+
+// ============ Character (roster) page ============
 let rosterFilter = 'all';
 let rosterSort = { key: 'totalPullValue', dir: -1 };
 
 function getRosterRows() {
-  let rows = DATA.roster.slice();
+  let rows = DATA.roster.map((r, idx) => ({ ...r, _idx: idx }));
   if (rosterFilter === 'Limited') rows = rows.filter(r => r.source === 'Limited');
   else if (rosterFilter === 'Standard') rows = rows.filter(r => r.source === 'Standard');
   else if (rosterFilter === 'other') rows = rows.filter(r => r.source !== 'Limited' && r.source !== 'Standard');
@@ -258,7 +472,7 @@ function renderRoster() {
   const rows = getRosterRows();
   const body = document.getElementById('rosterBody');
   if (!rows.length) {
-    body.innerHTML = `<tr><td colspan="6" style="color:var(--text-dim); font-family:var(--font-mono); font-size:12px;">No data yet.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="7" style="color:var(--text-dim); font-family:var(--font-mono); font-size:12px;">No data yet.</td></tr>`;
     return;
   }
   body.innerHTML = rows.map(r => `
@@ -269,6 +483,7 @@ function renderRoster() {
       <td>${r.signature}</td>
       <td>${fmt(r.totalPullValue, 0)}</td>
       <td>${fmt(r.pullPercent, 2)}%</td>
+      <td><button class="btn-del" data-section="roster" data-idx="${r._idx}" title="Delete">✕</button></td>
     </tr>
   `).join('');
 }
@@ -284,98 +499,14 @@ document.getElementById('rosterTabs').addEventListener('click', (e) => {
 
 document.getElementById('rosterTable').querySelector('thead').addEventListener('click', (e) => {
   const th = e.target.closest('th');
-  if (!th) return;
+  if (!th || !th.dataset.sort) return;
   const key = th.dataset.sort;
   rosterSort.dir = rosterSort.key === key ? -rosterSort.dir : -1;
   rosterSort.key = key;
   renderRoster();
 });
 
-// ============ Re-render everything after a data change ============
-function renderAll() {
-  buildOverview();
-  renderLimited();
-  renderStandard();
-  renderFreebies();
-  renderRoster();
-  renderManageTable();
-}
-
-// ============ Manage Data: tabs ============
-let currentManageSection = 'limited';
-const manageForms = {
-  limited: document.getElementById('form-limited'),
-  standard: document.getElementById('form-standard'),
-  freebies: document.getElementById('form-freebies'),
-  roster: document.getElementById('form-roster'),
-};
-
-document.getElementById('manageTabs').addEventListener('click', (e) => {
-  const btn = e.target.closest('.tab');
-  if (!btn) return;
-  document.querySelectorAll('#manageTabs .tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  currentManageSection = btn.dataset.manage;
-  Object.entries(manageForms).forEach(([key, form]) => {
-    form.hidden = key !== currentManageSection;
-  });
-  renderManageTable();
-});
-
-// ============ Manage Data: add entry handlers ============
-manageForms.limited.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  DATA.limited.push({
-    date: fd.get('date'),
-    category: fd.get('category'),
-    name: fd.get('name').trim(),
-    pity: Number(fd.get('pity')),
-    result: fd.get('result'),
-    daysSince: 0,
-  });
-  sortByDate(DATA.limited);
-  recomputeDaysSince(DATA.limited);
-  saveWorkingData();
-  renderAll();
-  e.target.reset();
-});
-
-manageForms.standard.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  DATA.standard.push({
-    date: fd.get('date'),
-    category: fd.get('category'),
-    name: fd.get('name').trim(),
-    pity: Number(fd.get('pity')),
-    daysSince: 0,
-  });
-  sortByDate(DATA.standard);
-  recomputeDaysSince(DATA.standard);
-  saveWorkingData();
-  renderAll();
-  e.target.reset();
-});
-
-manageForms.freebies.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  DATA.freebies.push({
-    date: fd.get('date'),
-    category: fd.get('category'),
-    name: fd.get('name').trim(),
-    event: fd.get('event').trim(),
-    daysSince: 0,
-  });
-  sortByDate(DATA.freebies);
-  recomputeDaysSince(DATA.freebies);
-  saveWorkingData();
-  renderAll();
-  e.target.reset();
-});
-
-manageForms.roster.addEventListener('submit', (e) => {
+document.getElementById('form-character').addEventListener('submit', (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
   const pullValueEidolon = Number(fd.get('pullValueEidolon')) || 0;
@@ -385,8 +516,7 @@ manageForms.roster.addEventListener('submit', (e) => {
     name: fd.get('name').trim(),
     eidolon: fd.get('eidolon').trim(),
     signature: fd.get('signature').trim(),
-    pullValueEidolon,
-    pullValueSignature,
+    pullValueEidolon, pullValueSignature,
     totalPullValue: pullValueEidolon + pullValueSignature,
     pullPercent: 0,
   });
@@ -396,102 +526,47 @@ manageForms.roster.addEventListener('submit', (e) => {
   e.target.reset();
 });
 
-// ============ Manage Data: manage table (list + delete) ============
-function deleteEntry(section, idx) {
-  DATA[section].splice(idx, 1);
-  if (section === 'limited' || section === 'standard' || section === 'freebies') {
-    recomputeDaysSince(DATA[section]);
-  }
-  if (section === 'roster') {
-    recomputeRosterPercent();
-  }
+// ============ StellarJade page ============
+function renderStellarJade() {
+  const rows = DATA.stellarJade;
+  const totalJade = rows.reduce((s, r) => s + (r.jade || 0), 0);
+  const totalPasses = rows.reduce((s, r) => s + (r.passes || 0), 0);
+  const totalPulls = totalJade / 160 + totalPasses;
+  const stats = [
+    { label: 'Total Stellar Jade', value: fmt(totalJade, 0) },
+    { label: 'Total Star Rail Passes', value: fmt(totalPasses, 0) },
+    { label: 'Pulls Available', value: fmt(totalPulls, 1) },
+    { label: 'Logged Entries', value: fmt(rows.length, 0) },
+  ];
+  document.getElementById('jadeStats').innerHTML = stats.map(s => `
+    <div class="bstat">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${s.value}</div>
+    </div>
+  `).join('');
+
+  renderDeleteTable('manageTable-stellarjade', 'stellarJade',
+    ['Date', 'Activity / Event', 'Stellar Jade', 'Star Rail Pass'],
+    r => [formatDate(r.date), r.activity, fmt(r.jade, 0), fmt(r.passes, 0)],
+    (a, b) => b.r.date.localeCompare(a.r.date));
+}
+
+document.getElementById('form-stellarjade').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  DATA.stellarJade.push({
+    date: fd.get('date'),
+    activity: fd.get('activity').trim(),
+    jade: Number(fd.get('jade')) || 0,
+    passes: Number(fd.get('passes')) || 0,
+  });
+  sortByDate(DATA.stellarJade);
   saveWorkingData();
   renderAll();
-}
-
-function renderManageTable() {
-  const table = document.getElementById('manageTable');
-  const thead = table.querySelector('thead');
-  const tbody = table.querySelector('tbody');
-  const rows = DATA[currentManageSection];
-
-  const columns = {
-    limited: ['Date', 'Type', 'Name', 'Pity', 'Result', 'Days Since', ''],
-    standard: ['Date', 'Type', 'Name', 'Pity', 'Days Since', ''],
-    freebies: ['Date', 'Type', 'Name', 'Event', ''],
-    roster: ['Name', 'Source', 'Eidolon', 'Signature', 'Total Value', '%', ''],
-  };
-  thead.innerHTML = `<tr>${columns[currentManageSection].map(c => `<th>${c}</th>`).join('')}</tr>`;
-
-  if (!rows.length) {
-    const colspan = columns[currentManageSection].length;
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">No entries yet. Add one using the form above.</td></tr>`;
-    return;
-  }
-
-  // Pair each row with its real index in DATA[section] before sorting for display,
-  // so the delete button always targets the correct underlying entry.
-  const indexed = rows.map((r, idx) => ({ r, idx }));
-
-  if (currentManageSection === 'roster') {
-    indexed.sort((a, b) => b.r.totalPullValue - a.r.totalPullValue);
-    tbody.innerHTML = indexed.map(({ r, idx }) => `
-      <tr>
-        <td>${r.name}</td>
-        <td>${r.source}</td>
-        <td>${r.eidolon}</td>
-        <td>${r.signature}</td>
-        <td>${fmt(r.totalPullValue, 0)}</td>
-        <td>${fmt(r.pullPercent, 2)}%</td>
-        <td><button class="btn-del" data-section="roster" data-idx="${idx}" title="Delete">✕</button></td>
-      </tr>
-    `).join('');
-  } else {
-    indexed.sort((a, b) => b.r.date.localeCompare(a.r.date));
-    tbody.innerHTML = indexed.map(({ r, idx }) => {
-      if (currentManageSection === 'limited') {
-        return `
-          <tr>
-            <td>${formatDate(r.date)}</td>
-            <td>${r.category}</td>
-            <td>${r.name}</td>
-            <td>${r.pity}</td>
-            <td>${r.result === 'W' ? 'Win' : r.result === 'L' ? 'Loss' : 'Guaranteed'}</td>
-            <td>${r.daysSince}</td>
-            <td><button class="btn-del" data-section="limited" data-idx="${idx}" title="Delete">✕</button></td>
-          </tr>`;
-      }
-      if (currentManageSection === 'standard') {
-        return `
-          <tr>
-            <td>${formatDate(r.date)}</td>
-            <td>${r.category}</td>
-            <td>${r.name}</td>
-            <td>${r.pity}</td>
-            <td>${r.daysSince}</td>
-            <td><button class="btn-del" data-section="standard" data-idx="${idx}" title="Delete">✕</button></td>
-          </tr>`;
-      }
-      // freebies
-      return `
-        <tr>
-          <td>${formatDate(r.date)}</td>
-          <td>${r.category}</td>
-          <td>${r.name}</td>
-          <td>${r.event}</td>
-          <td><button class="btn-del" data-section="freebies" data-idx="${idx}" title="Delete">✕</button></td>
-        </tr>`;
-    }).join('');
-  }
-}
-
-document.getElementById('manageTable').addEventListener('click', (e) => {
-  const btn = e.target.closest('.btn-del');
-  if (!btn) return;
-  deleteEntry(btn.dataset.section, Number(btn.dataset.idx));
+  e.target.reset();
 });
 
-// ============ Manage Data: export / import / reset ============
+// ============ Export / Import / Reset (global, all sections) ============
 function downloadFile(filename, content, mime) {
   const blob = new Blob([content], { type: mime });
   const url = URL.createObjectURL(blob);
@@ -505,7 +580,7 @@ function downloadFile(filename, content, mime) {
 }
 
 document.getElementById('btnExport').addEventListener('click', () => {
-  const header = `// Your pull data — exported from the Manage Data panel on ${new Date().toLocaleString('en-US')}\n` +
+  const header = `// Your pull data — exported from Warp Record HSR on ${new Date().toLocaleString('en-US')}\n` +
     `// category for Limited & Standard: "Character" or "Light Cone"\n` +
     `// result for Limited: "W" (won the 50/50), "L" (lost the 50/50), "G" (guaranteed after a loss)\n`;
   const content = header + `const HSR_DATA = ${JSON.stringify(DATA, null, 2)};\n`;
@@ -527,9 +602,9 @@ document.getElementById('importFile').addEventListener('change', (e) => {
         if (!match) throw new Error('Unrecognized file format.');
         parsed = JSON.parse(match[1]);
       }
-      if (!parsed.limited || !parsed.standard || !parsed.freebies || !parsed.roster) {
-        throw new Error('File does not have the complete data.js structure.');
-      }
+      ['limited', 'standard', 'freebies', 'roster', 'priority', 'team', 'stellarJade'].forEach(key => {
+        if (!parsed[key]) parsed[key] = [];
+      });
       DATA = parsed;
       saveWorkingData();
       renderAll();
@@ -550,6 +625,22 @@ document.getElementById('btnReset').addEventListener('click', () => {
   saveWorkingData();
   renderAll();
 });
+
+// ============ Re-render everything ============
+function renderAll() {
+  buildOverview();
+  renderLimited();
+  renderManageLimited();
+  renderStandard();
+  renderManageStandard();
+  renderFreebies();
+  renderManageFreebies();
+  renderCalc();
+  renderPriority();
+  renderTeam();
+  renderRoster();
+  renderStellarJade();
+}
 
 // ============ Init ============
 renderAll();

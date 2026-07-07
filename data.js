@@ -938,5 +938,500 @@ const HSR_DATA = {
       "totalPullValue": 0,
       "pullPercent": 0
     }
+  ],
+  "priority": [
+    {
+      "priority": 1,
+      "name": "Himeko Nova",
+      "type": "Character",
+      "archetype": "AE",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 2,
+      "name": "Himeko Nova S1",
+      "type": "Light Cone",
+      "archetype": "AE",
+      "minPulls": 52,
+      "medianPulls": 77.5,
+      "maxPulls": 103
+    },
+    {
+      "priority": 3,
+      "name": "Himeko Nova E1",
+      "type": "Character",
+      "archetype": "AE",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 4,
+      "name": "Elation Sustain",
+      "type": "Character",
+      "archetype": "Elation",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 5,
+      "name": "Rin Tohsaka",
+      "type": "Character",
+      "archetype": "SP",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 6,
+      "name": "Rin Tohsaka S1",
+      "type": "Light Cone",
+      "archetype": "SP",
+      "minPulls": 52,
+      "medianPulls": 77.5,
+      "maxPulls": 103
+    },
+    {
+      "priority": 7,
+      "name": "Firefly E2",
+      "type": "Character",
+      "archetype": "Break",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 8,
+      "name": "Hysilens E1",
+      "type": "Character",
+      "archetype": "DOT",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 9,
+      "name": "Black Swan E1",
+      "type": "Character",
+      "archetype": "DOT",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 8,
+      "name": "The Dahlia S1",
+      "type": "Light Cone",
+      "archetype": "Break",
+      "minPulls": 52,
+      "medianPulls": 77.5,
+      "maxPulls": 103
+    },
+    {
+      "priority": 9,
+      "name": "The Dahlia E1",
+      "type": "Character",
+      "archetype": "Break",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 10,
+      "name": "The Dahlia E2",
+      "type": "Character",
+      "archetype": "Break",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 11,
+      "name": "Hyacine E1",
+      "type": "Character",
+      "archetype": "Remembrance",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 12,
+      "name": "Yao E1",
+      "type": "Character",
+      "archetype": "Elation",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 13,
+      "name": "Fugue E1",
+      "type": "Character",
+      "archetype": "Break",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    },
+    {
+      "priority": 14,
+      "name": "Fugue E2",
+      "type": "Character",
+      "archetype": "Break",
+      "minPulls": 62,
+      "medianPulls": 93.0,
+      "maxPulls": 124
+    }
+  ],
+  "team": [
+    {
+      "archetype": "Elation",
+      "mainDps": "Superwolf E2S1",
+      "subDps": "Sparxie E0S1",
+      "support": "Yao Guang E0S1",
+      "sustain": "Hyacine E0S1",
+      "cost": "10 Limited",
+      "pullValue": 452.0
+    },
+    {
+      "archetype": "Elation",
+      "mainDps": "Superwolf E2S1",
+      "subDps": "Sparxie E0S1",
+      "support": "Yao Guang E0S1 / Sparkle E1S0",
+      "sustain": "",
+      "cost": "9 Limited + 1 Freebies",
+      "pullValue": 383.0
+    },
+    {
+      "archetype": "Elation",
+      "mainDps": "Superwolf E2S1",
+      "subDps": "Sparxie E0S1",
+      "support": "Yao Guang E0S1",
+      "sustain": "Dan Heng PT E0S0",
+      "cost": "8 Limited + 1 Freebies",
+      "pullValue": 303.0
+    },
+    {
+      "archetype": "Elation",
+      "mainDps": "Superwolf E2S1",
+      "subDps": "Sparxie E0S1",
+      "support": "Yao Guang E0S1 / EMC E6S0",
+      "sustain": "",
+      "cost": "8 Limited",
+      "pullValue": 303.0
+    },
+    {
+      "archetype": "DOT",
+      "mainDps": "Hysilens E0S1",
+      "subDps": "Kafka E2S1 / Black Swan E0S0",
+      "support": "",
+      "sustain": "Dan Heng PT E0S0",
+      "cost": "7 Limited + 1 Freebies",
+      "pullValue": 457.0
+    },
+    {
+      "archetype": "DOT",
+      "mainDps": "Hysilens E0S1",
+      "subDps": "Kafka E2S1 / Black Swan E0S0",
+      "support": "Ruan Mei E2S0",
+      "sustain": "",
+      "cost": "8 Limited + 2 Freebies",
+      "pullValue": 504.0
+    },
+    {
+      "archetype": "Break",
+      "mainDps": "Firefly E1S1",
+      "subDps": "",
+      "support": "The Dahlia E0S0 / Fugue E0S0 / Ruan Mei E2S0",
+      "sustain": "",
+      "cost": "6 Limited + 2 Freebies",
+      "pullValue": 453.0
+    },
+    {
+      "archetype": "Break",
+      "mainDps": "Firefly E1S1",
+      "subDps": "",
+      "support": "The Dahlia E0S0 / Fugue E0S0 / HMC E6S0",
+      "sustain": "",
+      "cost": "5 Limited",
+      "pullValue": 406.0
+    },
+    {
+      "archetype": "Break",
+      "mainDps": "Firefly E1S1",
+      "subDps": "",
+      "support": "The Dahlia E0S0 / Fugue E0S0",
+      "sustain": "Lingsha E0S0",
+      "cost": "6 Limited",
+      "pullValue": 484.0
+    },
+    {
+      "archetype": "Remembrance",
+      "mainDps": "Castorice E0S1",
+      "subDps": "Evernight E0S0",
+      "support": "Cyrene E0S0",
+      "sustain": "Hyacine E0S1",
+      "cost": "6 Limited",
+      "pullValue": 501.0
+    },
+    {
+      "archetype": "Remembrance",
+      "mainDps": "Castorice E0S1",
+      "subDps": "Evernight E0S0",
+      "support": "Tribbie E0S0",
+      "sustain": "Hyacine E0S1",
+      "cost": "6 Limited",
+      "pullValue": 575.0
+    },
+    {
+      "archetype": "AE",
+      "mainDps": "",
+      "subDps": "",
+      "support": "Welt E4S0 / RMC E6S0",
+      "sustain": "Dan Heng PT E0S0",
+      "cost": "4 Standard + 2 Freebies",
+      "pullValue": 233.0
+    },
+    {
+      "archetype": "AE",
+      "mainDps": "",
+      "subDps": "",
+      "support": "Welt E4S0 / Sparkle E1S0",
+      "sustain": "Dan Heng PT E0S0",
+      "cost": "1 Limited + 4 Standard + 3 Freebies",
+      "pullValue": 313.0
+    },
+    {
+      "archetype": "SP",
+      "mainDps": "Archer E0S1",
+      "subDps": "",
+      "support": "Sparkle E1S0",
+      "sustain": "Dan Heng PT E0S0",
+      "cost": "1 Limited + 4 Freebies",
+      "pullValue": 80.0
+    },
+    {
+      "archetype": "SP",
+      "mainDps": "Archer E0S1",
+      "subDps": "",
+      "support": "Sparkle E1S0 / Tribbie E0S0",
+      "sustain": "",
+      "cost": "2 Limited + 3 Freebies",
+      "pullValue": 235.0
+    }
+  ],
+  "stellarJade": [
+    {
+      "date": "2026-06-14",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-15",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-16",
+      "activity": "Weekly CW/DU Reset",
+      "jade": 225.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-16",
+      "activity": "Birthday Gift",
+      "jade": 100.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-16",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-17",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-18",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-19",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-20",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-21",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-21",
+      "activity": "Event",
+      "jade": 20.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-22",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-22",
+      "activity": "Pure Fiction",
+      "jade": 900.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-22",
+      "activity": "Weekly CW/DU Reset",
+      "jade": 225.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-23",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-24",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-24",
+      "activity": "Character Trial",
+      "jade": 40.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-25",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-26",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-27",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-28",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-29",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-29",
+      "activity": "Character Dialog",
+      "jade": 5.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-29",
+      "activity": "Event",
+      "jade": 500.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-29",
+      "activity": "Weekly CW/DU Reset",
+      "jade": 225.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-30",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-06-30",
+      "activity": "Character Dialog",
+      "jade": 5.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-07-01",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-07-01",
+      "activity": "Character Dialog",
+      "jade": 5.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-07-01",
+      "activity": "Shop Reset",
+      "jade": 0,
+      "passes": 5.0
+    },
+    {
+      "date": "2026-07-02",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-07-03",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-07-03",
+      "activity": "Nameless Glory",
+      "jade": 680.0,
+      "passes": 4.0
+    },
+    {
+      "date": "2026-07-03",
+      "activity": "Special Program Redeem Code",
+      "jade": 300.0,
+      "passes": 0
+    },
+    {
+      "date": "2026-07-04",
+      "activity": "Daily + Express",
+      "jade": 150.0,
+      "passes": 0
+    }
   ]
 };

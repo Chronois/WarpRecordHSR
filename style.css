@@ -34,133 +34,71 @@ body{
   overflow-x:hidden;
 }
 
-/* MAIN NAV */
+/* MAIN NAV — styled after spreadsheet sheet tabs */
 .main-nav{
   position: sticky;
-  top: 14px;
+  top: 0;
   z-index: 20;
   display:flex;
-  justify-content:center;
   align-items:center;
-  gap: 6px;
-  flex-wrap: nowrap;
+  gap: 2px;
   overflow-x: auto;
-  max-width: 980px;
-  margin: 14px auto 0;
-  padding: 8px;
-  background: rgba(20,23,51,.68);
+  padding: 0 16px;
+  background: rgba(10,12,24,.92);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--border);
-  border-radius: 100px;
-  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+  border-bottom: 1px solid var(--border);
   scrollbar-width: none;
 }
 .main-nav::-webkit-scrollbar{ display:none; }
 
 .nav-item{
-  --accent: var(--nebula);
   flex-shrink:0;
   display:flex;
   align-items:center;
-  gap: 9px;
+  gap: 6px;
   background: transparent;
-  border: 1px solid transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
   color: var(--text-dim);
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 13px;
-  padding: 8px 16px 8px 8px;
-  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12.5px;
+  padding: 14px 14px 12px;
   cursor: pointer;
-  transition: all .18s ease;
+  transition: all .15s ease;
   white-space: nowrap;
 }
-.nav-item:hover{
-  color: var(--text);
-  background: rgba(255,255,255,.04);
-}
+.nav-item:hover{ color: var(--text); background: rgba(255,255,255,.03); }
 .nav-item.active{
-  color: var(--text);
-  background: rgba(255,255,255,.06);
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent) inset;
+  color: var(--gold-soft);
+  background: var(--surface);
+  border-bottom-color: var(--gold);
+  border-radius: 6px 6px 0 0;
 }
-.nav-icon{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--accent);
-  flex-shrink:0;
-  transition: transform .18s ease;
-}
-.nav-item.active .nav-icon{ background: color-mix(in srgb, var(--accent) 30%, transparent); }
-.nav-item:hover .nav-icon{ transform: scale(1.08); }
-.nav-icon svg{ width: 16px; height:16px; }
+.nav-caret{ font-size: 8px; opacity:.5; }
 
-@media (max-width: 720px){
-  .main-nav{ justify-content:flex-start; margin: 10px 10px 0; border-radius: 20px; }
-  .nav-label{ display:none; }
-  .nav-item{ padding: 6px; }
-  .nav-item.active .nav-label{
-    display:inline;
-  }
+/* UTILITY BAR — export / import / reset, visible on every page */
+.util-bar{
+  position: sticky;
+  top: 45px;
+  z-index: 19;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(20,23,51,.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
 }
+.util-actions{ display:flex; gap: 8px; flex-wrap: wrap; }
 
-/* PLACEHOLDER PAGES (Characters / Data Bank / Ascension / Achievements) */
-.placeholder-page{
-  min-height: calc(100vh - 90px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: 40px 24px;
-}
-.placeholder-content{
-  max-width: 480px;
-  text-align:center;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-.placeholder-icon{
-  --accent: var(--nebula);
-  width: 74px;
-  height: 74px;
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-  color: var(--accent);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-bottom: 22px;
-  box-shadow: 0 0 40px color-mix(in srgb, var(--accent) 25%, transparent);
-}
-.placeholder-icon svg{ width: 34px; height:34px; }
-.placeholder-content .eyebrow{
-  display:block;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: .14em;
-  color: var(--text-dim);
-  margin-bottom: 14px;
-}
-.placeholder-content h2{
-  font-family: var(--font-display);
-  font-size: 30px;
-  margin: 0 0 14px;
-}
-.placeholder-content p{
-  color: var(--text-dim);
-  font-size: 14px;
-  margin: 0 0 28px;
-}
-.placeholder-cta{
-  padding: 11px 24px;
+@media (max-width: 640px){
+  .nav-item{ padding: 12px 10px 10px; font-size: 11.5px; }
+  .util-bar{ top: 40px; }
 }
 
 /* Starfield background */
@@ -337,6 +275,29 @@ main, header, footer, .page{ position:relative; z-index:1; }
 .bstat .stat-label{ margin-bottom:6px; }
 .bstat .stat-value{ font-size: 20px; }
 
+/* CALC PAGE */
+.calc-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+}
+.calc-col{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+.calc-col h3{
+  font-family: var(--font-display);
+  font-size: 16px;
+  margin: 0 0 4px;
+  color: var(--gold-soft);
+}
+.calc-col .bstat{ padding: 10px 14px; }
+
 /* TRACK (signature element) */
 .track-wrap{
   background: var(--surface);
@@ -480,6 +441,8 @@ main, header, footer, .page{ position:relative; z-index:1; }
   white-space:nowrap;
 }
 .roster-table thead th:hover{ color: var(--gold-soft); }
+.roster-table thead th:not([data-sort]){ cursor: default; }
+.roster-table thead th:not([data-sort]):hover{ color: var(--text-dim); }
 .roster-table tbody td{
   padding: 10px 16px;
   border-bottom: 1px solid rgba(255,255,255,.04);
@@ -512,28 +475,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
   font-family: var(--font-mono);
 }
 
-/* MANAGE DATA */
-.manage-desc{
-  color: var(--text-dim);
-  font-size: 13px;
-  max-width: 640px;
-  margin: 10px 0 0;
-}
-.manage-desc code{
-  background: var(--surface);
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-}
-
-.manage-toolbar{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 24px 0 20px;
-}
+/* MANAGE DATA (per-page add forms) */
 .save-status{
   font-family: var(--font-mono);
   font-size: 12px;
@@ -541,11 +483,6 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 .save-status.ok{ color: var(--win); }
 .save-status.err{ color: var(--loss); }
-.manage-actions{
-  display:flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
 .btn-ghost{
   font-family: var(--font-body);
   font-weight: 600;
