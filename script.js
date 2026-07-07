@@ -1,17 +1,34 @@
 // ============ Helpers ============
 function fmt(n, d = 1) {
   if (n === null || n === undefined || isNaN(n)) return '—';
-  return Number(n).toLocaleString('id-ID', { maximumFractionDigits: d });
+  return Number(n).toLocaleString('en-US', { maximumFractionDigits: d });
 }
 function pct(n, d = 1) {
   return fmt(n * 100, d) + '%';
 }
 function formatDate(iso) {
   const d = new Date(iso + 'T00:00:00');
-  return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 function daysBetween(a, b) {
   return Math.max(0, Math.round((new Date(a + 'T00:00:00') - new Date(b + 'T00:00:00')) / 86400000));
+}
+
+// ============ Main nav / page switching ============
+document.getElementById('mainNav').addEventListener('click', (e) => {
+  const btn = e.target.closest('.nav-item');
+  if (!btn) return;
+  goToPage(btn.dataset.page);
+});
+
+document.querySelectorAll('.placeholder-cta').forEach(btn => {
+  btn.addEventListener('click', () => goToPage(btn.dataset.goto));
+});
+
+function goToPage(page) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  document.querySelectorAll('.page').forEach(p => { p.hidden = p.id !== 'page-' + page; });
+  window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
 // ============ Working data (default HSR_DATA from data.js + browser overrides) ============
@@ -23,7 +40,7 @@ function loadWorkingData() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch (e) {
-    console.warn('Gagal memuat data dari browser, pakai data bawaan.', e);
+    console.warn('Failed to load data from the browser, using default data.', e);
   }
   // Deep clone so the original HSR_DATA constant from data.js is never mutated.
   return JSON.parse(JSON.stringify(HSR_DATA));
@@ -34,12 +51,12 @@ function saveWorkingData() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
     if (statusEl) {
-      statusEl.textContent = 'Tersimpan di browser ini · ' + new Date().toLocaleTimeString('id-ID');
+      statusEl.textContent = 'Saved in this browser · ' + new Date().toLocaleTimeString('en-US');
       statusEl.className = 'save-status ok';
     }
   } catch (e) {
     if (statusEl) {
-      statusEl.textContent = 'Gagal menyimpan (mode private atau kuota penuh?)';
+      statusEl.textContent = 'Failed to save (private browsing mode or storage full?)';
       statusEl.className = 'save-status err';
     }
   }
@@ -101,12 +118,12 @@ function buildOverview() {
   const total5star = limChar.length + limLC.length + stdRows.length + freebies.length;
 
   const cards = [
-    { label: 'Total Warp Terpakai', value: fmt(totalWarps, 0), sub: 'karakter + light cone + standard' },
-    { label: 'Total 5★ Didapat', value: fmt(total5star, 0), sub: `${limChar.length + limLC.length} limited · ${stdRows.length} standard · ${freebies.length} gratis` },
-    { label: 'Win Rate 50/50 (Karakter)', value: limCharStats.winRate !== null ? pct(limCharStats.winRate) : '—', sub: `${limCharStats.wins}W / ${limCharStats.losses}L dari ${limCharStats.wins + limCharStats.losses} rebutan` },
-    { label: 'Luck Multiplier (Karakter)', value: limCharStats.luckMultiplier !== null ? fmt(limCharStats.luckMultiplier, 2) + '×' : '—', sub: limCharStats.luckMultiplier > 1 ? 'lebih beruntung dari rata-rata' : 'di bawah rata-rata' },
-    { label: 'Rata-rata Pity Karakter', value: fmt(limCharStats.avgPity, 1), sub: `dari hard pity 90` },
-    { label: 'Rata-rata Pity Light Cone', value: fmt(limLCStats.avgPity, 1), sub: `dari hard pity 80` },
+    { label: 'Total Warps Spent', value: fmt(totalWarps, 0), sub: 'character + light cone + standard' },
+    { label: 'Total 5★ Obtained', value: fmt(total5star, 0), sub: `${limChar.length + limLC.length} limited · ${stdRows.length} standard · ${freebies.length} free` },
+    { label: '50/50 Win Rate (Character)', value: limCharStats.winRate !== null ? pct(limCharStats.winRate) : '—', sub: `${limCharStats.wins}W / ${limCharStats.losses}L from ${limCharStats.wins + limCharStats.losses} 50/50s` },
+    { label: 'Luck Multiplier (Character)', value: limCharStats.luckMultiplier !== null ? fmt(limCharStats.luckMultiplier, 2) + '×' : '—', sub: limCharStats.luckMultiplier > 1 ? 'luckier than average' : 'below average' },
+    { label: 'Average Character Pity', value: fmt(limCharStats.avgPity, 1), sub: `out of hard pity 90` },
+    { label: 'Average Light Cone Pity', value: fmt(limLCStats.avgPity, 1), sub: `out of hard pity 80` },
   ];
 
   const grid = document.getElementById('statGrid');
@@ -119,7 +136,7 @@ function buildOverview() {
   `).join('');
 
   document.getElementById('metaTotalWarps').textContent = fmt(totalWarps, 0);
-  document.getElementById('metaGenerated').textContent = 'Pull terakhir tercatat: ' +
+  document.getElementById('metaGenerated').textContent = 'Last pull logged: ' +
     (DATA.limited.length ? formatDate(DATA.limited[DATA.limited.length - 1].date) : '—');
 }
 
@@ -127,7 +144,7 @@ function buildOverview() {
 function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
   if (!rows.length) {
-    container.innerHTML = `<p style="color:var(--text-dim); font-family:var(--font-mono); font-size:13px; padding:20px;">Belum ada data.</p>`;
+    container.innerHTML = `<p style="color:var(--text-dim); font-family:var(--font-mono); font-size:13px; padding:20px;">No data yet.</p>`;
     return;
   }
   const gaps = rows.map(r => Math.max(Math.sqrt(r.daysSince || 0.5) * 22, 46));
@@ -138,7 +155,7 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
       <div class="station" style="margin-left:${i === 0 ? 24 : gap}px">
         <div class="station-tooltip">
           <div class="tt-name">${r.name}</div>
-          <div class="tt-meta">${formatDate(r.date)} · pity ${r.pity} ${hasResult ? '· ' + (r.result === 'W' ? 'Menang 50/50' : r.result === 'L' ? 'Kalah 50/50' : 'Guaranteed') : ''}</div>
+          <div class="tt-meta">${formatDate(r.date)} · pity ${r.pity} ${hasResult ? '· ' + (r.result === 'W' ? '50/50 Win' : r.result === 'L' ? '50/50 Loss' : 'Guaranteed') : ''}</div>
         </div>
         <div class="station-dot ${resultClass}"></div>
         <div class="station-pity">${r.pity}</div>
@@ -159,8 +176,8 @@ function renderBannerStats(containerId, stats, label) {
   const container = document.getElementById(containerId);
   const items = [
     { label: 'Total 5★', value: fmt(stats.total, 0) },
-    { label: 'Total Warp', value: fmt(stats.totalWarps, 0) },
-    { label: 'Rata-rata Pity', value: fmt(stats.avgPity, 1) },
+    { label: 'Total Warps', value: fmt(stats.totalWarps, 0) },
+    { label: 'Average Pity', value: fmt(stats.avgPity, 1) },
   ];
   if (stats.winRate !== null) {
     items.push({ label: 'Win Rate', value: pct(stats.winRate) });
@@ -208,7 +225,7 @@ function renderStandard() {
 function renderFreebies() {
   const container = document.getElementById('freebieRow');
   if (!DATA.freebies.length) {
-    container.innerHTML = `<p style="color:var(--text-dim); font-family:var(--font-mono); font-size:13px;">Belum ada data.</p>`;
+    container.innerHTML = `<p style="color:var(--text-dim); font-family:var(--font-mono); font-size:13px;">No data yet.</p>`;
     return;
   }
   container.innerHTML = DATA.freebies.map(f => `
@@ -241,7 +258,7 @@ function renderRoster() {
   const rows = getRosterRows();
   const body = document.getElementById('rosterBody');
   if (!rows.length) {
-    body.innerHTML = `<tr><td colspan="6" style="color:var(--text-dim); font-family:var(--font-mono); font-size:12px;">Belum ada data.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="6" style="color:var(--text-dim); font-family:var(--font-mono); font-size:12px;">No data yet.</td></tr>`;
     return;
   }
   body.innerHTML = rows.map(r => `
@@ -284,7 +301,7 @@ function renderAll() {
   renderManageTable();
 }
 
-// ============ Kelola Data: tabs ============
+// ============ Manage Data: tabs ============
 let currentManageSection = 'limited';
 const manageForms = {
   limited: document.getElementById('form-limited'),
@@ -305,7 +322,7 @@ document.getElementById('manageTabs').addEventListener('click', (e) => {
   renderManageTable();
 });
 
-// ============ Kelola Data: add entry handlers ============
+// ============ Manage Data: add entry handlers ============
 manageForms.limited.addEventListener('submit', (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
@@ -379,7 +396,7 @@ manageForms.roster.addEventListener('submit', (e) => {
   e.target.reset();
 });
 
-// ============ Kelola Data: manage table (list + delete) ============
+// ============ Manage Data: manage table (list + delete) ============
 function deleteEntry(section, idx) {
   DATA[section].splice(idx, 1);
   if (section === 'limited' || section === 'standard' || section === 'freebies') {
@@ -399,16 +416,16 @@ function renderManageTable() {
   const rows = DATA[currentManageSection];
 
   const columns = {
-    limited: ['Tanggal', 'Jenis', 'Nama', 'Pity', 'Hasil', 'Jarak Hari', ''],
-    standard: ['Tanggal', 'Jenis', 'Nama', 'Pity', 'Jarak Hari', ''],
-    freebies: ['Tanggal', 'Jenis', 'Nama', 'Event', ''],
-    roster: ['Nama', 'Sumber', 'Eidolon', 'Signature', 'Nilai Total', '%', ''],
+    limited: ['Date', 'Type', 'Name', 'Pity', 'Result', 'Days Since', ''],
+    standard: ['Date', 'Type', 'Name', 'Pity', 'Days Since', ''],
+    freebies: ['Date', 'Type', 'Name', 'Event', ''],
+    roster: ['Name', 'Source', 'Eidolon', 'Signature', 'Total Value', '%', ''],
   };
   thead.innerHTML = `<tr>${columns[currentManageSection].map(c => `<th>${c}</th>`).join('')}</tr>`;
 
   if (!rows.length) {
     const colspan = columns[currentManageSection].length;
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">Belum ada entri. Tambahkan lewat form di atas.</td></tr>`;
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">No entries yet. Add one using the form above.</td></tr>`;
     return;
   }
 
@@ -426,7 +443,7 @@ function renderManageTable() {
         <td>${r.signature}</td>
         <td>${fmt(r.totalPullValue, 0)}</td>
         <td>${fmt(r.pullPercent, 2)}%</td>
-        <td><button class="btn-del" data-section="roster" data-idx="${idx}" title="Hapus">✕</button></td>
+        <td><button class="btn-del" data-section="roster" data-idx="${idx}" title="Delete">✕</button></td>
       </tr>
     `).join('');
   } else {
@@ -439,9 +456,9 @@ function renderManageTable() {
             <td>${r.category}</td>
             <td>${r.name}</td>
             <td>${r.pity}</td>
-            <td>${r.result === 'W' ? 'Menang' : r.result === 'L' ? 'Kalah' : 'Guaranteed'}</td>
+            <td>${r.result === 'W' ? 'Win' : r.result === 'L' ? 'Loss' : 'Guaranteed'}</td>
             <td>${r.daysSince}</td>
-            <td><button class="btn-del" data-section="limited" data-idx="${idx}" title="Hapus">✕</button></td>
+            <td><button class="btn-del" data-section="limited" data-idx="${idx}" title="Delete">✕</button></td>
           </tr>`;
       }
       if (currentManageSection === 'standard') {
@@ -452,7 +469,7 @@ function renderManageTable() {
             <td>${r.name}</td>
             <td>${r.pity}</td>
             <td>${r.daysSince}</td>
-            <td><button class="btn-del" data-section="standard" data-idx="${idx}" title="Hapus">✕</button></td>
+            <td><button class="btn-del" data-section="standard" data-idx="${idx}" title="Delete">✕</button></td>
           </tr>`;
       }
       // freebies
@@ -462,7 +479,7 @@ function renderManageTable() {
           <td>${r.category}</td>
           <td>${r.name}</td>
           <td>${r.event}</td>
-          <td><button class="btn-del" data-section="freebies" data-idx="${idx}" title="Hapus">✕</button></td>
+          <td><button class="btn-del" data-section="freebies" data-idx="${idx}" title="Delete">✕</button></td>
         </tr>`;
     }).join('');
   }
@@ -474,7 +491,7 @@ document.getElementById('manageTable').addEventListener('click', (e) => {
   deleteEntry(btn.dataset.section, Number(btn.dataset.idx));
 });
 
-// ============ Kelola Data: export / import / reset ============
+// ============ Manage Data: export / import / reset ============
 function downloadFile(filename, content, mime) {
   const blob = new Blob([content], { type: mime });
   const url = URL.createObjectURL(blob);
@@ -488,9 +505,9 @@ function downloadFile(filename, content, mime) {
 }
 
 document.getElementById('btnExport').addEventListener('click', () => {
-  const header = `// Data pull kamu — diekspor dari panel Kelola Data pada ${new Date().toLocaleString('id-ID')}\n` +
-    `// category untuk Limited & Standard: "Character" atau "Light Cone"\n` +
-    `// result untuk Limited: "W" (menang 50/50), "L" (kalah 50/50), "G" (guaranteed setelah kalah)\n`;
+  const header = `// Your pull data — exported from the Manage Data panel on ${new Date().toLocaleString('en-US')}\n` +
+    `// category for Limited & Standard: "Character" or "Light Cone"\n` +
+    `// result for Limited: "W" (won the 50/50), "L" (lost the 50/50), "G" (guaranteed after a loss)\n`;
   const content = header + `const HSR_DATA = ${JSON.stringify(DATA, null, 2)};\n`;
   downloadFile('data.js', content, 'text/javascript');
 });
@@ -507,18 +524,18 @@ document.getElementById('importFile').addEventListener('change', (e) => {
         parsed = JSON.parse(text);
       } else {
         const match = text.match(/const\s+HSR_DATA\s*=\s*(\{[\s\S]*\})\s*;?\s*$/);
-        if (!match) throw new Error('Format file tidak dikenali.');
+        if (!match) throw new Error('Unrecognized file format.');
         parsed = JSON.parse(match[1]);
       }
       if (!parsed.limited || !parsed.standard || !parsed.freebies || !parsed.roster) {
-        throw new Error('File tidak memiliki struktur data.js yang lengkap.');
+        throw new Error('File does not have the complete data.js structure.');
       }
       DATA = parsed;
       saveWorkingData();
       renderAll();
-      alert('Data berhasil dimuat dari file.');
+      alert('Data loaded successfully from file.');
     } catch (err) {
-      alert('Gagal memuat file: ' + err.message);
+      alert('Failed to load file: ' + err.message);
     } finally {
       e.target.value = '';
     }
@@ -527,7 +544,7 @@ document.getElementById('importFile').addEventListener('change', (e) => {
 });
 
 document.getElementById('btnReset').addEventListener('click', () => {
-  if (!confirm('Kembalikan ke data bawaan dari data.js? Semua perubahan yang tersimpan di browser ini akan dihapus.')) return;
+  if (!confirm('Reset to the default data from data.js? All changes saved in this browser will be deleted.')) return;
   localStorage.removeItem(STORAGE_KEY);
   DATA = JSON.parse(JSON.stringify(HSR_DATA));
   saveWorkingData();

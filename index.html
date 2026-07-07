@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Warp Log · Astral Express Ledger</title>
+<title>Warp Ledger · Astral Express Companion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -13,250 +13,339 @@
 
 <div class="stars" id="stars"></div>
 
-<header class="hero">
-  <div class="hero-eyebrow">TRAILBLAZE LOG // ASTRAL EXPRESS</div>
-  <h1 class="hero-title">Warp Ledger</h1>
-  <p class="hero-sub">Setiap warp adalah satu perhentian. Ini rekam jejak perjalanan pull kamu — dari stasiun ke stasiun, kemenangan dan kekalahan 50/50, sampai ke jade terakhir yang tersisa.</p>
-  <div class="hero-meta">
-    <span id="metaGenerated">—</span>
-    <span class="dot">·</span>
-    <span id="metaTotalWarps">—</span> warp tercatat
+<nav class="main-nav" id="mainNav" aria-label="Main sections">
+  <button class="nav-item" data-page="characters" style="--accent:var(--gold)">
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="10" r="3"/><path d="M6 19c1.1-3 3.3-4.6 6-4.6s4.9 1.6 6 4.6"/></svg>
+    </span>
+    <span class="nav-label">Characters</span>
+  </button>
+  <button class="nav-item" data-page="databank" style="--accent:var(--cyan)">
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7.5" ry="3"/><path d="M4.5 5.5v6.3c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V5.5"/><path d="M4.5 11.8v6.2c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6.2"/></svg>
+    </span>
+    <span class="nav-label">Data Bank</span>
+  </button>
+  <button class="nav-item active" data-page="warptracker" style="--accent:var(--nebula)">
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1.8v2.4M12 19.8v2.4M1.8 12h2.4M19.8 12h2.4"/></svg>
+    </span>
+    <span class="nav-label">Warp Tracker</span>
+  </button>
+  <button class="nav-item" data-page="ascension" style="--accent:var(--win)">
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-4h4v-4h4v-4h4v-4h4"/></svg>
+    </span>
+    <span class="nav-label">Ascension Planner</span>
+  </button>
+  <button class="nav-item" data-page="achievements" style="--accent:var(--gold-soft)">
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4.2a4 4 0 0 1-8 0V4z"/><path d="M8 4.8H5.3a2.8 2.8 0 0 0 2.8 3.6M16 4.8h2.7a2.8 2.8 0 0 1-2.8 3.6"/><path d="M12 12.2v3M9 19.5h6M9.8 19.5v-2.1h4.4v2.1"/></svg>
+    </span>
+    <span class="nav-label">Achievements</span>
+  </button>
+</nav>
+
+<div class="page" id="page-warptracker">
+
+  <header class="hero">
+    <div class="hero-eyebrow">TRAILBLAZE LOG // ASTRAL EXPRESS</div>
+    <h1 class="hero-title">Warp Ledger</h1>
+    <p class="hero-sub">Every warp is a stop along the line. This is the record of your pull journey — station to station, every 50/50 win and loss, down to the last Stellar Jade.</p>
+    <div class="hero-meta">
+      <span id="metaGenerated">—</span>
+      <span class="dot">·</span>
+      <span id="metaTotalWarps">—</span> warps logged
+    </div>
+  </header>
+
+  <main>
+
+    <!-- OVERVIEW -->
+    <section class="section" id="overview">
+      <div class="section-head">
+        <span class="eyebrow">01 — Overview</span>
+        <h2>Journey Status</h2>
+      </div>
+      <div class="stat-grid" id="statGrid"></div>
+    </section>
+
+    <!-- LIMITED BANNER -->
+    <section class="section" id="limitedSection">
+      <div class="section-head">
+        <span class="eyebrow">02 — Featured Banner (Limited)</span>
+        <h2>Main Warp Line</h2>
+        <div class="tabs" id="limitedTabs">
+          <button class="tab active" data-cat="Character">Character</button>
+          <button class="tab" data-cat="Light Cone">Light Cone</button>
+        </div>
+      </div>
+
+      <div class="banner-stats" id="limitedStats"></div>
+
+      <div class="track-wrap">
+        <div class="track-scroll" id="limitedTrack"></div>
+        <div class="legend">
+          <span><i style="background:var(--win)"></i>50/50 Win</span>
+          <span><i style="background:var(--loss)"></i>50/50 Loss</span>
+          <span><i style="background:var(--guaranteed)"></i>Guaranteed</span>
+        </div>
+      </div>
+      <p class="track-hint">Scroll sideways to follow the timeline &nbsp;→&nbsp; the distance between stations represents how long the wait was (in days)</p>
+    </section>
+
+    <!-- STANDARD BANNER -->
+    <section class="section" id="standardSection">
+      <div class="section-head">
+        <span class="eyebrow">03 — Standard Banner</span>
+        <h2>Reserve Line</h2>
+      </div>
+      <div class="banner-stats" id="standardStats"></div>
+      <div class="track-wrap">
+        <div class="track-scroll" id="standardTrack"></div>
+      </div>
+    </section>
+
+    <!-- FREEBIES -->
+    <section class="section" id="freebiesSection">
+      <div class="section-head">
+        <span class="eyebrow">04 — Free Rewards</span>
+        <h2>Parcels from Herta Space Station</h2>
+      </div>
+      <div class="freebie-row" id="freebieRow"></div>
+    </section>
+
+    <!-- ROSTER -->
+    <section class="section" id="rosterSection">
+      <div class="section-head">
+        <span class="eyebrow">05 — Passenger Cabin</span>
+        <h2>Collected Roster</h2>
+        <div class="tabs" id="rosterTabs">
+          <button class="tab active" data-filter="all">All</button>
+          <button class="tab" data-filter="Limited">Limited</button>
+          <button class="tab" data-filter="Standard">Standard</button>
+          <button class="tab" data-filter="other">Other</button>
+        </div>
+      </div>
+      <div class="roster-table-wrap">
+        <table class="roster-table" id="rosterTable">
+          <thead>
+            <tr>
+              <th data-sort="name">Name</th>
+              <th data-sort="source">Source</th>
+              <th data-sort="eidolon">Eidolon</th>
+              <th data-sort="signature">Signature</th>
+              <th data-sort="totalPullValue">Pull Value</th>
+              <th data-sort="pullPercent">% of Total</th>
+            </tr>
+          </thead>
+          <tbody id="rosterBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- MANAGE DATA -->
+    <section class="section" id="manageSection">
+      <div class="section-head">
+        <span class="eyebrow">06 — Manage Data</span>
+        <h2>Trailblazer Control Room</h2>
+        <p class="manage-desc">Add new pulls right here — no need to open <code>data.js</code> anymore. Changes are saved automatically in this browser. To make your changes show up for anyone visiting the public link, click <strong>Export data.js</strong>, then upload that file to GitHub (overwriting the old one).</p>
+        <div class="tabs" id="manageTabs">
+          <button class="tab active" data-manage="limited">Limited Warps</button>
+          <button class="tab" data-manage="standard">Standard Warps</button>
+          <button class="tab" data-manage="freebies">Free Rewards</button>
+          <button class="tab" data-manage="roster">Roster</button>
+        </div>
+      </div>
+
+      <div class="manage-toolbar">
+        <span class="save-status" id="saveStatus">—</span>
+        <div class="manage-actions">
+          <button type="button" class="btn-ghost" id="btnExport">⬇ Export data.js</button>
+          <label class="btn-ghost" for="importFile">⬆ Import data.js</label>
+          <input type="file" id="importFile" accept=".js,.json,application/json,text/javascript" hidden>
+          <button type="button" class="btn-ghost danger" id="btnReset">↺ Reset to Default</button>
+        </div>
+      </div>
+
+      <form class="manage-form" id="form-limited" data-section="limited">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select name="category" required>
+            <option value="Character">Character</option>
+            <option value="Light Cone">Light Cone</option>
+          </select>
+        </div>
+        <div class="field field-grow">
+          <label>Name</label>
+          <input type="text" name="name" required placeholder="e.g. Feixiao">
+        </div>
+        <div class="field field-narrow">
+          <label>Pity</label>
+          <input type="number" name="pity" min="1" max="90" required>
+        </div>
+        <div class="field">
+          <label>50/50 Result</label>
+          <select name="result" required>
+            <option value="W">Win</option>
+            <option value="L">Loss</option>
+            <option value="G">Guaranteed</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-add">+ Add Pull</button>
+      </form>
+
+      <form class="manage-form" id="form-standard" data-section="standard" hidden>
+        <div class="field">
+          <label>Date</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select name="category" required>
+            <option value="Character">Character</option>
+            <option value="Light Cone">Light Cone</option>
+          </select>
+        </div>
+        <div class="field field-grow">
+          <label>Name</label>
+          <input type="text" name="name" required placeholder="e.g. Gepard">
+        </div>
+        <div class="field field-narrow">
+          <label>Pity</label>
+          <input type="number" name="pity" min="1" max="80" required>
+        </div>
+        <button type="submit" class="btn-add">+ Add Pull</button>
+      </form>
+
+      <form class="manage-form" id="form-freebies" data-section="freebies" hidden>
+        <div class="field">
+          <label>Date</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select name="category" required>
+            <option value="Character">Character</option>
+            <option value="Light Cone">Light Cone</option>
+          </select>
+        </div>
+        <div class="field field-grow">
+          <label>Name</label>
+          <input type="text" name="name" required placeholder="e.g. Dr. Ratio">
+        </div>
+        <div class="field field-grow">
+          <label>Event</label>
+          <input type="text" name="event" required placeholder="e.g. Golden Companion Spirit">
+        </div>
+        <button type="submit" class="btn-add">+ Add Reward</button>
+      </form>
+
+      <form class="manage-form" id="form-roster" data-section="roster" hidden>
+        <div class="field field-grow">
+          <label>Name</label>
+          <input type="text" name="name" required placeholder="e.g. Feixiao">
+        </div>
+        <div class="field field-grow">
+          <label>Source</label>
+          <input type="text" name="source" required placeholder="Limited / Standard" list="sourceOptions">
+          <datalist id="sourceOptions">
+            <option value="Limited">
+            <option value="Standard">
+            <option value="Celestial Invitation">
+            <option value="Golden Companion Spirit">
+          </datalist>
+        </div>
+        <div class="field field-narrow">
+          <label>Eidolon</label>
+          <input type="text" name="eidolon" required placeholder="E0 / NoE">
+        </div>
+        <div class="field field-narrow">
+          <label>Signature</label>
+          <input type="text" name="signature" required placeholder="S0 / NoS">
+        </div>
+        <div class="field field-narrow">
+          <label>Eidolon Value</label>
+          <input type="number" name="pullValueEidolon" min="0" step="1" value="0">
+        </div>
+        <div class="field field-narrow">
+          <label>Signature Value</label>
+          <input type="number" name="pullValueSignature" min="0" step="1" value="0">
+        </div>
+        <button type="submit" class="btn-add">+ Add Roster Entry</button>
+      </form>
+
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Warp Ledger — built from a Trailblazer's own pull data. Fill it in through the <strong>Manage Data</strong> panel above, or update <code>data.js</code> by hand after every warp session.</p>
+  </footer>
+
+</div>
+
+<!-- CHARACTERS (placeholder) -->
+<div class="page placeholder-page" id="page-characters" hidden>
+  <div class="placeholder-content">
+    <div class="placeholder-icon" style="--accent:var(--gold)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="10" r="3"/><path d="M6 19c1.1-3 3.3-4.6 6-4.6s4.9 1.6 6 4.6"/></svg>
+    </div>
+    <span class="eyebrow">DECK UNDER CONSTRUCTION</span>
+    <h2>Characters</h2>
+    <p>A full showcase of every Trailblazer's roster — builds, traces, and light cones side by side — is still boarding. This deck isn't open yet.</p>
+    <button class="btn-add placeholder-cta" data-goto="warptracker">Open Warp Tracker</button>
   </div>
-</header>
+</div>
 
-<main>
-
-  <!-- OVERVIEW -->
-  <section class="section" id="overview">
-    <div class="section-head">
-      <span class="eyebrow">01 — Ringkasan</span>
-      <h2>Status Perjalanan</h2>
+<!-- DATA BANK (placeholder) -->
+<div class="page placeholder-page" id="page-databank" hidden>
+  <div class="placeholder-content">
+    <div class="placeholder-icon" style="--accent:var(--cyan)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7.5" ry="3"/><path d="M4.5 5.5v6.3c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V5.5"/><path d="M4.5 11.8v6.2c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6.2"/></svg>
     </div>
-    <div class="stat-grid" id="statGrid"></div>
-  </section>
+    <span class="eyebrow">DECK UNDER CONSTRUCTION</span>
+    <h2>Data Bank</h2>
+    <p>A searchable archive of every character, light cone, and relic set is being catalogued. This deck isn't open yet.</p>
+    <button class="btn-add placeholder-cta" data-goto="warptracker">Open Warp Tracker</button>
+  </div>
+</div>
 
-  <!-- LIMITED BANNER -->
-  <section class="section" id="limitedSection">
-    <div class="section-head">
-      <span class="eyebrow">02 — Banner Kejar (Limited)</span>
-      <h2>Jalur Warp Utama</h2>
-      <div class="tabs" id="limitedTabs">
-        <button class="tab active" data-cat="Character">Karakter</button>
-        <button class="tab" data-cat="Light Cone">Light Cone</button>
-      </div>
+<!-- ASCENSION PLANNER (placeholder) -->
+<div class="page placeholder-page" id="page-ascension" hidden>
+  <div class="placeholder-content">
+    <div class="placeholder-icon" style="--accent:var(--win)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20v-4h4v-4h4v-4h4v-4h4"/></svg>
     </div>
+    <span class="eyebrow">DECK UNDER CONSTRUCTION</span>
+    <h2>Ascension Planner</h2>
+    <p>Plan level-up materials and ascension costs for your whole roster here. This deck isn't open yet.</p>
+    <button class="btn-add placeholder-cta" data-goto="warptracker">Open Warp Tracker</button>
+  </div>
+</div>
 
-    <div class="banner-stats" id="limitedStats"></div>
-
-    <div class="track-wrap">
-      <div class="track-scroll" id="limitedTrack"></div>
-      <div class="legend">
-        <span><i style="background:var(--win)"></i>Menang 50/50</span>
-        <span><i style="background:var(--loss)"></i>Kalah 50/50</span>
-        <span><i style="background:var(--guaranteed)"></i>Guaranteed</span>
-      </div>
+<!-- ACHIEVEMENTS (placeholder) -->
+<div class="page placeholder-page" id="page-achievements" hidden>
+  <div class="placeholder-content">
+    <div class="placeholder-icon" style="--accent:var(--gold-soft)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4.2a4 4 0 0 1-8 0V4z"/><path d="M8 4.8H5.3a2.8 2.8 0 0 0 2.8 3.6M16 4.8h2.7a2.8 2.8 0 0 1-2.8 3.6"/><path d="M12 12.2v3M9 19.5h6M9.8 19.5v-2.1h4.4v2.1"/></svg>
     </div>
-    <p class="track-hint">Geser ke samping untuk menyusuri linimasa &nbsp;→&nbsp; jarak antar stasiun merepresentasikan lamanya penantian (hari)</p>
-  </section>
-
-  <!-- STANDARD BANNER -->
-  <section class="section" id="standardSection">
-    <div class="section-head">
-      <span class="eyebrow">03 — Banner Standar</span>
-      <h2>Jalur Cadangan</h2>
-    </div>
-    <div class="banner-stats" id="standardStats"></div>
-    <div class="track-wrap">
-      <div class="track-scroll" id="standardTrack"></div>
-    </div>
-  </section>
-
-  <!-- FREEBIES -->
-  <section class="section" id="freebiesSection">
-    <div class="section-head">
-      <span class="eyebrow">04 — Hadiah Cuma-Cuma</span>
-      <h2>Titipan dari Herta Space Station</h2>
-    </div>
-    <div class="freebie-row" id="freebieRow"></div>
-  </section>
-
-  <!-- ROSTER -->
-  <section class="section" id="rosterSection">
-    <div class="section-head">
-      <span class="eyebrow">05 — Kabin Penumpang</span>
-      <h2>Roster Terkumpul</h2>
-      <div class="tabs" id="rosterTabs">
-        <button class="tab active" data-filter="all">Semua</button>
-        <button class="tab" data-filter="Limited">Limited</button>
-        <button class="tab" data-filter="Standard">Standard</button>
-        <button class="tab" data-filter="other">Lainnya</button>
-      </div>
-    </div>
-    <div class="roster-table-wrap">
-      <table class="roster-table" id="rosterTable">
-        <thead>
-          <tr>
-            <th data-sort="name">Nama</th>
-            <th data-sort="source">Sumber</th>
-            <th data-sort="eidolon">Eidolon</th>
-            <th data-sort="signature">Signature</th>
-            <th data-sort="totalPullValue">Nilai Pull</th>
-            <th data-sort="pullPercent">% dari Total</th>
-          </tr>
-        </thead>
-        <tbody id="rosterBody"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- MANAGE DATA -->
-  <section class="section" id="manageSection">
-    <div class="section-head">
-      <span class="eyebrow">06 — Kelola Data</span>
-      <h2>Ruang Kendali Trailblazer</h2>
-      <p class="manage-desc">Tambahkan pull baru langsung dari sini — tidak perlu buka <code>data.js</code> lagi. Perubahan otomatis tersimpan di browser ini. Kalau mau perubahan tampil juga buat orang lain yang buka link publiknya, klik <strong>Export data.js</strong> lalu upload ulang file itu ke GitHub (menimpa yang lama).</p>
-      <div class="tabs" id="manageTabs">
-        <button class="tab active" data-manage="limited">Warp Limited</button>
-        <button class="tab" data-manage="standard">Warp Standard</button>
-        <button class="tab" data-manage="freebies">Hadiah Gratis</button>
-        <button class="tab" data-manage="roster">Roster</button>
-      </div>
-    </div>
-
-    <div class="manage-toolbar">
-      <span class="save-status" id="saveStatus">—</span>
-      <div class="manage-actions">
-        <button type="button" class="btn-ghost" id="btnExport">⬇ Export data.js</button>
-        <label class="btn-ghost" for="importFile">⬆ Import data.js</label>
-        <input type="file" id="importFile" accept=".js,.json,application/json,text/javascript" hidden>
-        <button type="button" class="btn-ghost danger" id="btnReset">↺ Reset ke Bawaan</button>
-      </div>
-    </div>
-
-    <form class="manage-form" id="form-limited" data-section="limited">
-      <div class="field">
-        <label>Tanggal</label>
-        <input type="date" name="date" required>
-      </div>
-      <div class="field">
-        <label>Jenis</label>
-        <select name="category" required>
-          <option value="Character">Karakter</option>
-          <option value="Light Cone">Light Cone</option>
-        </select>
-      </div>
-      <div class="field field-grow">
-        <label>Nama</label>
-        <input type="text" name="name" required placeholder="mis. Feixiao">
-      </div>
-      <div class="field field-narrow">
-        <label>Pity</label>
-        <input type="number" name="pity" min="1" max="90" required>
-      </div>
-      <div class="field">
-        <label>Hasil 50/50</label>
-        <select name="result" required>
-          <option value="W">Menang</option>
-          <option value="L">Kalah</option>
-          <option value="G">Guaranteed</option>
-        </select>
-      </div>
-      <button type="submit" class="btn-add">+ Tambah Pull</button>
-    </form>
-
-    <form class="manage-form" id="form-standard" data-section="standard" hidden>
-      <div class="field">
-        <label>Tanggal</label>
-        <input type="date" name="date" required>
-      </div>
-      <div class="field">
-        <label>Jenis</label>
-        <select name="category" required>
-          <option value="Character">Karakter</option>
-          <option value="Light Cone">Light Cone</option>
-        </select>
-      </div>
-      <div class="field field-grow">
-        <label>Nama</label>
-        <input type="text" name="name" required placeholder="mis. Gepard">
-      </div>
-      <div class="field field-narrow">
-        <label>Pity</label>
-        <input type="number" name="pity" min="1" max="80" required>
-      </div>
-      <button type="submit" class="btn-add">+ Tambah Pull</button>
-    </form>
-
-    <form class="manage-form" id="form-freebies" data-section="freebies" hidden>
-      <div class="field">
-        <label>Tanggal</label>
-        <input type="date" name="date" required>
-      </div>
-      <div class="field">
-        <label>Jenis</label>
-        <select name="category" required>
-          <option value="Character">Karakter</option>
-          <option value="Light Cone">Light Cone</option>
-        </select>
-      </div>
-      <div class="field field-grow">
-        <label>Nama</label>
-        <input type="text" name="name" required placeholder="mis. Dr. Ratio">
-      </div>
-      <div class="field field-grow">
-        <label>Event</label>
-        <input type="text" name="event" required placeholder="mis. Golden Companion Spirit">
-      </div>
-      <button type="submit" class="btn-add">+ Tambah Hadiah</button>
-    </form>
-
-    <form class="manage-form" id="form-roster" data-section="roster" hidden>
-      <div class="field field-grow">
-        <label>Nama</label>
-        <input type="text" name="name" required placeholder="mis. Feixiao">
-      </div>
-      <div class="field field-grow">
-        <label>Sumber</label>
-        <input type="text" name="source" required placeholder="Limited / Standard" list="sourceOptions">
-        <datalist id="sourceOptions">
-          <option value="Limited">
-          <option value="Standard">
-          <option value="Celestial Invitation">
-          <option value="Golden Companion Spirit">
-        </datalist>
-      </div>
-      <div class="field field-narrow">
-        <label>Eidolon</label>
-        <input type="text" name="eidolon" required placeholder="E0 / NoE">
-      </div>
-      <div class="field field-narrow">
-        <label>Signature</label>
-        <input type="text" name="signature" required placeholder="S0 / NoS">
-      </div>
-      <div class="field field-narrow">
-        <label>Nilai Eidolon</label>
-        <input type="number" name="pullValueEidolon" min="0" step="1" value="0">
-      </div>
-      <div class="field field-narrow">
-        <label>Nilai Signature</label>
-        <input type="number" name="pullValueSignature" min="0" step="1" value="0">
-      </div>
-      <button type="submit" class="btn-add">+ Tambah Roster</button>
-    </form>
-
-    <div class="manage-table-wrap">
-      <table class="manage-table" id="manageTable">
-        <thead></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-
-</main>
-
-<footer class="site-footer">
-  <p>Warp Ledger — dibuat dari data pribadi Trailblazer. Isi lewat panel <strong>Kelola Data</strong> di atas, atau update <code>data.js</code> manual tiap habis warp.</p>
-</footer>
+    <span class="eyebrow">DECK UNDER CONSTRUCTION</span>
+    <h2>Achievements</h2>
+    <p>Track your Trailblaze completion and rare milestones here. This deck isn't open yet.</p>
+    <button class="btn-add placeholder-cta" data-goto="warptracker">Open Warp Tracker</button>
+  </div>
+</div>
 
 <script src="data.js"></script>
 <script src="script.js"></script>

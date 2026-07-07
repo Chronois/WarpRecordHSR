@@ -1,6 +1,6 @@
-// Data pull kamu — edit / tambah entri baru di sini setiap habis warp.
-// category untuk Limited & Standard: "Character" atau "Light Cone"
-// result untuk Limited: "W" (menang 50/50), "L" (kalah 50/50), "G" (guaranteed setelah kalah)
+// Your pull data — edit or add new entries here after every warp session.
+// category for Limited & Standard: "Character" or "Light Cone"
+// result for Limited: "W" (won the 50/50), "L" (lost the 50/50), "G" (guaranteed after a loss)
 const HSR_DATA = {
   "limited": [
     {
