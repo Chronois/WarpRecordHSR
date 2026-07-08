@@ -25,8 +25,6 @@ function initDateInputs() {
 }
 
 // ============ Version schedule ============
-// v4.3 starts 2024-06-05, each version = 42 days (21 days per half)
-// Starting from v4.3 = 2024-06-05
 const VERSION_START = { major: 4, minor: 3, date: '2026-06-03' };
 const HALF_DAYS = 21;
 const VERSION_DAYS = 42;
@@ -49,17 +47,14 @@ function getVersionSchedule() {
     const v2Start = new Date(v1Start.getTime() + HALF_DAYS * 86400000);
     const vEnd    = new Date(v1Start.getTime() + VERSION_DAYS * 86400000);
 
-    const label1 = getVersionLabel(major, minor, 1);
-    const label2 = getVersionLabel(major, minor, 2);
-
     schedule.push({
-      label: label1,
+      label: getVersionLabel(major, minor, 1),
       start: v1Start.toISOString().split('T')[0],
       end:   v2Start.toISOString().split('T')[0],
       major, minor, half: 1
     });
     schedule.push({
-      label: label2,
+      label: getVersionLabel(major, minor, 2),
       start: v2Start.toISOString().split('T')[0],
       end:   vEnd.toISOString().split('T')[0],
       major, minor, half: 2
@@ -70,7 +65,7 @@ function getVersionSchedule() {
 
     idx++;
     minor++;
-    if (major === 4 && minor === 9) { major = 5; minor = 0; } else if (minor > 9) { major++; minor = 0; }
+    if (major === 4 && minor === 9) { major = 5; minor = 0; } else if (minor > 8) { major++; minor = 0; }
   }
   return schedule;
 }
@@ -238,7 +233,7 @@ function computeRosterFromHistory() {
     }
   });
 
-  // Merge into roster — preserve existing 'source' type, add computed values
+  // Merge into roster
   const allNames = new Set([
     ...Object.keys(eidoMap),
     ...Object.keys(signMap),
@@ -278,7 +273,6 @@ function computeRosterFromHistory() {
     });
   });
 
-  // Sort by total pull desc
   newRoster.sort((a, b) => b.totalPullValue - a.totalPullValue);
   DATA.roster = newRoster;
   recomputeRosterPercent();
@@ -347,7 +341,15 @@ document.addEventListener('click', (e) => {
 });
 
 function deleteEntry(section, idx) {
-  DATA[section].splice(idx, 1);
+  if (section === 'priority') {
+    const deletedPrio = Number(DATA.priority[idx].priority);
+    DATA.priority.splice(idx, 1);
+    DATA.priority.forEach(p => {
+      if (Number(p.priority) > deletedPrio) p.priority = Number(p.priority) - 1;
+    });
+  } else {
+    DATA[section].splice(idx, 1);
+  }
   if (['limited','standard','freebies'].includes(section)) recomputeDaysSince(DATA[section]);
   saveWorkingData();
   renderAll();
@@ -399,6 +401,7 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
     const rc = hasResult ? r.result : 'G';
     return `
       <div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px">
+        <div class="station-label-name">${r.name}</div>
         <div class="station-tooltip">
           <div class="tt-name">${r.name}</div>
           <div class="tt-meta">${formatDate(r.date)} · pity ${r.pity}${hasResult ? ' · ' + (r.result === 'W' ? '50/50 Win' : r.result === 'L' ? '50/50 Loss' : 'Guaranteed') : ''}</div>
@@ -488,15 +491,21 @@ document.getElementById('form-standard').addEventListener('submit', (e) => {
 });
 
 // ============ Freebies ============
+const VERSION_SCHEDULE = getVersionSchedule();
+
 function renderFreebies() {
   const container = document.getElementById('freebieRow');
   if (!DATA.freebies.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`; return; }
-  container.innerHTML = DATA.freebies.map(f => `
+  container.innerHTML = DATA.freebies.map(f => {
+    const ver = getVersionForDate(f.date, VERSION_SCHEDULE);
+    return `
     <div class="freebie-card">
       <div class="freebie-name">${f.name}</div>
       <div class="freebie-event">${f.event}</div>
       <div class="freebie-date">${formatDate(f.date)} · ${f.category}</div>
-    </div>`).join('');
+      <div class="freebie-date" style="color:var(--cyan); margin-top:2px;">Version ${ver}</div>
+    </div>`;
+  }).join('');
 }
 function renderManageFreebies() {
   renderDeleteTable('manageTable-freebies', 'freebies',
@@ -531,7 +540,6 @@ function renderCalc() {
       ['Total Pulls',  fmt(s.total, 0)],
       ['Total Warps',  fmt(s.totalWarps, 0)],
       ['Average 5★',  fmt(s.avgPity, 1)],
-      ...(s.pityRoad !== null  ? [['Pity Road', pct(s.pityRoad)]] : []),
       ...(s.winRate !== null   ? [['Win Rate', pct(s.winRate)], ['W / L / G', `${s.wins} / ${s.losses} / ${s.guaranteed}`]] : []),
     ].map(([label, value]) => `
       <div class="bstat">
@@ -552,6 +560,7 @@ function renderCalc() {
 
 // ============ Priority ============
 function renderPriority() {
+  DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority));
   renderDeleteTable('manageTable-priority', 'priority',
     ['Priority','Name','Type','Archetype','Average Pull','Worst Scenario Pull','Patch (min-max)'],
     r => {
@@ -560,16 +569,26 @@ function renderPriority() {
       const worst = isLC ? 160 : 180;
       return [r.priority, r.name, r.type, r.archetype, avg, worst, `${fmt(avg/100,2)}–${fmt(worst/100,2)}`];
     },
-    (a, b) => a.r.priority - b.r.priority);
+    null);
 }
 document.getElementById('form-priority').addEventListener('submit', (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
   const newPrio = Number(fd.get('priority'));
+  
   DATA.priority.forEach(p => {
-    if (Number(p.priority) >= newPrio) p.priority = Number(p.priority) + 1;
+    if (Number(p.priority) >= newPrio) {
+      p.priority = Number(p.priority) + 1;
+    }
   });
-  DATA.priority.push({ priority: newPrio, name: fd.get('name').trim(), type: fd.get('type'), archetype: fd.get('archetype').trim() });
+  
+  DATA.priority.push({ 
+    priority: newPrio, 
+    name: fd.get('name').trim(), 
+    type: fd.get('type'), 
+    archetype: fd.get('archetype').trim() 
+  });
+  
   saveWorkingData();
   renderAll();
   e.target.reset();
@@ -688,20 +707,43 @@ function updateTeamPreview() {
 document.getElementById('form-team').addEventListener('change', updateTeamPreview);
 
 function renderTeam() {
+  const grid = document.getElementById('teamGrid');
+  if (!grid) return;
   const limitedTotalWarps = DATA.limited.reduce((s, r) => s + r.pity, 0);
-  renderDeleteTable('manageTable-team', 'team',
-    ['Archetype','Main DPS','Sub DPS','Support','Sustain','Cost','Pull Value','% of Total'],
-    r => [
-      r.archetype,
-      r.mainDps   || '—',
-      Array.isArray(r.subDps)   ? r.subDps.join(', ')   || '—' : r.subDps   || '—',
-      Array.isArray(r.support)  ? r.support.join(', ')  || '—' : r.support  || '—',
-      r.sustain   || '—',
-      r.cost,
-      fmt(r.pullValue, 0),
-      pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2),
-    ],
-    (a, b) => b.r.pullValue - a.r.pullValue);
+  
+  if (!DATA.team || !DATA.team.length) {
+    grid.innerHTML = '<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No teams built yet.</p>';
+    return;
+  }
+  
+  let indexed = DATA.team.map((r, idx) => ({ r, idx }));
+  indexed.sort((a, b) => b.r.pullValue - a.r.pullValue);
+  
+  grid.innerHTML = indexed.map(({ r, idx }) => {
+    const defaultImg = 'image_bf69ff.png';
+    const imgUrl = r.image || defaultImg;
+    const subDps = Array.isArray(r.subDps) ? r.subDps.join(', ') : r.subDps;
+    const support = Array.isArray(r.support) ? r.support.join(', ') : r.support;
+    const pctVal = pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2);
+    
+    return `
+      <div class="team-card searchable-item" data-idx="${idx}">
+        <img src="${imgUrl}" alt="Team" class="team-image" onerror="this.src='${defaultImg}'">
+        <div class="team-card-content">
+          <div class="tc-arch">${r.archetype}</div>
+          <div class="tc-row"><span>Main DPS:</span><span class="tc-val">${r.mainDps || '—'}</span></div>
+          <div class="tc-row"><span>Sub DPS:</span><span class="tc-val">${subDps || '—'}</span></div>
+          <div class="tc-row"><span>Support:</span><span class="tc-val">${support || '—'}</span></div>
+          <div class="tc-row"><span>Sustain:</span><span class="tc-val">${r.sustain || '—'}</span></div>
+          <div class="tc-row"><span>Cost:</span><span class="tc-val">${r.cost || '—'}</span></div>
+          <div class="tc-footer">
+            <span class="tc-pv">PV: ${fmt(r.pullValue, 0)} (${pctVal})</span>
+            <button class="btn-del" data-section="team" data-idx="${idx}" title="Delete">✕</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 document.getElementById('form-team').addEventListener('submit', (e) => {
@@ -718,7 +760,7 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
   const allMembers = [...mainDpsSlots, ...subDpsSlots, ...supportSlots, ...sustainSlots];
   const { costStr, totalPV } = computeTeamCostAndPV(allMembers);
 
-  DATA.team.push({
+  const newTeam = {
     archetype: fd.get('archetype').trim(),
     mainDps:   fmt2(mainDpsSlots).join(', ') || '',
     subDps:    fmt2(subDpsSlots),
@@ -726,25 +768,43 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
     sustain:   fmt2(sustainSlots).join(', ') || '',
     cost:      costStr,
     pullValue: totalPV,
-  });
-  saveWorkingData();
-  renderAll();
-  e.target.reset();
-  initDateInputs();
-  // Reset slot rows (keep first row, remove extras)
-  ['subDps','support'].forEach(role => {
-    const slotDiv = document.getElementById('slot-' + role);
-    const rows = slotDiv.querySelectorAll('.slot-row');
-    rows.forEach((row, i) => { if (i > 0) row.remove(); });
-    slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = '');
-  });
-  ['mainDps','sustain'].forEach(role => {
-    const slotDiv = document.getElementById('slot-' + role);
-    slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = '');
-  });
-  document.getElementById('team-cost-preview').value = '';
-  document.getElementById('team-pv-preview').value   = '';
-  populateSlotDropdowns();
+    image: null
+  };
+
+  const fileInput = document.getElementById('teamImageUpload');
+  if (fileInput && fileInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      newTeam.image = evt.target.result;
+      finishTeamAdd(newTeam);
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    finishTeamAdd(newTeam);
+  }
+
+  function finishTeamAdd(teamObj) {
+    if (!DATA.team) DATA.team = [];
+    DATA.team.push(teamObj);
+    saveWorkingData();
+    renderAll();
+    e.target.reset();
+    initDateInputs();
+    ['subDps','support'].forEach(role => {
+      const slotDiv = document.getElementById('slot-' + role);
+      const rows = slotDiv.querySelectorAll('.slot-row');
+      rows.forEach((row, i) => { if (i > 0) row.remove(); });
+      slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = '');
+    });
+    ['mainDps','sustain'].forEach(role => {
+      const slotDiv = document.getElementById('slot-' + role);
+      slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = '');
+    });
+    document.getElementById('team-cost-preview').value = '';
+    document.getElementById('team-pv-preview').value   = '';
+    if(fileInput) fileInput.value = '';
+    populateSlotDropdowns();
+  }
 });
 
 // ============ Character (auto-computed) ============
@@ -831,8 +891,6 @@ document.getElementById('form-character').addEventListener('submit', (e) => {
 });
 
 // ============ StellarJade ============
-const VERSION_SCHEDULE = getVersionSchedule();
-
 function renderStellarJade() {
   const rows       = DATA.stellarJade;
   const totalJade  = rows.reduce((s, r) => s + (r.jade  || 0), 0);
@@ -904,10 +962,8 @@ function downloadFile(filename, content, mime) {
 }
 
 document.getElementById('btnExport').addEventListener('click', () => {
-  const header = `// Warp Record HSR — exported ${new Date().toLocaleString('en-US')}
-`;
-  downloadFile('data.js', header + `const HSR_DATA = ${JSON.stringify(DATA, null, 2)};
-`, 'text/javascript');
+  const header = `// Warp Record HSR — exported ${new Date().toLocaleString('en-US')}\n`;
+  downloadFile('data.js', header + `const HSR_DATA = ${JSON.stringify(DATA, null, 2)};\n`, 'text/javascript');
 });
 
 document.getElementById('importFile').addEventListener('change', (e) => {
@@ -970,14 +1026,23 @@ document.querySelectorAll('.table-filter').forEach(input => {
   input.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     const tableId = e.target.getAttribute('data-table');
-    const table = document.getElementById(tableId);
-    if (!table) return;
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
+    const container = document.getElementById(tableId);
+    if (!container) return;
     
-    tbody.querySelectorAll('tr').forEach(tr => {
-      if (tr.classList.contains('empty-row')) return;
-      tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
-    });
+    // For normal tables
+    const tbody = container.querySelector('tbody');
+    if (tbody) {
+      tbody.querySelectorAll('tr').forEach(tr => {
+        if (tr.classList.contains('empty-row')) return;
+        tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+    }
+    
+    // For team grid
+    if (container.classList.contains('team-grid')) {
+      container.querySelectorAll('.team-card').forEach(card => {
+        card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+    }
   });
 });
