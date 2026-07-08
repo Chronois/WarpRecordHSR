@@ -464,19 +464,25 @@ main, header, footer, .page{ position:relative; z-index:1; }
   text-transform: uppercase;
   color: var(--text-dim);
 }
+
+/* ==============================================
+   SEMUA INPUT & DROPDOWN MENGGUNAKAN SURFACE-2
+   ============================================== */
 .manage-form input, .manage-form select{
-  background: var(--bg);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text);
   padding: 9px 10px;
   border-radius: 8px;
   font-family: var(--font-body);
   font-size: 13px;
+  outline: none;
+  transition: border-color .15s ease;
 }
 .manage-form input:focus, .manage-form select:focus{
-  outline: none;
   border-color: var(--nebula);
 }
+
 .btn-add{
   font-family: var(--font-body);
   font-weight: 700;
@@ -588,7 +594,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 
 /* =========================================================
-   TEAM SECTION
+   TEAM SECTION (Grid & Form)
    ========================================================= */
 .team-form { display: block !important; }
 .team-grid-2x2 {
@@ -613,27 +619,45 @@ main, header, footer, .page{ position:relative; z-index:1; }
   margin-bottom: 8px;
   border-bottom: 1px solid var(--border); 
   padding-bottom: 6px;
-  min-height: 32px; /* <-- Menjamin sejajar */
+  min-height: 32px; 
 }
 .team-form-bottom { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; align-items: flex-end; width: 100%; }
 
-/* PERBAIKAN TOMBOL + (MENYATU DENGAN TEMA GELAP) */
+/* =========================================================
+   PERBAIKAN SLOT INPUT & TOMBOL PLUS
+   ========================================================= */
+.slot-name, .slot-eidolon, .slot-sign {
+  padding: 8px 10px; 
+  border-radius: 6px; 
+  background: var(--surface-2); 
+  border: 1px solid var(--border); 
+  color: var(--text); 
+  font-family: var(--font-body); 
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .15s ease;
+}
+.slot-name:focus, .slot-eidolon:focus, .slot-sign:focus { border-color: var(--nebula); }
+
+/* Tombol Plus (+) pada Sub DPS dan Support */
 .btn-add-slot {
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text-dim);
-  width: 20px; 
-  height: 20px;
-  border-radius: 4px;
+  width: 24px; 
+  height: 24px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 400;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   transition: all .15s ease;
   padding: 0;
   margin-left: 6px;
-  line-height: 0;
+  line-height: 1;
 }
 .btn-add-slot:hover { 
   background: var(--border); 
@@ -658,9 +682,19 @@ main, header, footer, .page{ position:relative; z-index:1; }
    ========================================================= */
 .filter-wrap { margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .table-filter {
-  background: var(--bg-deep); border: 1px solid var(--border); color: var(--text); padding: 10px 14px;
-  border-radius: 8px; font-family: var(--font-body); font-size: 13px; flex: 1; min-width: 200px;
-  max-width: none; transition: border-color .15s ease; outline: none; margin-bottom: 0;
+  background: var(--surface-2); 
+  border: 1px solid var(--border); 
+  color: var(--text); 
+  padding: 10px 14px;
+  border-radius: 8px; 
+  font-family: var(--font-body); 
+  font-size: 13px; 
+  flex: 1; 
+  min-width: 200px;
+  max-width: none; 
+  transition: border-color .15s ease; 
+  outline: none; 
+  margin-bottom: 0;
 }
 .table-filter:focus { border-color: var(--nebula); }
 .sort-select { flex: 0 1 auto; min-width: 160px; cursor: pointer; }
@@ -752,18 +786,18 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cur
 
 .crop-modal-body { padding: 20px; }
 .modal-tabs {
-  display: flex; border-radius: 8px; overflow: hidden; background: var(--bg); border: 1px solid var(--border); margin-bottom: 16px;
+  display: flex; border-radius: 8px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--border); margin-bottom: 16px;
 }
 .modal-tab {
   flex: 1; padding: 10px; background: transparent; border: none; border-right: 1px solid var(--border);
   color: var(--text-dim); font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s;
 }
 .modal-tab:last-child { border-right: none; }
-.modal-tab.active { background: var(--surface-2); color: var(--text); }
+.modal-tab.active { background: var(--surface); color: var(--text); }
 
 .upload-zone {
   border: 2px dashed var(--border); border-radius: 8px; padding: 40px 20px; text-align: center;
-  color: var(--text); font-size: 12px; cursor: pointer; transition: 0.2s; background: var(--bg);
+  color: var(--text); font-size: 12px; cursor: pointer; transition: 0.2s; background: var(--surface-2);
 }
 .upload-zone:hover { border-color: var(--cyan); background: rgba(95,201,217,0.05); }
 
