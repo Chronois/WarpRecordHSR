@@ -107,6 +107,11 @@ function goToPage(page) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
   document.querySelectorAll('.page').forEach(p => { p.hidden = p.id !== 'page-' + page; });
   window.scrollTo({ top: 0, behavior: 'auto' });
+
+  // Auto-populate the textarea when opening the Data tab
+  if (page === 'data') {
+    document.getElementById('dataTextarea').value = JSON.stringify(DATA, null, 2);
+  }
 }
 
 // ============ Working data (Multi-Profile System) ============
@@ -1094,49 +1099,93 @@ document.getElementById('form-stellarjade').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
-// ============ EXPORT / IMPORT ============
-function downloadFile(filename, content, mime) {
-  const blob = new Blob([content], { type: mime });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-}
-document.getElementById('btnExport').addEventListener('click', () => {
-  const header = `// Warp Record HSR — exported ${new Date().toLocaleString('en-US')}\n`;
-  downloadFile('data.js', header + `const HSR_DATA = ${JSON.stringify(DATA, null, 2)};\n`, 'text/javascript');
+// ============ DATA MANAGEMENT (Fribbels/MDC Style) ============
+
+// 1. Copy JSON text to clipboard
+document.getElementById('btnCopyJson')?.addEventListener('click', () => {
+  const textarea = document.getElementById('dataTextarea');
+  textarea.select();
+  document.execCommand('copy');
+  alert('Data copied to clipboard!');
 });
-document.getElementById('importFile').addEventListener('change', (e) => {
+
+// 2. Apply JSON text from textarea
+document.getElementById('btnImportText')?.addEventListener('click', () => {
+  try {
+    const text = document.getElementById('dataTextarea').value.trim();
+    if (!text) return alert('Textarea is empty!');
+    
+    // Validasi format file agar tidak memuat script JS aneh
+    const parsed = JSON.parse(text);
+    
+    // Pastikan array dasar ada
+    ['limited','standard','freebies','roster','priority','team','stellarJade'].forEach(k => { 
+      if (!parsed[k]) parsed[k] = []; 
+    });
+    
+    DATA = parsed;
+    saveWorkingData();
+    renderAll();
+    alert('Data successfully applied from text!');
+  } catch (err) {
+    alert('Failed to parse JSON. Please make sure the format is correct.\nError: ' + err.message);
+  }
+});
+
+// 3. Download JSON file
+document.getElementById('btnDownloadJson')?.addEventListener('click', () => {
+  const content = JSON.stringify(DATA, null, 2);
+  const blob = new Blob([content], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; 
+  a.download = `hsr_backup_${CURRENT_PROFILE}_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); 
+  a.click(); 
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+// 4. Upload JSON file
+document.getElementById('uploadJsonFile')?.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
     try {
       const text = reader.result.trim();
-      let parsed;
-      if (text.startsWith('{')) { parsed = JSON.parse(text); }
-      else {
-        const m = text.match(/const\s+HSR_DATA\s*=\s*(\{[\s\S]*\})\s*;?\s*$/);
-        if (!m) throw new Error('Unrecognized file format.');
-        parsed = JSON.parse(m[1]);
-      }
-      ['limited','standard','freebies','roster','priority','team','stellarJade'].forEach(k => { if (!parsed[k]) parsed[k] = []; });
+      const parsed = JSON.parse(text);
+      
+      ['limited','standard','freebies','roster','priority','team','stellarJade'].forEach(k => { 
+        if (!parsed[k]) parsed[k] = []; 
+      });
+      
       DATA = parsed;
       saveWorkingData();
       renderAll();
-      alert('Data loaded successfully.');
-    } catch (err) { alert('Failed to load: ' + err.message); }
-    finally { e.target.value = ''; }
+      document.getElementById('dataTextarea').value = JSON.stringify(DATA, null, 2);
+      alert('Data loaded successfully from file!');
+    } catch (err) { 
+      alert('Failed to load file. Ensure it is a valid JSON backup.\nError: ' + err.message); 
+    } finally { 
+      e.target.value = ''; 
+    }
   };
   reader.readAsText(file);
 });
-document.getElementById('btnReset').addEventListener('click', () => {
-  if (!confirm('Reset to default data? All browser-saved changes will be deleted.')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  DATA = typeof HSR_DATA !== 'undefined' ? JSON.parse(JSON.stringify(HSR_DATA)) : {};
+
+// 5. Clear Data (Reset)
+document.getElementById('btnResetData')?.addEventListener('click', () => {
+  if (!confirm(`Clear all data for profile "${CURRENT_PROFILE}"? This action cannot be undone.`)) return;
+  localStorage.removeItem(getStorageKey());
+  
+  // Format template data kosong murni
+  DATA = { limited: [], standard: [], freebies: [], roster: [], priority: [], team: [], stellarJade: [] };
+  
   saveWorkingData();
   renderAll();
+  document.getElementById('dataTextarea').value = JSON.stringify(DATA, null, 2);
+  alert('Data cleared.');
 });
 
 // ============ Table & Grid Filters ============
