@@ -146,6 +146,23 @@ function saveWorkingData() {
   }
 }
 
+// Event Listener when profile dropdown is changed
+document.getElementById('profileSwitcher')?.addEventListener('change', (e) => {
+  CURRENT_PROFILE = e.target.value;
+  localStorage.setItem('hsr_current_profile', CURRENT_PROFILE);
+  DATA = loadWorkingData();
+  renderAll(); // Re-render the entire page with the new profile data
+});
+
+// Update Reset function to only reset the currently active profile
+document.getElementById('btnReset').addEventListener('click', () => {
+  if (!confirm(`Reset data for profile "${CURRENT_PROFILE}"? All browser-saved changes for this profile will be deleted.`)) return;
+  localStorage.removeItem(getStorageKey());
+  DATA = typeof HSR_DATA !== 'undefined' ? JSON.parse(JSON.stringify(HSR_DATA)) : {};
+  saveWorkingData();
+  renderAll();
+});
+
 // Event Listener ketika dropdown profile diubah
 document.getElementById('profileSwitcher')?.addEventListener('change', (e) => {
   CURRENT_PROFILE = e.target.value;
