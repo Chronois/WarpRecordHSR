@@ -586,23 +586,17 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 
 /* =========================================================
-   TEAM SECTION (Fixed Split Columns)
+   TEAM SECTION (Perfect 2x2 Grid)
    ========================================================= */
 .team-form {
   display: block !important; 
 }
-.team-split-layout {
-  display: flex;
+.team-grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
-  align-items: flex-start; /* Kunci utama: kolom independen & tidak memaksakan tinggi yang sama */
+  align-items: start; /* Mengunci item agar tetap di atas tanpa memaksa tarik ulur tinggi */
   width: 100%;
-}
-.team-split-col {
-  flex: 1;
-  min-width: 0; /* Mencegah elemen keluar dari kontainer */
-  display: flex;
-  flex-direction: column;
-  gap: 24px; /* Jarak pas antara Main DPS - Sustain atau Sub DPS - Support */
 }
 .team-slot-group {
   display: flex;
@@ -645,7 +639,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
 .team-slot { display: flex; flex-direction: column; gap: 6px; }
 
 @media (max-width: 768px) {
-  .team-split-layout { flex-direction: column; }
+  .team-grid-2x2 { grid-template-columns: 1fr; }
 }
 
 .slot-row { padding: 8px 12px; gap: 12px; margin-bottom: 0; }
