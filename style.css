@@ -513,11 +513,10 @@ main, header, footer, .page{ position:relative; z-index:1; }
   color: var(--text-dim);
   border-bottom: 1px solid var(--border);
   white-space:nowrap;
-  cursor: pointer; /* Menambahkan cursor pointer untuk global sort */
+  cursor: pointer;
   user-select: none;
 }
-.manage-table thead th:hover { color: var(--gold-soft); }
-/* Styling Sort Arrow pada Table Header */
+.manage-table less th:hover { color: var(--gold-soft); }
 .manage-table thead th::after {
   content: '';
   display: inline-block;
@@ -587,12 +586,24 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 
 /* =========================================================
-   TEAM SECTION (Compact & Refined)
+   TEAM SECTION (Compact & Two-Column Layout)
    ========================================================= */
 .team-form {
   flex-direction: column;
   gap: 16px;
 }
+.team-cols {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.team-col {
+  flex: 1 1 300px;
+  display: flex;
+  flex-direction: column;
+}
+
 .team-slot-group {
   display: flex;
   flex-direction: column;
@@ -666,6 +677,13 @@ main, header, footer, .page{ position:relative; z-index:1; }
 /* =========================================================
    UPDATED: FILTER STYLING
    ========================================================= */
+.filter-wrap {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
 .table-filter {
   background: var(--bg-deep);
   border: 1px solid var(--border);
@@ -674,13 +692,19 @@ main, header, footer, .page{ position:relative; z-index:1; }
   border-radius: 8px;
   font-family: var(--font-body);
   font-size: 13px;
-  width: 100%;
-  max-width: 320px;
+  flex: 1;
+  min-width: 200px;
+  max-width: none;
   transition: border-color .15s ease;
   outline: none;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 .table-filter:focus { border-color: var(--nebula); }
+.sort-select {
+  flex: 0 1 auto;
+  min-width: 160px;
+  cursor: pointer;
+}
 
 /* =========================================================
    UPDATED: PAGE CHARACTER GRID
@@ -752,19 +776,6 @@ main, header, footer, .page{ position:relative; z-index:1; }
 .roster-card:hover .roster-del-btn { opacity: 1; }
 .char-form-layout { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
 
-/* =========================================================
-   UPDATED: COMPACT TEAM PAGE RESPONSIVENESS
-   ========================================================= */
-@media (min-width: 768px) {
-  .team-form { 
-    display: flex; 
-    flex-direction: row; 
-    flex-wrap: wrap; 
-  }
-  .team-slot-group { 
-    flex-basis: calc(50% - 8px) !important; 
-  }
-}
 .slot-row { padding: 8px 12px; gap: 12px; margin-bottom: 0; }
 .slot-img-upload { width: 45px; height: 45px; }
 .slot-inputs { gap: 4px; }
