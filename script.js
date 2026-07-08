@@ -926,6 +926,7 @@ function renderRoster() {
     const signCls = r.signature === 'S0' ? '' : 'style="color:var(--cyan);font-weight:700"';
     const imgSrc = r.img || DEFAULT_AVATAR;
     
+    // 3. Tambahkan PV Eido, PV Sign, dan Total PV
     return `
       <div class="roster-card searchable-item" data-idx="${r._idx}">
         <div class="roster-img-wrap">
@@ -935,12 +936,19 @@ function renderRoster() {
         </div>
         <div class="roster-info">
           <div class="roster-name" title="${r.name}">${r.name}</div>
+          
           <div class="roster-stats">
             <span>Eidolon: <span ${eidoCls}>${r.eidolon}</span></span>
             <span>Sign: <span ${signCls}>${r.signature}</span></span>
           </div>
-          <div class="roster-stats" style="margin-bottom:0">
-            <span>Pull Value: <span style="color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</span></span>
+          
+          <div class="roster-stats" style="margin-top: 4px;">
+            <span>PV Eido: <span style="color:var(--text)">${fmt(r.pullValueEidolon, 0)}</span></span>
+            <span>PV Sign: <span style="color:var(--text)">${fmt(r.pullValueSignature, 0)}</span></span>
+          </div>
+          
+          <div class="roster-stats" style="margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;">
+            <span>Total Pull Value: <span style="color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</span></span>
           </div>
         </div>
       </div>
