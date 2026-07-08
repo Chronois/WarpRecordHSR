@@ -47,6 +47,7 @@
   </div>
 </header>
 
+<!-- LIMITED HISTORY -->
 <div class="page" id="page-limitedhistory">
   <main>
     <section class="section">
@@ -113,7 +114,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
-      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-limited" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); width:100%; max-width:300px; outline:none;"></div>
+      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-limited" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); font-size:13px; width:100%; max-width:300px; outline:none; transition:border-color .15s ease;" onfocus="this.style.borderColor='var(--nebula)'" onblur="this.style.borderColor='var(--border)'"></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-limited"><thead></thead><tbody></tbody></table>
       </div>
@@ -121,6 +122,7 @@
   </main>
 </div>
 
+<!-- STANDARD HISTORY -->
 <div class="page" id="page-standardhistory" hidden>
   <main>
     <section class="section">
@@ -161,7 +163,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
-      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-standard" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); width:100%; max-width:300px; outline:none;"></div>
+      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-standard" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); font-size:13px; width:100%; max-width:300px; outline:none; transition:border-color .15s ease;" onfocus="this.style.borderColor='var(--nebula)'" onblur="this.style.borderColor='var(--border)'"></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-standard"><thead></thead><tbody></tbody></table>
       </div>
@@ -169,6 +171,7 @@
   </main>
 </div>
 
+<!-- FREEBIES -->
 <div class="page" id="page-freebies" hidden>
   <main>
     <section class="section">
@@ -206,7 +209,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Reward</button>
       </form>
-      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-freebies" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); width:100%; max-width:300px; outline:none;"></div>
+      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-freebies" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); font-size:13px; width:100%; max-width:300px; outline:none; transition:border-color .15s ease;" onfocus="this.style.borderColor='var(--nebula)'" onblur="this.style.borderColor='var(--border)'"></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-freebies"><thead></thead><tbody></tbody></table>
       </div>
@@ -214,6 +217,7 @@
   </main>
 </div>
 
+<!-- CALC -->
 <div class="page" id="page-calc" hidden>
   <main>
     <section class="section">
@@ -233,6 +237,7 @@
   </main>
 </div>
 
+<!-- PRIORITY -->
 <div class="page" id="page-priority" hidden>
   <main>
     <section class="section">
@@ -260,9 +265,10 @@
           <label>Archetype</label>
           <input type="text" name="archetype" required placeholder="e.g. Break">
         </div>
+        
         <button type="submit" class="btn-add">+ Add to Wishlist</button>
       </form>
-      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-priority" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); width:100%; max-width:300px; outline:none;"></div>
+      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-priority" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); font-size:13px; width:100%; max-width:300px; outline:none; transition:border-color .15s ease;" onfocus="this.style.borderColor='var(--nebula)'" onblur="this.style.borderColor='var(--border)'"></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-priority"><thead></thead><tbody></tbody></table>
       </div>
@@ -270,6 +276,7 @@
   </main>
 </div>
 
+<!-- TEAM -->
 <div class="page" id="page-team" hidden>
   <main>
     <section class="section">
@@ -279,11 +286,13 @@
       </div>
 
       <form class="manage-form team-form" id="form-team" data-section="team">
+        <!-- Row 1: Archetype -->
         <div class="field field-grow" style="flex-basis:100%">
           <label>Archetype</label>
           <input type="text" name="archetype" required placeholder="e.g. Break">
         </div>
 
+        <!-- Main DPS -->
         <div class="team-slot-group">
           <div class="team-slot-label">Main DPS</div>
           <div class="team-slot" id="slot-mainDps">
@@ -295,6 +304,7 @@
           </div>
         </div>
 
+        <!-- Sub DPS (multi) -->
         <div class="team-slot-group">
           <div class="team-slot-label">Sub DPS <button type="button" class="btn-add-slot" data-role="subDps">+</button></div>
           <div class="team-slot" id="slot-subDps">
@@ -307,6 +317,7 @@
           </div>
         </div>
 
+        <!-- Support (multi) -->
         <div class="team-slot-group">
           <div class="team-slot-label">Support <button type="button" class="btn-add-slot" data-role="support">+</button></div>
           <div class="team-slot" id="slot-support">
@@ -319,6 +330,7 @@
           </div>
         </div>
 
+        <!-- Sustain -->
         <div class="team-slot-group">
           <div class="team-slot-label">Sustain</div>
           <div class="team-slot" id="slot-sustain">
@@ -330,6 +342,7 @@
           </div>
         </div>
 
+        <!-- Cost & Pull Value (auto) -->
         <div class="field field-grow">
           <label>Cost (Auto)</label>
           <input type="text" id="team-cost-preview" readonly placeholder="Will be computed..." style="opacity:0.6;cursor:default">
@@ -342,7 +355,7 @@
         <button type="submit" class="btn-add" style="align-self:flex-end">+ Add Team</button>
       </form>
 
-      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-team" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); width:100%; max-width:300px; outline:none;"></div>
+      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-team" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); font-size:13px; width:100%; max-width:300px; outline:none; transition:border-color .15s ease;" onfocus="this.style.borderColor='var(--nebula)'" onblur="this.style.borderColor='var(--border)'"></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-team"><thead></thead><tbody></tbody></table>
       </div>
@@ -351,6 +364,7 @@
   </main>
 </div>
 
+<!-- CHARACTER (auto-computed) -->
 <div class="page" id="page-character" hidden>
   <main>
     <section class="section">
@@ -365,7 +379,7 @@
         </div>
       </div>
       <p class="track-hint" style="margin-bottom:16px">Pull Value &amp; Eidolon/Signature are computed automatically from Limited Pull, Standard Pull, and Freebies. Use the form below to set each character's <em>type</em> (Limited / Standard / etc.) — that is the only field you need to fill in.</p>
-      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="rosterTable" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); width:100%; max-width:300px; outline:none;"></div>
+      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="rosterTable" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); font-size:13px; width:100%; max-width:300px; outline:none; transition:border-color .15s ease;" onfocus="this.style.borderColor='var(--nebula)'" onblur="this.style.borderColor='var(--border)'"></div>
       <div class="roster-table-wrap">
         <table class="roster-table" id="rosterTable">
           <thead>
@@ -412,6 +426,7 @@
   </main>
 </div>
 
+<!-- STELLAR JADE -->
 <div class="page" id="page-stellarjade" hidden>
   <main>
     <section class="section">
@@ -422,6 +437,7 @@
       <div class="banner-stats" id="jadeStats"></div>
     </section>
 
+    <!-- Version summary -->
     <section class="section">
       <div class="section-head">
         <span class="eyebrow">By Version</span>
@@ -473,7 +489,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Transaction</button>
       </form>
-      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-stellarjade" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); width:100%; max-width:300px; outline:none;"></div>
+      <div class="filter-wrap" style="margin-bottom:12px;"><input type="text" class="table-filter" data-table="manageTable-stellarjade" placeholder="Filter records..." style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:6px; font-family:var(--font-body); font-size:13px; width:100%; max-width:300px; outline:none; transition:border-color .15s ease;" onfocus="this.style.borderColor='var(--nebula)'" onblur="this.style.borderColor='var(--border)'"></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-stellarjade"><thead></thead><tbody></tbody></table>
       </div>

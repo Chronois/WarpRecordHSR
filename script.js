@@ -70,8 +70,7 @@ function getVersionSchedule() {
 
     idx++;
     minor++;
-    if (major === 4 && minor === 9) { major = 5; minor = 0; }
-    else if (minor > 9) { major++; minor = 0; }
+    if (major === 4 && minor === 9) { major = 5; minor = 0; } else if (minor > 9) { major++; minor = 0; }
   }
   return schedule;
 }
@@ -905,8 +904,10 @@ function downloadFile(filename, content, mime) {
 }
 
 document.getElementById('btnExport').addEventListener('click', () => {
-  const header = `// Warp Record HSR — exported ${new Date().toLocaleString('en-US')}\n`;
-  downloadFile('data.js', header + `const HSR_DATA = ${JSON.stringify(DATA, null, 2)};\n`, 'text/javascript');
+  const header = `// Warp Record HSR — exported ${new Date().toLocaleString('en-US')}
+`;
+  downloadFile('data.js', header + `const HSR_DATA = ${JSON.stringify(DATA, null, 2)};
+`, 'text/javascript');
 });
 
 document.getElementById('importFile').addEventListener('change', (e) => {
@@ -942,19 +943,6 @@ document.getElementById('btnReset').addEventListener('click', () => {
   renderAll();
 });
 
-// ============ Table Filters ============
-document.querySelectorAll('.table-filter').forEach(input => {
-  input.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-    const tableId = e.target.getAttribute('data-table');
-    const tbody = document.querySelector(`#${tableId} tbody`);
-    if (!tbody) return;
-    tbody.querySelectorAll('tr').forEach(tr => {
-      tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
-    });
-  });
-});
-
 // ============ Render all ============
 function renderAll() {
   computeRosterFromHistory();
@@ -976,3 +964,20 @@ function renderAll() {
 // ============ Init ============
 initDateInputs();
 renderAll();
+
+// ============ Table Filters ============
+document.querySelectorAll('.table-filter').forEach(input => {
+  input.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    const tableId = e.target.getAttribute('data-table');
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+    
+    tbody.querySelectorAll('tr').forEach(tr => {
+      if (tr.classList.contains('empty-row')) return;
+      tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+  });
+});
