@@ -16,7 +16,6 @@ function daysBetween(a, b) {
   return Math.max(0, Math.round((new Date(a + 'T00:00:00') - new Date(b + 'T00:00:00')) / 86400000));
 }
 
-// Set today's date on all date inputs
 function initDateInputs() {
   const today = new Date().toISOString().split('T')[0];
   document.querySelectorAll('input[type="date"]').forEach(el => {
@@ -69,15 +68,14 @@ function getVersionSchedule() {
   return schedule;
 }
 
+const VERSION_SCHEDULE = getVersionSchedule();
+
 function getVersionForDate(dateStr, schedule) {
   for (const v of schedule) {
     if (dateStr >= v.start && dateStr < v.end) return v.label;
   }
   return '—';
 }
-
-// Inisialisasi secara Global agar tidak memicu error Reference Error
-const VERSION_SCHEDULE = getVersionSchedule();
 
 // ============ Main nav / page switching ============
 document.getElementById('mainNav').addEventListener('click', (e) => {
@@ -135,10 +133,37 @@ function recomputeDaysSince(rows) {
 
 function sortByDate(rows) { rows.sort((a, b) => a.date.localeCompare(b.date)); }
 
+// ============ Global Delete Logic ============
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-del');
+  if (!btn) return;
+  
+  // Jika ini dari roster (karena sekarang tidak ada atribut idx di dataset jika diletakkan inline onclick)
+  // Untuk amannya, mari gunakan delegasi untuk tabel yang ada
+  if (btn.hasAttribute('onclick')) return; // Abaikan jika btn roster sudah pakai onclick
+  
+  deleteEntry(btn.dataset.section, Number(btn.dataset.idx));
+});
+
+function deleteEntry(section, idx) {
+  DATA[section].splice(idx, 1);
+  
+  if (section === 'priority') {
+    // Auto-fix nomor priority berurutan
+    DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority));
+    DATA.priority.forEach((p, i) => { p.priority = String(i + 1); });
+  }
+  
+  if (['limited','standard','freebies'].includes(section)) recomputeDaysSince(DATA[section]);
+  saveWorkingData();
+  renderAll();
+}
+
 // ============ Auto-compute roster from history ============
 const MC_NAMES = ['hmc', 'rmc', 'emc', 'dmc', 'pmc'];
 function isMC(name) { return MC_NAMES.includes((name || '').trim().toLowerCase()); }
 function normName(n) { return String(n || '').trim().toLowerCase(); }
+const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E";
 
 function computeRosterFromHistory() {
   const charHistory   = (DATA.limited || []).filter(r => r.category === 'Character');
@@ -241,6 +266,7 @@ function computeRosterFromHistory() {
     if (!name) return;
     const existing = (DATA.roster || []).find(r => normName(r.name) === name);
     const source   = existing ? existing.source : 'Unknown';
+    const imgData  = existing ? existing.img : null;
     const dispName = existing ? existing.name : (
       (DATA.limited||[]).find(r => normName(r.name) === name)?.name ||
       (DATA.standard||[]).find(r => normName(r.name) === name)?.name ||
@@ -260,6 +286,7 @@ function computeRosterFromHistory() {
     newRoster.push({
       name: dispName,
       source,
+      img: imgData,
       eidolon: eidoStr,
       signature: signStr,
       pullValueEidolon: pvEido,
@@ -313,7 +340,10 @@ function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   const thead = table.querySelector('thead');
   const tbody = table.querySelector('tbody');
   const rows  = DATA[section] || [];
+  
+  // Render thead with sortable behavior enabled through CSS
   thead.innerHTML = `<tr>${columnLabels.map(c => `<th>${c}</th>`).join('')}<th></th></tr>`;
+  
   if (!rows || !rows.length) {
     tbody.innerHTML = `<tr class="empty-row"><td colspan="${columnLabels.length + 1}">No entries yet.</td></tr>`;
     return;
@@ -328,45 +358,32 @@ function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   `).join('');
 }
 
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.btn-del');
+// ============ Overview & Summary ============
+let summaryCat = 'Character';
+
+document.getElementById('summaryTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.tab');
   if (!btn) return;
-  deleteEntry(btn.dataset.section, Number(btn.dataset.idx));
+  document.querySelectorAll('#summaryTabs .tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  summaryCat = btn.dataset.cat;
+  buildOverview();
 });
 
-function deleteEntry(section, idx) {
-  if (section === 'priority') {
-    const deletedPrio = Number(DATA.priority[idx].priority);
-    DATA.priority.splice(idx, 1);
-    DATA.priority.forEach(p => {
-      if (Number(p.priority) > deletedPrio) p.priority = Number(p.priority) - 1;
-    });
-  } else {
-    DATA[section].splice(idx, 1);
-  }
-  if (['limited','standard','freebies'].includes(section)) recomputeDaysSince(DATA[section]);
-  saveWorkingData();
-  renderAll();
-}
-
 function buildOverview() {
-  const limChar   = (DATA.limited||[]).filter(r => r.category === 'Character');
-  const limLC     = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
-  const stdRows   = DATA.standard || [];
-  const freebies  = DATA.freebies || [];
+  const limRows = (DATA.limited||[]).filter(r => r.category === summaryCat);
+  const stdRows = (DATA.standard||[]).filter(r => r.category === summaryCat);
+  const freebies = (DATA.freebies||[]).filter(r => r.category === summaryCat);
 
-  const limCharStats = computeBannerStats(limChar, 90);
-  const limLCStats   = computeBannerStats(limLC, 80);
-  const stdWarps     = stdRows.reduce((s, r) => s + r.pity, 0);
-  const totalWarps   = limCharStats.totalWarps + limLCStats.totalWarps + stdWarps;
-  const total5star   = limChar.length + limLC.length + stdRows.length + freebies.length;
+  const maxPity = summaryCat === 'Character' ? 90 : 80;
+  const stats = computeBannerStats(limRows, maxPity);
+  const total5star = limRows.length + stdRows.length + freebies.length;
 
   const cards = [
-    { label: 'Total Warps Spent',         value: fmt(totalWarps, 0),  sub: 'character + light cone + standard' },
-    { label: 'Total 5★ Obtained',         value: fmt(total5star, 0),  sub: `${limChar.length + limLC.length} limited · ${stdRows.length} standard · ${freebies.length} free` },
-    { label: '50/50 Win Rate (Character)',value: limCharStats.winRate !== null ? pct(limCharStats.winRate) : '—', sub: `${limCharStats.wins}W / ${limCharStats.losses}L` },
-    { label: 'Average Character Pity',    value: fmt(limCharStats.avgPity, 1), sub: 'out of hard pity 90' },
-    { label: 'Average Light Cone Pity',   value: fmt(limLCStats.avgPity, 1),   sub: 'out of hard pity 80' },
+    { label: `Total Warps (${summaryCat})`, value: fmt(stats.totalWarps, 0),  sub: 'Limited pull only' },
+    { label: `Total 5★ (${summaryCat})`, value: fmt(total5star, 0),  sub: `${limRows.length} lim · ${stdRows.length} std · ${freebies.length} free` },
+    { label: '50/50 Win Rate', value: stats.winRate !== null ? pct(stats.winRate) : '—', sub: `${stats.wins}W / ${stats.losses}L` },
+    { label: `Average Pity`, value: fmt(stats.avgPity, 1), sub: `out of hard pity ${maxPity}` }
   ];
 
   document.getElementById('statGrid').innerHTML = cards.map(c => `
@@ -377,12 +394,21 @@ function buildOverview() {
     </div>
   `).join('');
 
-  document.getElementById('metaLimitedWarps').textContent = fmt(limCharStats.totalWarps + limLCStats.totalWarps, 0);
-  document.getElementById('metaStandardWarps').textContent = fmt(stdWarps, 0);
-  document.getElementById('metaGenerated').textContent = 'Last pull: ' +
+  // Update Hero Meta 
+  const limCharTotal = (DATA.limited||[]).filter(r => r.category === 'Character').reduce((s, r) => s + r.pity, 0);
+  const limLCTotal = (DATA.limited||[]).filter(r => r.category === 'Light Cone').reduce((s, r) => s + r.pity, 0);
+  const stdWarps = (DATA.standard || []).reduce((s, r) => s + r.pity, 0);
+  
+  const elMetaLim = document.getElementById('metaLimitedWarps');
+  if(elMetaLim) elMetaLim.textContent = fmt(limCharTotal + limLCTotal, 0);
+  const elMetaStd = document.getElementById('metaStandardWarps');
+  if(elMetaStd) elMetaStd.textContent = fmt(stdWarps, 0);
+  const elMetaGen = document.getElementById('metaGenerated');
+  if(elMetaGen) elMetaGen.textContent = 'Last pull: ' +
     (DATA.limited && DATA.limited.length ? formatDate(DATA.limited[DATA.limited.length - 1].date) : '—');
 }
 
+// ============ Track Render ============
 function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
   if (!rows || !rows.length) {
@@ -422,6 +448,7 @@ function renderBannerStats(containerId, stats) {
     </div>`).join('');
 }
 
+// ============ Limited ============
 let currentLimitedCat = 'Character';
 function renderLimited() {
   const rows   = (DATA.limited||[]).filter(r => r.category === currentLimitedCat);
@@ -460,6 +487,7 @@ document.getElementById('form-limited').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
+// ============ Standard ============
 function renderStandard() {
   const rows = DATA.standard || [];
   renderBannerStats('standardStats', computeBannerStats(rows, 80));
@@ -484,7 +512,7 @@ document.getElementById('form-standard').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
-
+// ============ Freebies ============
 function renderFreebies() {
   const container = document.getElementById('freebieRow');
   if (!DATA.freebies || !DATA.freebies.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`; return; }
@@ -518,6 +546,7 @@ document.getElementById('form-freebies').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
+// ============ Calc Stats ============
 function renderCalc() {
   const limChar = (DATA.limited||[]).filter(r => r.category === 'Character');
   const limLC   = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
@@ -550,6 +579,7 @@ function renderCalc() {
     <div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${fmt(s.value, 0)}</div></div>`).join('');
 }
 
+// ============ Priority ============
 function renderPriority() {
   if (DATA.priority) {
       DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority));
@@ -598,8 +628,6 @@ document.getElementById('form-priority').addEventListener('submit', (e) => {
 });
 
 // ============ Team ============
-const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E";
-
 function getAllCharNames() {
   const names = new Set();
   (DATA.limited||[]).forEach(r => { if (r.name) names.add(r.name); });
@@ -830,47 +858,59 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
   populateSlotDropdowns();
 });
 
-// ROSTER
+// ============ ROSTER ============
 let rosterFilter = 'all';
-let rosterSort   = { key: 'totalPullValue', dir: -1 };
+
 function getRosterRows() {
   let rows = (DATA.roster||[]).map((r, idx) => ({ ...r, _idx: idx }));
   if (rosterFilter === 'Limited')  rows = rows.filter(r => r.source === 'Limited');
   else if (rosterFilter === 'Standard') rows = rows.filter(r => r.source === 'Standard');
   else if (rosterFilter === 'other')    rows = rows.filter(r => r.source !== 'Limited' && r.source !== 'Standard');
-  rows.sort((a, b) => {
-    const va = a[rosterSort.key], vb = b[rosterSort.key];
-    if (typeof va === 'string') return va.localeCompare(vb) * rosterSort.dir;
-    return (va - vb) * rosterSort.dir;
-  });
+  
+  // Sort descending by pull value by default
+  rows.sort((a, b) => b.totalPullValue - a.totalPullValue);
   return rows;
 }
+
 function renderRoster() {
   const rows = getRosterRows();
-  const body = document.getElementById('rosterBody');
+  const grid = document.getElementById('rosterGrid');
+  
   if (!rows.length) {
-    body.innerHTML = `<tr><td colspan="9" style="color:var(--text-dim);font-family:var(--font-mono);font-size:12px;">No data yet.</td></tr>`;
+    grid.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`;
     return;
   }
-  body.innerHTML = rows.map(r => {
+  
+  grid.innerHTML = rows.map(r => {
     const eidoCls = r.eidolon === 'NoE' ? '' : 'style="color:var(--gold-soft);font-weight:700"';
     const signCls = r.signature === 'S0' ? '' : 'style="color:var(--cyan);font-weight:700"';
-    const pctStr  = r.source === 'Limited' ? `${fmt(r.pullPercent,2)}%` : '—';
-    return `<tr>
-      <td class="name">${r.name}</td>
-      <td><span class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''}">${r.source}</span></td>
-      <td ${eidoCls}>${r.eidolon}</td>
-      <td ${signCls}>${r.signature}</td>
-      <td>${fmt(r.pullValueEidolon, 0)}</td>
-      <td>${fmt(r.pullValueSignature, 0)}</td>
-      <td style="font-weight:700;color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</td>
-      <td>${pctStr}</td>
-      <td><button class="btn-del" data-section="roster" data-idx="${r._idx}" title="Delete">✕</button></td>
-    </tr>`;
+    const imgSrc = r.img || DEFAULT_AVATAR;
+    
+    return `
+      <div class="roster-card searchable-item" data-idx="${r._idx}">
+        <div class="roster-img-wrap">
+          <img src="${imgSrc}" onerror="this.src='${DEFAULT_AVATAR}'">
+          <div class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''} roster-type-tag">${r.source}</div>
+          <button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button>
+        </div>
+        <div class="roster-info">
+          <div class="roster-name" title="${r.name}">${r.name}</div>
+          <div class="roster-stats">
+            <span>Eido: <span ${eidoCls}>${r.eidolon}</span></span>
+            <span>Sign: <span ${signCls}>${r.signature}</span></span>
+          </div>
+          <div class="roster-stats" style="margin-bottom:0">
+            <span>Pull Value: <span style="color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</span></span>
+          </div>
+        </div>
+      </div>
+    `;
   }).join('');
+  
   const dl = document.getElementById('charNameList');
   if (dl) dl.innerHTML = getAllCharNames().map(n => `<option value="${n}">`).join('');
 }
+
 document.getElementById('rosterTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('.tab');
   if (!btn) return;
@@ -879,33 +919,47 @@ document.getElementById('rosterTabs').addEventListener('click', (e) => {
   rosterFilter = btn.dataset.filter;
   renderRoster();
 });
-document.getElementById('rosterTable').querySelector('thead').addEventListener('click', (e) => {
-  const th = e.target.closest('th');
-  if (!th || !th.dataset.sort) return;
-  const key = th.dataset.sort;
-  rosterSort.dir = rosterSort.key === key ? -rosterSort.dir : -1;
-  rosterSort.key = key;
-  renderRoster();
+
+// Image Preview & Upload for Character form
+document.getElementById('charFileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = evt => document.getElementById('charFormImg').src = evt.target.result;
+    reader.readAsDataURL(file);
+  }
 });
+
 document.getElementById('form-character').addEventListener('submit', (e) => {
   e.preventDefault();
   const fd   = new FormData(e.target);
   const name = fd.get('name').trim();
   const src  = fd.get('source');
+  
+  const imgSrc = document.getElementById('charFormImg').src;
+  const isDefault = imgSrc.includes('viewBox'); 
+
   const existing = (DATA.roster||[]).find(r => normName(r.name) === normName(name));
+  
   if (existing) {
     existing.source = src;
+    if (!isDefault) existing.img = imgSrc;
   } else {
     if(!DATA.roster) DATA.roster = [];
-    DATA.roster.push({ name, source: src, eidolon: 'NoE', signature: 'S0', pullValueEidolon: 0, pullValueSignature: 0, totalPullValue: 0, pullPercent: 0 });
+    DATA.roster.push({ 
+      name, source: src, 
+      img: isDefault ? null : imgSrc,
+      eidolon: 'NoE', signature: 'S0', pullValueEidolon: 0, pullValueSignature: 0, totalPullValue: 0, pullPercent: 0 
+    });
   }
   recomputeRosterPercent();
   saveWorkingData();
   renderAll();
   e.target.reset();
+  document.getElementById('charFormImg').src = DEFAULT_AVATAR; // Reset preview
 });
 
-// STELLAR JADE
+// ============ STELLAR JADE ============
 function renderStellarJade() {
   const rows       = DATA.stellarJade || [];
   const totalJade  = rows.reduce((s, r) => s + (r.jade  || 0), 0);
@@ -964,7 +1018,7 @@ document.getElementById('form-stellarjade').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
-// EXPORT / IMPORT
+// ============ EXPORT / IMPORT ============
 function downloadFile(filename, content, mime) {
   const blob = new Blob([content], { type: mime });
   const url  = URL.createObjectURL(blob);
@@ -1009,33 +1063,57 @@ document.getElementById('btnReset').addEventListener('click', () => {
   renderAll();
 });
 
-// ============ Table Filters ============
+// ============ Table & Grid Filters ============
 document.querySelectorAll('.table-filter').forEach(input => {
   input.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
-    const tableId = e.target.getAttribute('data-table');
-    const container = document.getElementById(tableId);
+    const targetId = e.target.getAttribute('data-table');
+    const container = document.getElementById(targetId);
     if (!container) return;
     
-    // For normal tables
-    const tbody = container.querySelector('tbody');
-    if (tbody) {
-      tbody.querySelectorAll('tr').forEach(tr => {
-        if (tr.classList.contains('empty-row')) return;
-        tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
-      });
-    }
-    
-    // For team grid
-    if (container.classList.contains('team-grid')) {
-      container.querySelectorAll('.team-card').forEach(card => {
+    if (container.tagName === 'TABLE') {
+      const tbody = container.querySelector('tbody');
+      if (tbody) {
+        tbody.querySelectorAll('tr').forEach(tr => {
+          if (tr.classList.contains('empty-row')) return;
+          tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
+        });
+      }
+    } else {
+      container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => {
         card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none';
       });
     }
   });
 });
 
-// Init
+// ============ Global Table Sorter ============
+document.addEventListener('click', (e) => {
+  if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) {
+    const th = e.target;
+    const table = th.closest('table');
+    const tbody = table.querySelector('tbody');
+    const idx = Array.from(th.parentNode.children).indexOf(th);
+    const isAsc = th.classList.contains('asc');
+
+    table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc'));
+    th.classList.add(isAsc ? 'desc' : 'asc');
+
+    const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
+    rows.sort((a, b) => {
+      const aText = a.children[idx].textContent.trim();
+      const bText = b.children[idx].textContent.trim();
+      const aNum = parseFloat(aText.replace(/,/g, ''));
+      const bNum = parseFloat(bText.replace(/,/g, ''));
+      
+      if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum;
+      return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText);
+    });
+    tbody.append(...rows);
+  }
+});
+
+// ============ Init ============
 function renderAll() {
   computeRosterFromHistory();
   buildOverview();
