@@ -36,6 +36,19 @@ body{
   overflow-x:hidden;
 }
 
+/* Scrollbar Customization - Menyesuaikan tema Web */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--nebula); }
+
+/* Khusus scrollbar yang mendatar di track road */
+.track-scroll::-webkit-scrollbar { height: 8px; }
+.track-scroll::-webkit-scrollbar-track { background: var(--bg-deep); border-radius: 8px; }
+.track-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+.track-scroll::-webkit-scrollbar-thumb:hover { background: var(--nebula); }
+
+
 /* MAIN NAV */
 .main-nav{
   position: sticky;
@@ -465,9 +478,6 @@ main, header, footer, .page{ position:relative; z-index:1; }
   color: var(--text-dim);
 }
 
-/* ==============================================
-   SEMUA INPUT & DROPDOWN MENGGUNAKAN SURFACE-2
-   ============================================== */
 .manage-form input, .manage-form select{
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -547,17 +557,29 @@ main, header, footer, .page{ position:relative; z-index:1; }
   font-size: 12px;
   white-space: normal;
 }
-.btn-del{
+
+/* Edit, Dup, and Del buttons in TC Footer */
+.btn-del, .btn-edit, .btn-dup {
   background: none;
   border: 1px solid var(--border);
-  color: var(--loss);
   width: 26px; height: 26px;
   border-radius: 6px;
   cursor:pointer;
   font-size: 13px;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s ease;
+  padding: 0;
 }
-.btn-del:hover{ border-color: var(--loss); background: rgba(226,128,125,.12); }
+.btn-del { color: var(--loss); }
+.btn-del:hover { border-color: var(--loss); background: rgba(226,128,125,.12); }
+.btn-edit { color: var(--cyan); }
+.btn-edit:hover { border-color: var(--cyan); background: rgba(95,201,217,.12); }
+.btn-dup { color: var(--gold-soft); }
+.btn-dup:hover { border-color: var(--gold-soft); background: rgba(242,205,118,.12); }
+.tc-footer-actions { display: flex; gap: 6px; }
 
 /* TAGS */
 .tag{
@@ -605,8 +627,6 @@ main, header, footer, .page{ position:relative; z-index:1; }
   width: 100%;
 }
 .team-slot-group { display: flex; flex-direction: column; gap: 6px; }
-
-/* KUNCI PENYEJAJARAN: LABEL TINGGINYA SAMA */
 .team-slot-label {
   font-family: var(--font-mono); 
   font-size: 10px; 
@@ -623,9 +643,6 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 .team-form-bottom { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; align-items: flex-end; width: 100%; }
 
-/* =========================================================
-   PERBAIKAN SLOT INPUT & TOMBOL PLUS
-   ========================================================= */
 .slot-name, .slot-eidolon, .slot-sign {
   padding: 8px 10px; 
   border-radius: 6px; 
@@ -640,7 +657,6 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 .slot-name:focus, .slot-eidolon:focus, .slot-sign:focus { border-color: var(--nebula); }
 
-/* Tombol Plus (+) pada Sub DPS dan Support */
 .btn-add-slot {
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -725,7 +741,6 @@ main, header, footer, .page{ position:relative; z-index:1; }
 .slot-row { padding: 8px 12px; gap: 12px; margin-bottom: 0; }
 .slot-inputs { gap: 4px; }
 
-/* UKURAN SLOT IMAGE KOTAK SEMPURNA */
 .slot-img-upload { 
   width: 56px; 
   height: 56px; 
@@ -805,6 +820,5 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cur
   padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px;
 }
 
-/* Override gaya cropper agar rapi */
 .cropper-view-box { outline: 1px solid var(--cyan); }
 .cropper-line, .cropper-point { background-color: var(--cyan); }
