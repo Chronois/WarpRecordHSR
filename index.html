@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
+  /* Tambahan Style Ekstra agar sesuai permintaan tanpa merusak CSS lama */
   .filter-wrap { margin-bottom: 16px; }
   .filter-input {
     background: var(--bg); border: 1px solid var(--border); color: var(--text);
@@ -26,9 +27,12 @@
   .station { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
   .station-dot { margin-top: auto; }
   
-  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
   .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-  .team-image { width: 100%; height: 140px; object-fit: cover; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .team-image-row { display: flex; height: 90px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .team-image-slot { flex: 1; border-right: 1px solid var(--border); display: flex; justify-content: center; align-items: center; overflow: hidden; }
+  .team-image-slot:last-child { border-right: none; }
+  .team-image-slot img { width: 100%; height: 100%; object-fit: cover; }
   .team-card-content { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
   .tc-arch { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--nebula); }
   .tc-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); }
@@ -142,7 +146,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
-      <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-limited" placeholder="Filter records..."></div>
+      <div class="filter-wrap"><input type="text" class="filter-input" data-table="manageTable-limited" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-limited"><thead></thead><tbody></tbody></table>
       </div>
@@ -191,7 +195,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
-      <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-standard" placeholder="Filter records..."></div>
+      <div class="filter-wrap"><input type="text" class="filter-input" data-table="manageTable-standard" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-standard"><thead></thead><tbody></tbody></table>
       </div>
@@ -237,7 +241,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Reward</button>
       </form>
-      <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-freebies" placeholder="Filter records..."></div>
+      <div class="filter-wrap"><input type="text" class="filter-input" data-table="manageTable-freebies" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-freebies"><thead></thead><tbody></tbody></table>
       </div>
@@ -313,11 +317,6 @@
       </div>
 
       <form class="manage-form team-form" id="form-team" data-section="team">
-        <!-- Image Upload -->
-        <div class="field field-grow" style="flex-basis:100%">
-          <label>Team Image (Leave blank for default)</label>
-          <input type="file" id="teamImageUpload" accept="image/*">
-        </div>
         <!-- Row 1: Archetype -->
         <div class="field field-grow" style="flex-basis:100%">
           <label>Archetype</label>
@@ -325,53 +324,27 @@
         </div>
 
         <!-- Main DPS -->
-        <div class="team-slot-group">
-          <div class="team-slot-label">Main DPS</div>
-          <div class="team-slot" id="slot-mainDps">
-            <div class="slot-row">
-              <select class="slot-name" data-role="mainDps"><option value="">— none —</option></select>
-              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
-              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
-            </div>
-          </div>
+        <div class="team-slot-group" style="flex-basis: 100%;">
+          <div class="team-slot-label" style="margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; color: var(--nebula);">Main DPS</div>
+          <div class="team-slot" id="slot-mainDps"></div>
         </div>
 
         <!-- Sub DPS (multi) -->
-        <div class="team-slot-group">
-          <div class="team-slot-label">Sub DPS <button type="button" class="btn-add-slot" data-role="subDps">+</button></div>
-          <div class="team-slot" id="slot-subDps">
-            <div class="slot-row">
-              <select class="slot-name" data-role="subDps"><option value="">— none —</option></select>
-              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
-              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
-              <button type="button" class="btn-remove-slot">✕</button>
-            </div>
-          </div>
+        <div class="team-slot-group" style="flex-basis: 100%;">
+          <div class="team-slot-label" style="margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; color: var(--nebula);">Sub DPS <button type="button" class="btn-add-slot" data-role="subDps">+</button></div>
+          <div class="team-slot" id="slot-subDps"></div>
         </div>
 
         <!-- Support (multi) -->
-        <div class="team-slot-group">
-          <div class="team-slot-label">Support <button type="button" class="btn-add-slot" data-role="support">+</button></div>
-          <div class="team-slot" id="slot-support">
-            <div class="slot-row">
-              <select class="slot-name" data-role="support"><option value="">— none —</option></select>
-              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
-              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
-              <button type="button" class="btn-remove-slot">✕</button>
-            </div>
-          </div>
+        <div class="team-slot-group" style="flex-basis: 100%;">
+          <div class="team-slot-label" style="margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; color: var(--nebula);">Support <button type="button" class="btn-add-slot" data-role="support">+</button></div>
+          <div class="team-slot" id="slot-support"></div>
         </div>
 
         <!-- Sustain -->
-        <div class="team-slot-group">
-          <div class="team-slot-label">Sustain</div>
-          <div class="team-slot" id="slot-sustain">
-            <div class="slot-row">
-              <select class="slot-name" data-role="sustain"><option value="">— none —</option></select>
-              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
-              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
-            </div>
-          </div>
+        <div class="team-slot-group" style="flex-basis: 100%;">
+          <div class="team-slot-label" style="margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; color: var(--nebula);">Sustain</div>
+          <div class="team-slot" id="slot-sustain"></div>
         </div>
 
         <!-- Cost & Pull Value (auto) -->
@@ -384,10 +357,10 @@
           <input type="number" id="team-pv-preview" readonly placeholder="—" style="opacity:0.6;cursor:default">
         </div>
 
-        <button type="submit" class="btn-add" style="align-self:flex-end">+ Add Team</button>
+        <button type="submit" class="btn-add" style="align-self:flex-end; flex-basis: 100%; margin-top: 10px;">+ Add Team</button>
       </form>
 
-      <div class="filter-wrap"><input type="text" class="table-filter" data-table="teamGrid" placeholder="Filter teams..."></div>
+      <div class="filter-wrap"><input type="text" class="filter-input" data-table="teamGrid" placeholder="Filter teams..."></div>
       <div class="team-grid" id="teamGrid"></div>
       <p class="track-hint">% of Total Pulls is each team's Pull Value against every warp spent on the Limited Pull banner so far.</p>
     </section>
@@ -409,7 +382,7 @@
         </div>
       </div>
       <p class="track-hint" style="margin-bottom:16px">Pull Value &amp; Eidolon/Signature are computed automatically from Limited Pull, Standard Pull, and Freebies. Use the form below to set each character's <em>type</em> (Limited / Standard / etc.) — that is the only field you need to fill in.</p>
-      <div class="filter-wrap"><input type="text" class="table-filter" data-table="rosterTable" placeholder="Filter records..."></div>
+      <div class="filter-wrap"><input type="text" class="filter-input" data-table="rosterTable" placeholder="Filter records..."></div>
       <div class="roster-table-wrap">
         <table class="roster-table" id="rosterTable">
           <thead>
