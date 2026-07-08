@@ -717,13 +717,61 @@ document.getElementById('rosterSortSelect')?.addEventListener('change', (e) => {
 
 function getRosterRows() {
   let rows = (DATA.roster||[]).map((r, idx) => ({ ...r, _idx: idx }));
-  if (rosterFilter === 'Limited') rows = rows.filter(r => r.source === 'Limited'); else if (rosterFilter === 'Standard') rows = rows.filter(r => r.source === 'Standard'); else if (rosterFilter === 'other') rows = rows.filter(r => r.source !== 'Limited' && r.source !== 'Standard');
+  
+  if (rosterFilter === 'Limited') rows = rows.filter(r => r.source === 'Limited'); 
+  else if (rosterFilter === 'Standard') rows = rows.filter(r => r.source === 'Standard'); 
+  else if (rosterFilter === 'other') rows = rows.filter(r => r.source !== 'Limited' && r.source !== 'Standard');
+  
   rows.sort((a, b) => {
-    if (a.isOwned !== b.isOwned) { return a.isOwned ? -1 : 1; }
-    if (rosterSortValue === 'nameAsc') return a.name.localeCompare(b.name); if (rosterSortValue === 'nameDesc') return b.name.localeCompare(a.name);
-    const ea = parseInt(a.eidolon.replace('E','').replace('No','0')) || 0; const sa = parseInt(a.signature.replace('S','')) || 0; const eb = parseInt(b.eidolon.replace('E','').replace('No','0')) || 0; const sb = parseInt(b.signature.replace('S','')) || 0;
-    if (rosterSortValue === 'eidolonDesc') { if (eb !== ea) return eb - ea; return b.totalPullValue - a.totalPullValue; }
-    if (rosterSortValue === 'costDesc') { const costA = ea + sa; const costB = eb + sb; if (costB !== costA) return costB - costA; return b.totalPullValue - a.totalPullValue; }
+    // 1. Kunci karakter "Not Owned" agar selalu ada di bawah
+    if (a.isOwned !== b.isOwned) {
+        return a.isOwned ? -1 : 1;
+    }
+
+    // 2. Lanjutkan sorting biasa
+    if (rosterSortValue === 'nameAsc') return a.name.localeCompare(b.name); 
+    if (rosterSortValue === 'nameDesc') return b.name.localeCompare(a.name);
+    
+    // Kalkulasi nilai asli Eidolon dan Signature
+    let ea = parseInt(a.eidolon.replace('E','').replace('No','0')) || 0; 
+    let sa = parseInt(a.signature.replace('S','')) || 0; 
+    let eb = parseInt(b.eidolon.replace('E','').replace('No','0')) || 0; 
+    let sb = parseInt(b.signature.replace('S','')) || 0;
+
+    // LOGIKA KHUSUS: Abaikan Eidolon (Anggap E0) jika karakternya adalah Main Character
+    if (a.source === 'Main Character') ea = 0;
+    if (b.source === 'Main Character') eb = 0;
+    
+    // Sorting Eidolon
+    if (rosterSortValue === 'eidolonDesc') { 
+        if (eb !== ea) return eb - ea; 
+        return b.totalPullValue - a.totalPullValue; 
+    }
+    if (rosterSortValue === 'eidolonAsc') { 
+        if (ea !== eb) return ea - eb; 
+        return a.totalPullValue - b.totalPullValue; 
+    }
+    
+    // Sorting Cost
+    if (rosterSortValue === 'costDesc') { 
+        const costA = ea + sa; 
+        const costB = eb + sb; 
+        if (costB !== costA) return costB - costA; 
+        return b.totalPullValue - a.totalPullValue; 
+    }
+    if (rosterSortValue === 'costAsc') { 
+        const costA = ea + sa; 
+        const costB = eb + sb; 
+        if (costA !== costB) return costA - costB; 
+        return a.totalPullValue - b.totalPullValue; 
+    }
+    
+    // Sorting Pull Value
+    if (rosterSortValue === 'pullValueAsc') {
+        return a.totalPullValue - b.totalPullValue;
+    }
+    
+    // Default (pullValueDesc)
     return b.totalPullValue - a.totalPullValue;
   }); 
   return rows;
