@@ -28,42 +28,54 @@ const VERSION_START = { major: 4, minor: 3, date: '2026-06-03' };
 const HALF_DAYS = 21;
 const VERSION_DAYS = 42;
 
-function getVersionLabel(major, minor, half) {
-  return `${major}.${minor} (${half}/2)`;
-}
-
 function getVersionSchedule() {
   const schedule = [];
-  const base = new Date(VERSION_START.date + 'T00:00:00');
-  const now = new Date();
-  let major = VERSION_START.major;
-  let minor = VERSION_START.minor;
-  let idx = 0;
-
-  while (true) {
-    const v1Start = new Date(base.getTime() + idx * VERSION_DAYS * 86400000);
+  const baseDate = new Date(VERSION_START.date + 'T00:00:00').getTime();
+  
+  // Hitung mundur 40 patch ke belakang agar data lama ikut ter-cover
+  const startIdx = -40; 
+  
+  let curMajor = VERSION_START.major;
+  let curMinor = VERSION_START.minor;
+  
+  // Mencari versi awal (mundur 40 iterasi dari 4.3)
+  for(let i=0; i < Math.abs(startIdx); i++) {
+     if (curMinor === 0) {
+         curMajor--;
+         curMinor = 8;
+     } else {
+         curMinor--;
+     }
+  }
+  
+  // Build jadwal dari versi lama sampai 20 versi ke depan
+  for (let i = startIdx; i <= 20; i++) {
+    const v1Start = new Date(baseDate + i * VERSION_DAYS * 86400000);
     const v2Start = new Date(v1Start.getTime() + HALF_DAYS * 86400000);
     const vEnd    = new Date(v1Start.getTime() + VERSION_DAYS * 86400000);
-
+    
+    const fullLabel = `${curMajor}.${curMinor}`;
+    
     schedule.push({
-      label: getVersionLabel(major, minor, 1),
+      fullLabel: fullLabel,
+      label: `${fullLabel} (1/2)`,
       start: v1Start.toISOString().split('T')[0],
       end:   v2Start.toISOString().split('T')[0],
-      major, minor, half: 1
     });
     schedule.push({
-      label: getVersionLabel(major, minor, 2),
+      fullLabel: fullLabel,
+      label: `${fullLabel} (2/2)`,
       start: v2Start.toISOString().split('T')[0],
       end:   vEnd.toISOString().split('T')[0],
-      major, minor, half: 2
     });
-
-    if (v1Start > new Date(now.getTime() + 3 * VERSION_DAYS * 86400000)) break;
-
-    idx++;
-    minor++;
-    if (major === 4 && minor === 9) { major = 5; minor = 0; }
-    else if (minor > 9) { major++; minor = 0; }
+    
+    // Update versi (batas sampai x.8)
+    if (curMinor >= 8) {
+        curMajor++;
+        curMinor = 0;
+    } else {
+        curMinor++;
+    }
   }
   return schedule;
 }
@@ -73,6 +85,13 @@ const VERSION_SCHEDULE = getVersionSchedule();
 function getVersionForDate(dateStr, schedule) {
   for (const v of schedule) {
     if (dateStr >= v.start && dateStr < v.end) return v.label;
+  }
+  return '—';
+}
+
+function getFullVersionForDate(dateStr, schedule) {
+  for (const v of schedule) {
+    if (dateStr >= v.start && dateStr < v.end) return v.fullLabel;
   }
   return '—';
 }
@@ -138,9 +157,7 @@ document.addEventListener('click', (e) => {
   const btn = e.target.closest('.btn-del');
   if (!btn) return;
   
-  // Jika ini dari roster (karena sekarang tidak ada atribut idx di dataset jika diletakkan inline onclick)
-  // Untuk amannya, mari gunakan delegasi untuk tabel yang ada
-  if (btn.hasAttribute('onclick')) return; // Abaikan jika btn roster sudah pakai onclick
+  if (btn.hasAttribute('onclick')) return; 
   
   deleteEntry(btn.dataset.section, Number(btn.dataset.idx));
 });
@@ -149,7 +166,6 @@ function deleteEntry(section, idx) {
   DATA[section].splice(idx, 1);
   
   if (section === 'priority') {
-    // Auto-fix nomor priority berurutan
     DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority));
     DATA.priority.forEach((p, i) => { p.priority = String(i + 1); });
   }
@@ -341,7 +357,6 @@ function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   const tbody = table.querySelector('tbody');
   const rows  = DATA[section] || [];
   
-  // Render thead with sortable behavior enabled through CSS
   thead.innerHTML = `<tr>${columnLabels.map(c => `<th>${c}</th>`).join('')}<th></th></tr>`;
   
   if (!rows || !rows.length) {
@@ -394,7 +409,6 @@ function buildOverview() {
     </div>
   `).join('');
 
-  // Update Hero Meta 
   const limCharTotal = (DATA.limited||[]).filter(r => r.category === 'Character').reduce((s, r) => s + r.pity, 0);
   const limLCTotal = (DATA.limited||[]).filter(r => r.category === 'Light Cone').reduce((s, r) => s + r.pity, 0);
   const stdWarps = (DATA.standard || []).reduce((s, r) => s + r.pity, 0);
@@ -517,7 +531,7 @@ function renderFreebies() {
   const container = document.getElementById('freebieRow');
   if (!DATA.freebies || !DATA.freebies.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`; return; }
   container.innerHTML = DATA.freebies.map(f => {
-    const ver = getVersionForDate(f.date, VERSION_SCHEDULE);
+    const ver = getFullVersionForDate(f.date, VERSION_SCHEDULE);
     return `
     <div class="freebie-card">
       <div class="freebie-name">${f.name}</div>
@@ -530,7 +544,7 @@ function renderFreebies() {
 function renderManageFreebies() {
   renderDeleteTable('manageTable-freebies', 'freebies',
     ['Date','Version','Type','Name','Event'],
-    r => [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), r.category, r.name, r.event],
+    r => [formatDate(r.date), getFullVersionForDate(r.date, VERSION_SCHEDULE), r.category, r.name, r.event],
     (a, b) => b.r.date.localeCompare(a.r.date));
 }
 document.getElementById('form-freebies').addEventListener('submit', (e) => {
@@ -860,6 +874,12 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
 
 // ============ ROSTER ============
 let rosterFilter = 'all';
+let rosterSortValue = 'pullValueDesc';
+
+document.getElementById('rosterSortSelect')?.addEventListener('change', (e) => {
+  rosterSortValue = e.target.value;
+  renderRoster();
+});
 
 function getRosterRows() {
   let rows = (DATA.roster||[]).map((r, idx) => ({ ...r, _idx: idx }));
@@ -867,8 +887,28 @@ function getRosterRows() {
   else if (rosterFilter === 'Standard') rows = rows.filter(r => r.source === 'Standard');
   else if (rosterFilter === 'other')    rows = rows.filter(r => r.source !== 'Limited' && r.source !== 'Standard');
   
-  // Sort descending by pull value by default
-  rows.sort((a, b) => b.totalPullValue - a.totalPullValue);
+  rows.sort((a, b) => {
+    if (rosterSortValue === 'nameAsc') return a.name.localeCompare(b.name);
+    if (rosterSortValue === 'nameDesc') return b.name.localeCompare(a.name);
+    
+    const ea = parseInt(a.eidolon.replace('E','').replace('NoE','0')) || 0;
+    const sa = parseInt(a.signature.replace('S','')) || 0;
+    const eb = parseInt(b.eidolon.replace('E','').replace('NoE','0')) || 0;
+    const sb = parseInt(b.signature.replace('S','')) || 0;
+
+    if (rosterSortValue === 'eidolonDesc') {
+       if (eb !== ea) return eb - ea;
+       return b.totalPullValue - a.totalPullValue;
+    }
+    if (rosterSortValue === 'costDesc') {
+       const costA = ea + sa;
+       const costB = eb + sb;
+       if (costB !== costA) return costB - costA;
+       return b.totalPullValue - a.totalPullValue;
+    }
+    // Default: Pull Value Tertinggi
+    return b.totalPullValue - a.totalPullValue;
+  });
   return rows;
 }
 
@@ -896,7 +936,7 @@ function renderRoster() {
         <div class="roster-info">
           <div class="roster-name" title="${r.name}">${r.name}</div>
           <div class="roster-stats">
-            <span>Eido: <span ${eidoCls}>${r.eidolon}</span></span>
+            <span>Eidolon: <span ${eidoCls}>${r.eidolon}</span></span>
             <span>Sign: <span ${signCls}>${r.signature}</span></span>
           </div>
           <div class="roster-stats" style="margin-bottom:0">
@@ -956,7 +996,7 @@ document.getElementById('form-character').addEventListener('submit', (e) => {
   saveWorkingData();
   renderAll();
   e.target.reset();
-  document.getElementById('charFormImg').src = DEFAULT_AVATAR; // Reset preview
+  document.getElementById('charFormImg').src = DEFAULT_AVATAR; 
 });
 
 // ============ STELLAR JADE ============
