@@ -516,7 +516,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
   cursor: pointer;
   user-select: none;
 }
-.manage-table less th:hover { color: var(--gold-soft); }
+.manage-table thead th:hover { color: var(--gold-soft); }
 .manage-table thead th::after {
   content: '';
   display: inline-block;
@@ -586,22 +586,18 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 
 /* =========================================================
-   TEAM SECTION (Compact & Two-Column Layout)
+   TEAM SECTION (Grid Aligned Layout)
    ========================================================= */
 .team-form {
   flex-direction: column;
   gap: 16px;
 }
 .team-cols {
-  display: flex;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px 24px;
   width: 100%;
-  flex-wrap: wrap;
-}
-.team-col {
-  flex: 1 1 300px;
-  display: flex;
-  flex-direction: column;
+  align-items: start; /* Fixes vertical stretching misalignment */
 }
 
 .team-slot-group {
@@ -675,7 +671,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
 .vunit { font-size: 10px; color: var(--text-dim); font-family: var(--font-mono); }
 
 /* =========================================================
-   UPDATED: FILTER STYLING
+   FILTER STYLING
    ========================================================= */
 .filter-wrap {
   margin-bottom: 16px;
@@ -707,7 +703,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 
 /* =========================================================
-   UPDATED: PAGE CHARACTER GRID
+   PAGE CHARACTER GRID
    ========================================================= */
 .roster-grid {
   display: grid;
