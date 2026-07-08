@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<!-- Tambahan: Cropper.js CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 <link rel="stylesheet" href="style.css">
 <style>
@@ -34,9 +33,6 @@
   .tc-pv { font-weight: 700; color: var(--gold-soft); font-size: 14px; }
 
   .slot-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
-  .slot-img-upload { width: 60px; height: 60px; background: var(--surface-2); border-radius: 8px; border: 1px dashed var(--text-dim); overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer; transition: 0.2s; }
-  .slot-img-upload:hover { border-color: var(--cyan); }
-  .slot-preview { width:100%; height:100%; object-fit:cover; transition: 0.2s; pointer-events: none; }
   .slot-inputs { display: flex; flex-direction: column; gap: 8px; flex: 1; }
   .slot-top, .slot-bottom { display: flex; gap: 8px; align-items: center; }
   .slot-name, .slot-eidolon, .slot-sign { padding: 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 13px; }
@@ -85,10 +81,6 @@
       <div class="section-head">
         <span class="eyebrow">Overview</span>
         <h2>Trailblaze Summary</h2>
-        <div class="tabs" id="summaryTabs" style="margin-top: 12px;">
-          <button class="tab active" data-cat="Character">Character</button>
-          <button class="tab" data-cat="Light Cone">Light Cone</button>
-        </div>
       </div>
       <div class="stat-grid" id="statGrid"></div>
     </section>
@@ -310,7 +302,7 @@
     <section class="section">
       <div class="section-head">
         <span class="eyebrow">Compositions</span>
-        <h2>Teams You've Built</h2>
+        <h2>Team Planner</h2>
       </div>
 
       <form class="manage-form team-form" id="form-team" data-section="team">
@@ -325,7 +317,6 @@
               <div class="team-slot-label" style="color: var(--nebula);">Main DPS</div>
               <div class="team-slot" id="slot-mainDps">
                  <div class="slot-row">
-                   <!-- Berubah: Menggunakan onclick untuk panggil modal -->
                    <div class="slot-img-upload" onclick="openCropModal(this)">
                       <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
                    </div>
@@ -431,43 +422,28 @@
             <label>Pull Value (Auto)</label>
             <input type="number" id="team-pv-preview" readonly placeholder="—" style="opacity:0.6;cursor:default;width:100%;">
           </div>
-          <button type="submit" class="btn-add" style="margin-bottom: 2px;">+ Add Team</button>
+          <button type="submit" class="btn-add" style="margin-bottom: 2px;" id="btnSubmitTeam">+ Save Team</button>
         </div>
       </form>
 
-      <div class="filter-wrap"><input type="text" class="table-filter" data-table="teamGrid" placeholder="Filter teams..."></div>
+      <div class="filter-wrap">
+        <input type="text" class="table-filter" data-table="teamGrid" placeholder="Filter teams...">
+        <select id="teamSortSelect" class="table-filter sort-select">
+          <option value="pvDesc">Highest Pull Value</option>
+          <option value="pvAsc">Lowest Pull Value</option>
+          <option value="costDesc">Highest Cost</option>
+          <option value="costAsc">Lowest Cost</option>
+          <option value="nameAsc">Alphabet (A-Z)</option>
+          <option value="nameDesc">Alphabet (Z-A)</option>
+        </select>
+      </div>
       <div class="team-grid" id="teamGrid"></div>
-      <p class="track-hint">% of Total Pulls is each team's Pull Value against every warp spent on the Limited Pull banner so far.</p>
     </section>
   </main>
 </div>
 
 <div class="page" id="page-character" hidden>
   <main>
-    <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Passenger Cabin</span>
-        <h2>Astral Archive</h2>
-        <div class="tabs" id="rosterTabs">
-          <button class="tab active" data-filter="all">All</button>
-          <button class="tab" data-filter="Limited">Limited</button>
-          <button class="tab" data-filter="Standard">Standard</button>
-          <button class="tab" data-filter="other">Other</button>
-        </div>
-      </div>
-      <div class="filter-wrap">
-        <input type="text" class="table-filter" data-table="rosterGrid" placeholder="Filter characters...">
-        <select id="rosterSortSelect" class="table-filter sort-select">
-          <option value="pullValueDesc">Highest Pull Value</option>
-          <option value="costDesc">Highest Cost</option>
-          <option value="eidolonDesc">Highest Eidolon</option>
-          <option value="nameAsc">Alphabet (A-Z)</option>
-          <option value="nameDesc">Alphabet (Z-A)</option>
-        </select>
-      </div>
-      <div class="roster-grid" id="rosterGrid"></div>
-    </section>
-
     <section class="section">
       <div class="section-head">
         <span class="eyebrow">Set Character Type & Image</span>
@@ -493,6 +469,30 @@
         </div>
         <button type="submit" class="btn-add">+ Save Character</button>
       </form>
+    </section>
+
+    <section class="section" style="border-top: none; padding-top: 0;">
+      <div class="section-head">
+        <span class="eyebrow">Passenger Cabin</span>
+        <h2>Astral Archive</h2>
+        <div class="tabs" id="rosterTabs">
+          <button class="tab active" data-filter="all">All</button>
+          <button class="tab" data-filter="Limited">Limited</button>
+          <button class="tab" data-filter="Standard">Standard</button>
+          <button class="tab" data-filter="other">Other</button>
+        </div>
+      </div>
+      <div class="filter-wrap">
+        <input type="text" class="table-filter" data-table="rosterGrid" placeholder="Filter characters...">
+        <select id="rosterSortSelect" class="table-filter sort-select">
+          <option value="pullValueDesc">Highest Pull Value</option>
+          <option value="costDesc">Highest Cost</option>
+          <option value="eidolonDesc">Highest Eidolon</option>
+          <option value="nameAsc">Alphabet (A-Z)</option>
+          <option value="nameDesc">Alphabet (Z-A)</option>
+        </select>
+      </div>
+      <div class="roster-grid" id="rosterGrid"></div>
     </section>
   </main>
 </div>
@@ -589,7 +589,6 @@
   <p>Warp Record HSR — built from a Trailblazer's own pull data. Add entries right on each tab above, or upload your <code>.json</code> backup file.</p>
 </footer>
 
-<!-- MODAL CROPPER.JS -->
 <div id="cropModalOverlay" class="crop-modal-overlay" hidden>
   <div class="crop-modal-box">
     <div class="crop-modal-header">
@@ -601,7 +600,6 @@
       <div id="modalStep2" class="step-indicator"><div class="step-circle">2</div> Crop image</div>
     </div>
 
-    <!-- CONTENT STEP 1: PILIH SUMBER -->
     <div id="modalBody1" class="crop-modal-body">
       <div class="modal-tabs">
         <button class="modal-tab active" data-tab="upload">Upload image</button>
@@ -630,7 +628,6 @@
       </div>
     </div>
 
-    <!-- CONTENT STEP 2: CROPPER -->
     <div id="modalBody2" class="crop-modal-body" hidden style="padding: 0; background: var(--bg-deep);">
       <div style="width: 100%; height: 350px;">
         <img id="modalTargetImg" src="" style="display:block; max-width: 100%;">
@@ -646,7 +643,6 @@
   </div>
 </div>
 
-<!-- Tambahan: Cropper.js Script -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <script src="script.js"></script>
 </body>
