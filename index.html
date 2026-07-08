@@ -317,111 +317,120 @@
         <h2>Teams You've Built</h2>
       </div>
 
-     <form class="manage-form team-form" id="form-team" data-section="team">
+    <form class="manage-form team-form" id="form-team" data-section="team">
         <div class="field" style="width: 100%; margin-bottom: 24px;">
           <label>Archetype</label>
           <input type="text" name="archetype" required placeholder="e.g. Break" style="width: 100%;">
         </div>
 
-        <div class="team-grid-2x2">
-          <div class="team-slot-group">
-            <div class="team-slot-label" style="color: var(--nebula);">Main DPS</div>
-            <div class="team-slot" id="slot-mainDps">
-               <div class="slot-row">
-                 <div class="slot-img-upload">
-                    <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                    <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+        <div class="team-masonry">
+          
+          <div class="team-masonry-col">
+            
+            <div class="team-slot-group">
+              <div class="team-slot-label" style="color: var(--nebula);">Main DPS</div>
+              <div class="team-slot" id="slot-mainDps">
+                 <div class="slot-row">
+                   <div class="slot-img-upload">
+                      <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
+                      <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+                   </div>
+                   <div class="slot-inputs">
+                      <div class="slot-top">
+                        <select class="slot-name" data-role="mainDps"><option value="">— none —</option></select>
+                        <select class="slot-eidolon">
+                           <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
+                        </select>
+                      </div>
+                      <div class="slot-bottom">
+                        <select class="slot-sign">
+                           <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
+                        </select>
+                      </div>
+                   </div>
                  </div>
-                 <div class="slot-inputs">
-                    <div class="slot-top">
-                      <select class="slot-name" data-role="mainDps"><option value="">— none —</option></select>
-                      <select class="slot-eidolon">
-                         <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
-                      </select>
-                    </div>
-                    <div class="slot-bottom">
-                      <select class="slot-sign">
-                         <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
-                      </select>
-                    </div>
-                 </div>
-               </div>
+              </div>
             </div>
+
+            <div class="team-slot-group">
+              <div class="team-slot-label" style="color: var(--nebula);">Sustain</div>
+              <div class="team-slot" id="slot-sustain">
+                 <div class="slot-row">
+                   <div class="slot-img-upload">
+                      <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
+                      <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+                   </div>
+                   <div class="slot-inputs">
+                      <div class="slot-top">
+                        <select class="slot-name" data-role="sustain"><option value="">— none —</option></select>
+                        <select class="slot-eidolon">
+                           <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
+                        </select>
+                      </div>
+                      <div class="slot-bottom">
+                        <select class="slot-sign">
+                           <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
+                        </select>
+                      </div>
+                   </div>
+                 </div>
+              </div>
+            </div>
+
           </div>
 
-          <div class="team-slot-group">
-            <div class="team-slot-label" style="color: var(--nebula);">Sub DPS <button type="button" class="btn-add-slot" data-role="subDps">+</button></div>
-            <div class="team-slot" id="slot-subDps">
-               <div class="slot-row">
-                 <div class="slot-img-upload">
-                    <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                    <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+          <div class="team-masonry-col">
+            
+            <div class="team-slot-group">
+              <div class="team-slot-label" style="color: var(--nebula);">Sub DPS <button type="button" class="btn-add-slot" data-role="subDps">+</button></div>
+              <div class="team-slot" id="slot-subDps">
+                 <div class="slot-row">
+                   <div class="slot-img-upload">
+                      <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
+                      <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+                   </div>
+                   <div class="slot-inputs">
+                      <div class="slot-top">
+                        <select class="slot-name" data-role="subDps"><option value="">— none —</option></select>
+                        <select class="slot-eidolon">
+                           <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
+                        </select>
+                      </div>
+                      <div class="slot-bottom">
+                        <select class="slot-sign">
+                           <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
+                        </select>
+                      </div>
+                   </div>
                  </div>
-                 <div class="slot-inputs">
-                    <div class="slot-top">
-                      <select class="slot-name" data-role="subDps"><option value="">— none —</option></select>
-                      <select class="slot-eidolon">
-                         <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
-                      </select>
-                    </div>
-                    <div class="slot-bottom">
-                      <select class="slot-sign">
-                         <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
-                      </select>
-                    </div>
-                 </div>
-               </div>
+              </div>
             </div>
-          </div>
 
-          <div class="team-slot-group">
-            <div class="team-slot-label" style="color: var(--nebula);">Sustain</div>
-            <div class="team-slot" id="slot-sustain">
-               <div class="slot-row">
-                 <div class="slot-img-upload">
-                    <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                    <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+            <div class="team-slot-group">
+              <div class="team-slot-label" style="color: var(--nebula);">Support <button type="button" class="btn-add-slot" data-role="support">+</button></div>
+              <div class="team-slot" id="slot-support">
+                 <div class="slot-row">
+                   <div class="slot-img-upload">
+                      <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
+                      <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+                   </div>
+                   <div class="slot-inputs">
+                      <div class="slot-top">
+                        <select class="slot-name" data-role="support"><option value="">— none —</option></select>
+                        <select class="slot-eidolon">
+                           <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
+                        </select>
+                      </div>
+                      <div class="slot-bottom">
+                        <select class="slot-sign">
+                           <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
+                        </select>
+                      </div>
+                   </div>
                  </div>
-                 <div class="slot-inputs">
-                    <div class="slot-top">
-                      <select class="slot-name" data-role="sustain"><option value="">— none —</option></select>
-                      <select class="slot-eidolon">
-                         <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
-                      </select>
-                    </div>
-                    <div class="slot-bottom">
-                      <select class="slot-sign">
-                         <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
-                      </select>
-                    </div>
-                 </div>
-               </div>
+              </div>
             </div>
-          </div>
 
-          <div class="team-slot-group">
-            <div class="team-slot-label" style="color: var(--nebula);">Support <button type="button" class="btn-add-slot" data-role="support">+</button></div>
-            <div class="team-slot" id="slot-support">
-               <div class="slot-row">
-                 <div class="slot-img-upload">
-                    <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                    <input type="file" class="slot-file" accept="image/*" title="Upload Image">
-                 </div>
-                 <div class="slot-inputs">
-                    <div class="slot-top">
-                      <select class="slot-name" data-role="support"><option value="">— none —</option></select>
-                      <select class="slot-eidolon">
-                         <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
-                      </select>
-                    </div>
-                    <div class="slot-bottom">
-                      <select class="slot-sign">
-                         <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
-                      </select>
-                    </div>
-                 </div>
-               </div>
-            </div>
           </div>
         </div>
 
