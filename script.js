@@ -41,7 +41,6 @@ function getVersionSchedule() {
   let minor = VERSION_START.minor;
   let idx = 0;
 
-  // Generate enough versions to cover today + a few more
   while (true) {
     const v1Start = new Date(base.getTime() + idx * VERSION_DAYS * 86400000);
     const v2Start = new Date(v1Start.getTime() + HALF_DAYS * 86400000);
@@ -60,12 +59,12 @@ function getVersionSchedule() {
       major, minor, half: 2
     });
 
-    // Stop when we're 3 full versions past today
     if (v1Start > new Date(now.getTime() + 3 * VERSION_DAYS * 86400000)) break;
 
     idx++;
     minor++;
-    if (major === 4 && minor === 9) { major = 5; minor = 0; } else if (minor > 8) { major++; minor = 0; }
+    if (major === 4 && minor === 9) { major = 5; minor = 0; }
+    else if (minor > 9) { major++; minor = 0; }
   }
   return schedule;
 }
@@ -99,7 +98,7 @@ function loadWorkingData() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch (e) { console.warn('Failed to load from browser storage.', e); }
-  return JSON.parse(JSON.stringify(HSR_DATA));
+  return typeof HSR_DATA !== 'undefined' ? JSON.parse(JSON.stringify(HSR_DATA)) : {};
 }
 
 function saveWorkingData() {
@@ -139,12 +138,11 @@ function isMC(name) { return MC_NAMES.includes((name || '').trim().toLowerCase()
 function normName(n) { return String(n || '').trim().toLowerCase(); }
 
 function computeRosterFromHistory() {
-  const charHistory   = DATA.limited.filter(r => r.category === 'Character');
-  const lcHistory     = DATA.limited.filter(r => r.category === 'Light Cone');
-  const stdHistory    = DATA.standard;
-  const freebiesData  = DATA.freebies;
+  const charHistory   = (DATA.limited || []).filter(r => r.category === 'Character');
+  const lcHistory     = (DATA.limited || []).filter(r => r.category === 'Light Cone');
+  const stdHistory    = DATA.standard || [];
+  const freebiesData  = DATA.freebies || [];
 
-  // Build maps
   const eidoPullMap = {}, signPullMap = {}, eidoMap = {}, signMap = {}, obtainedMap = {};
 
   function ensure(name) {
@@ -155,7 +153,6 @@ function computeRosterFromHistory() {
     if (!obtainedMap[name]) obtainedMap[name] = false;
   }
 
-  // LimitedHistory Character
   for (let i = 0; i < charHistory.length; i++) {
     const r    = charHistory[i];
     const name = normName(r.name);
@@ -182,7 +179,6 @@ function computeRosterFromHistory() {
     }
   }
 
-  // LimitedHistory Light Cone
   for (let i = 0; i < lcHistory.length; i++) {
     const r    = lcHistory[i];
     const name = normName(r.name);
@@ -207,7 +203,6 @@ function computeRosterFromHistory() {
     }
   }
 
-  // StandardHistory
   stdHistory.forEach(r => {
     const name = normName(r.name);
     ensure(name);
@@ -221,7 +216,6 @@ function computeRosterFromHistory() {
     }
   });
 
-  // Freebies
   freebiesData.forEach(r => {
     const name = normName(r.name);
     ensure(name);
@@ -233,22 +227,21 @@ function computeRosterFromHistory() {
     }
   });
 
-  // Merge into roster
   const allNames = new Set([
     ...Object.keys(eidoMap),
     ...Object.keys(signMap),
-    ...DATA.roster.map(r => normName(r.name))
+    ...(DATA.roster || []).map(r => normName(r.name))
   ]);
 
   const newRoster = [];
   allNames.forEach(name => {
     if (!name) return;
-    const existing = DATA.roster.find(r => normName(r.name) === name);
+    const existing = (DATA.roster || []).find(r => normName(r.name) === name);
     const source   = existing ? existing.source : 'Unknown';
     const dispName = existing ? existing.name : (
-      DATA.limited.find(r => normName(r.name) === name)?.name ||
-      DATA.standard.find(r => normName(r.name) === name)?.name ||
-      DATA.freebies.find(r => normName(r.name) === name)?.name ||
+      (DATA.limited||[]).find(r => normName(r.name) === name)?.name ||
+      (DATA.standard||[]).find(r => normName(r.name) === name)?.name ||
+      (DATA.freebies||[]).find(r => normName(r.name) === name)?.name ||
       name
     );
 
@@ -289,7 +282,6 @@ function recomputeRosterPercent() {
   });
 }
 
-// ============ Stat computation ============
 function computeBannerStats(rows, maxPity) {
   const total      = rows.length;
   const totalWarps = rows.reduce((s, r) => s + r.pity, 0);
@@ -312,13 +304,12 @@ function bestWinStreak(rows) {
   return best;
 }
 
-// ============ Generic delete table ============
 function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   const table = document.getElementById(tableId);
   if (!table) return;
   const thead = table.querySelector('thead');
   const tbody = table.querySelector('tbody');
-  const rows  = DATA[section];
+  const rows  = DATA[section] || [];
   thead.innerHTML = `<tr>${columnLabels.map(c => `<th>${c}</th>`).join('')}<th></th></tr>`;
   if (!rows || !rows.length) {
     tbody.innerHTML = `<tr class="empty-row"><td colspan="${columnLabels.length + 1}">No entries yet.</td></tr>`;
@@ -355,12 +346,11 @@ function deleteEntry(section, idx) {
   renderAll();
 }
 
-// ============ LimitedHistory ============
 function buildOverview() {
-  const limChar   = DATA.limited.filter(r => r.category === 'Character');
-  const limLC     = DATA.limited.filter(r => r.category === 'Light Cone');
-  const stdRows   = DATA.standard;
-  const freebies  = DATA.freebies;
+  const limChar   = (DATA.limited||[]).filter(r => r.category === 'Character');
+  const limLC     = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
+  const stdRows   = DATA.standard || [];
+  const freebies  = DATA.freebies || [];
 
   const limCharStats = computeBannerStats(limChar, 90);
   const limLCStats   = computeBannerStats(limLC, 80);
@@ -387,7 +377,7 @@ function buildOverview() {
   document.getElementById('metaLimitedWarps').textContent = fmt(limCharStats.totalWarps + limLCStats.totalWarps, 0);
   document.getElementById('metaStandardWarps').textContent = fmt(stdWarps, 0);
   document.getElementById('metaGenerated').textContent = 'Last pull: ' +
-    (DATA.limited.length ? formatDate(DATA.limited[DATA.limited.length - 1].date) : '—');
+    (DATA.limited && DATA.limited.length ? formatDate(DATA.limited[DATA.limited.length - 1].date) : '—');
 }
 
 function renderTrack(containerId, rows, maxPity, hasResult) {
@@ -421,7 +411,7 @@ function renderBannerStats(containerId, stats) {
     { label: 'Average Pity',value: fmt(stats.avgPity, 1) },
   ];
   if (stats.winRate !== null) items.push({ label: 'Win Rate', value: pct(stats.winRate) });
-  if (stats.pityRoad !== null) items.push({ label: 'Pity Road', value: pct(stats.pityRoad) });
+  if (stats.pityRoad !== null && containerId !== 'calcGrid') items.push({ label: 'Pity Road', value: pct(stats.pityRoad) });
   container.innerHTML = items.map(i => `
     <div class="bstat">
       <div class="stat-label">${i.label}</div>
@@ -431,7 +421,7 @@ function renderBannerStats(containerId, stats) {
 
 let currentLimitedCat = 'Character';
 function renderLimited() {
-  const rows   = DATA.limited.filter(r => r.category === currentLimitedCat);
+  const rows   = (DATA.limited||[]).filter(r => r.category === currentLimitedCat);
   const maxPity = currentLimitedCat === 'Character' ? 90 : 80;
   renderBannerStats('limitedStats', computeBannerStats(rows, maxPity));
   renderTrack('limitedTrack', rows, maxPity, true);
@@ -466,9 +456,8 @@ document.getElementById('form-limited').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
-// ============ StandardHistory ============
 function renderStandard() {
-  const rows = DATA.standard;
+  const rows = DATA.standard || [];
   renderBannerStats('standardStats', computeBannerStats(rows, 80));
   renderTrack('standardTrack', rows, 80, false);
 }
@@ -490,12 +479,11 @@ document.getElementById('form-standard').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
-// ============ Freebies ============
 const VERSION_SCHEDULE = getVersionSchedule();
 
 function renderFreebies() {
   const container = document.getElementById('freebieRow');
-  if (!DATA.freebies.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`; return; }
+  if (!DATA.freebies || !DATA.freebies.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`; return; }
   container.innerHTML = DATA.freebies.map(f => {
     const ver = getVersionForDate(f.date, VERSION_SCHEDULE);
     return `
@@ -525,14 +513,13 @@ document.getElementById('form-freebies').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
-// ============ Calc ============
 function renderCalc() {
-  const limChar = DATA.limited.filter(r => r.category === 'Character');
-  const limLC   = DATA.limited.filter(r => r.category === 'Light Cone');
+  const limChar = (DATA.limited||[]).filter(r => r.category === 'Character');
+  const limLC   = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
   const buckets = [
     { label: 'Character',        rows: limChar,         maxPity: 90 },
     { label: 'Light Cone',       rows: limLC,           maxPity: 80 },
-    { label: 'Total (Limited)',  rows: DATA.limited,    maxPity: null },
+    { label: 'Total (Limited)',  rows: DATA.limited||[],    maxPity: null },
   ];
   document.getElementById('calcGrid').innerHTML = buckets.map(b => {
     const s = computeBannerStats(b.rows, b.maxPity);
@@ -552,41 +539,52 @@ function renderCalc() {
   const streaks = [
     { label: 'Character',  value: bestWinStreak(limChar) },
     { label: 'Light Cone', value: bestWinStreak(limLC) },
-    { label: 'Combined',   value: bestWinStreak(DATA.limited) },
+    { label: 'Combined',   value: bestWinStreak(DATA.limited||[]) },
   ];
   document.getElementById('streakGrid').innerHTML = streaks.map(s => `
     <div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${fmt(s.value, 0)}</div></div>`).join('');
 }
 
-// ============ Priority ============
 function renderPriority() {
-  DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority));
+  if (DATA.priority) {
+      DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority));
+      DATA.priority.forEach(r => {
+        let avgPull = 85;
+        let worstPull = 180;
+        if ((r.type || '').toLowerCase().includes('light cone') || (r.type || '').toLowerCase().includes('lightcone')) {
+          avgPull = 65;
+          worstPull = 160;
+        }
+        r.averagePull = avgPull;
+        r.worstPull = worstPull;
+      });
+  }
+
   renderDeleteTable('manageTable-priority', 'priority',
     ['Priority','Name','Type','Archetype','Average Pull','Worst Scenario Pull','Patch (min-max)'],
-    r => {
-      const isLC = (r.type || '').toLowerCase().includes('light cone') || (r.type || '').toLowerCase().includes('lightcone');
-      const avg = isLC ? 65 : 85;
-      const worst = isLC ? 160 : 180;
-      return [r.priority, r.name, r.type, r.archetype, avg, worst, `${fmt(avg/100,2)}–${fmt(worst/100,2)}`];
-    },
-    null);
+    r => [r.priority, r.name, r.type, r.archetype, fmt(r.averagePull,0), fmt(r.worstPull,0), `${fmt(r.averagePull/100,2)}–${fmt(r.worstPull/100,2)}`],
+    (a, b) => a.r.priority - b.r.priority);
 }
+
 document.getElementById('form-priority').addEventListener('submit', (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
-  const newPrio = Number(fd.get('priority'));
+  const targetPrio = Number(fd.get('priority'));
   
-  DATA.priority.forEach(p => {
-    if (Number(p.priority) >= newPrio) {
-      p.priority = Number(p.priority) + 1;
+  if (!DATA.priority) DATA.priority = [];
+  
+  DATA.priority.forEach(item => {
+    let currentPrio = Number(item.priority);
+    if (currentPrio >= targetPrio) {
+      item.priority = (currentPrio + 1).toString();
     }
   });
-  
+
   DATA.priority.push({ 
-    priority: newPrio, 
+    priority: targetPrio.toString(), 
     name: fd.get('name').trim(), 
     type: fd.get('type'), 
-    archetype: fd.get('archetype').trim() 
+    archetype: fd.get('archetype').trim()
   });
   
   saveWorkingData();
@@ -594,14 +592,12 @@ document.getElementById('form-priority').addEventListener('submit', (e) => {
   e.target.reset();
 });
 
-// ============ Team (auto cost + pull value + multi-slot) ============
-
-// Get unique character names from all history
+// ============ Team ============
 function getAllCharNames() {
   const names = new Set();
-  DATA.limited.forEach(r => { if (r.name) names.add(r.name); });
-  DATA.standard.forEach(r => { if (r.name) names.add(r.name); });
-  DATA.freebies.forEach(r => { if (r.name) names.add(r.name); });
+  (DATA.limited||[]).forEach(r => { if (r.name) names.add(r.name); });
+  (DATA.standard||[]).forEach(r => { if (r.name) names.add(r.name); });
+  (DATA.freebies||[]).forEach(r => { if (r.name) names.add(r.name); });
   return [...names].sort();
 }
 
@@ -615,80 +611,114 @@ function populateSlotDropdowns() {
   });
 }
 
-// Add slot row for sub-dps / support
+// UI Template for Team Slots
+const slotTemplate = (role, isRemovable) => `
+  <div class="slot-row" style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
+     <div class="slot-img-upload" style="width: 80px; height: 80px; background: var(--surface-2); border-radius: 8px; border: 1px dashed var(--text-dim); overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer;">
+        <img class="slot-preview" src="image_bfed43.png" style="width:100%; height:100%; object-fit:cover; opacity: 0.5; transition: 0.2s;">
+        <input type="file" class="slot-file" accept="image/*" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0; cursor: pointer;">
+     </div>
+     <div class="slot-inputs" style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+        <div style="display: flex; gap: 8px;">
+           <select class="slot-name" data-role="${role}" style="flex: 1; padding: 6px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text);"><option value="">— none —</option></select>
+           <select class="slot-eidolon" style="width: 70px; padding: 6px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text);">${[0,1,2,3,4,5,6].map(i=>`<option value="E${i}">E${i}</option>`).join('')}</select>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+           <select class="slot-sign" style="width: 90px; padding: 6px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text);">${[0,1,2,3,4,5].map(i=>`<option value="S${i}">S${i}</option>`).join('')}</select>
+           ${isRemovable ? `<button type="button" class="btn-remove-slot" style="padding: 6px 12px; border-radius: 6px; background: rgba(226,128,125,0.1); border: 1px solid var(--loss); color: var(--loss); cursor:pointer; font-size: 11px;">✕ Remove</button>` : ''}
+        </div>
+     </div>
+  </div>
+`;
+
+// Initialize Team default form slots
+document.getElementById('slot-mainDps').innerHTML = slotTemplate('mainDps', false);
+document.getElementById('slot-subDps').innerHTML = slotTemplate('subDps', false);
+document.getElementById('slot-support').innerHTML = slotTemplate('support', false);
+document.getElementById('slot-sustain').innerHTML = slotTemplate('sustain', false);
+
+// Image Upload Preview Listener
+document.getElementById('form-team').addEventListener('change', (e) => {
+  if (e.target.classList.contains('slot-file')) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = e.target.previousElementSibling;
+        if (img && img.classList.contains('slot-preview')) {
+          img.src = evt.target.result;
+          img.style.opacity = '1';
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  } else {
+    updateTeamPreview();
+  }
+});
+
 document.querySelectorAll('.btn-add-slot').forEach(btn => {
   btn.addEventListener('click', () => {
     const role    = btn.dataset.role;
     const slotDiv = document.getElementById('slot-' + role);
-    const row     = document.createElement('div');
-    row.className = 'slot-row';
-    const names   = getAllCharNames();
-    const opts    = `<option value="">— none —</option>` + names.map(n => `<option value="${n}">${n}</option>`).join('');
-    row.innerHTML = `
-      <select class="slot-name" data-role="${role}">${opts}</select>
-      <select class="slot-eidolon">${[0,1,2,3,4,5,6].map(i=>`<option value="E${i}">E${i}</option>`).join('')}</select>
-      <select class="slot-sign">${[0,1,2,3,4,5].map(i=>`<option value="S${i}">S${i}</option>`).join('')}</select>
-      <button type="button" class="btn-remove-slot">✕</button>`;
-    slotDiv.appendChild(row);
-    row.querySelector('.btn-remove-slot').addEventListener('click', () => row.remove());
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = slotTemplate(role, true);
+    slotDiv.appendChild(wrapper.firstElementChild);
+    
+    // Refresh names dropdown for the new select
+    populateSlotDropdowns();
     updateTeamPreview();
   });
 });
 
-// Remove slot
-document.querySelectorAll('.btn-remove-slot').forEach(btn => {
-  btn.addEventListener('click', () => btn.closest('.slot-row').remove());
+document.getElementById('form-team').addEventListener('click', (e) => {
+  if (e.target.classList.contains('btn-remove-slot')) {
+    e.target.closest('.slot-row').remove();
+    updateTeamPreview();
+  }
 });
 
-// Auto-compute cost and pull value for team form
 function getSlotMembers(role) {
   return [...document.querySelectorAll(`#slot-${role} .slot-row`)].map(row => {
     const name = row.querySelector('.slot-name')?.value || '';
     const eido = row.querySelector('.slot-eidolon')?.value || 'E0';
     const sign = row.querySelector('.slot-sign')?.value || 'S0';
-    return name ? { name, eido, sign } : null;
+    const preview = row.querySelector('.slot-preview');
+    const img = (preview && !preview.src.includes('image_bfed43.png')) ? preview.src : null;
+    return name ? { name, eido, sign, img } : null;
   }).filter(Boolean);
 }
 
 function computeTeamCostAndPV(members) {
-  // Build maps from history
   const freeMap = {}, stdMap = {}, loseMap = {};
-  DATA.freebies.forEach(r => { const n = normName(r.name); freeMap[n] = (freeMap[n]||0)+1; });
-  DATA.standard.forEach(r => { const n = normName(r.name); stdMap[n]  = (stdMap[n] ||0)+1; });
-  DATA.limited.filter(r => (r.result||'').toUpperCase() === 'L').forEach(r => {
+  (DATA.freebies||[]).forEach(r => { const n = normName(r.name); freeMap[n] = (freeMap[n]||0)+1; });
+  (DATA.standard||[]).forEach(r => { const n = normName(r.name); stdMap[n]  = (stdMap[n] ||0)+1; });
+  (DATA.limited||[]).filter(r => (r.result||'').toUpperCase() === 'L').forEach(r => {
     const n = normName(r.name); loseMap[n] = (loseMap[n]||0)+1;
   });
-
   let totalPV = 0, limited = 0, standard = 0, freebies = 0;
-
   members.forEach(m => {
     if (isMC(m.name)) return;
     const name = normName(m.name);
     const eidoNum = parseInt(m.eido.replace('E','')) || 0;
     const signNum = parseInt(m.sign.replace('S','')) || 0;
     const totalCost = (eidoNum + 1) + signNum;
-
     const freeCount = freeMap[name]  || 0;
     const stdCount  = (stdMap[name]  || 0) + (loseMap[name] || 0);
     const rem       = totalCost - freeCount - stdCount;
-
     limited  += Math.max(0, rem);
     standard += Math.min(stdCount, totalCost - freeCount);
     freebies += Math.min(freeCount, totalCost);
-
-    // Pull value from roster
-    const rosterEntry = DATA.roster.find(r => normName(r.name) === name);
+    const rosterEntry = (DATA.roster||[]).find(r => normName(r.name) === name);
     if (rosterEntry) {
       totalPV += signNum > 0 ? rosterEntry.totalPullValue : rosterEntry.pullValueEidolon;
     }
   });
-
   const parts = [];
   if (limited  > 0) parts.push(limited  + ' Limited');
   if (standard > 0) parts.push(standard + ' Standard');
   if (freebies > 0) parts.push(freebies + ' Freebies');
   const costStr = parts.length ? parts.join(' + ') : '0';
-
   return { costStr, totalPV };
 }
 
@@ -704,12 +734,10 @@ function updateTeamPreview() {
   document.getElementById('team-pv-preview').value   = totalPV;
 }
 
-document.getElementById('form-team').addEventListener('change', updateTeamPreview);
-
 function renderTeam() {
   const grid = document.getElementById('teamGrid');
   if (!grid) return;
-  const limitedTotalWarps = DATA.limited.reduce((s, r) => s + r.pity, 0);
+  const limitedTotalWarps = (DATA.limited||[]).reduce((s, r) => s + r.pity, 0);
   
   if (!DATA.team || !DATA.team.length) {
     grid.innerHTML = '<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No teams built yet.</p>';
@@ -720,15 +748,18 @@ function renderTeam() {
   indexed.sort((a, b) => b.r.pullValue - a.r.pullValue);
   
   grid.innerHTML = indexed.map(({ r, idx }) => {
-    const defaultImg = 'image_bf69ff.png';
-    const imgUrl = r.image || defaultImg;
     const subDps = Array.isArray(r.subDps) ? r.subDps.join(', ') : r.subDps;
     const support = Array.isArray(r.support) ? r.support.join(', ') : r.support;
     const pctVal = pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2);
     
+    const imgs = r.images || [];
+    const imgHtml = imgs.map(img => `<div class="team-image-slot"><img src="${img}" onerror="this.src='image_bfed43.png'"></div>`).join('');
+
     return `
       <div class="team-card searchable-item" data-idx="${idx}">
-        <img src="${imgUrl}" alt="Team" class="team-image" onerror="this.src='${defaultImg}'">
+        <div class="team-image-row">
+            ${imgHtml || `<div class="team-image-slot"><img src="image_bfed43.png"></div>`}
+        </div>
         <div class="team-card-content">
           <div class="tc-arch">${r.archetype}</div>
           <div class="tc-row"><span>Main DPS:</span><span class="tc-val">${r.mainDps || '—'}</span></div>
@@ -759,8 +790,10 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
 
   const allMembers = [...mainDpsSlots, ...subDpsSlots, ...supportSlots, ...sustainSlots];
   const { costStr, totalPV } = computeTeamCostAndPV(allMembers);
+  const images = allMembers.map(m => m.img || 'image_bfed43.png');
 
-  const newTeam = {
+  if (!DATA.team) DATA.team = [];
+  DATA.team.push({
     archetype: fd.get('archetype').trim(),
     mainDps:   fmt2(mainDpsSlots).join(', ') || '',
     subDps:    fmt2(subDpsSlots),
@@ -768,51 +801,30 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
     sustain:   fmt2(sustainSlots).join(', ') || '',
     cost:      costStr,
     pullValue: totalPV,
-    image: null
-  };
+    images:    images
+  });
 
-  const fileInput = document.getElementById('teamImageUpload');
-  if (fileInput && fileInput.files[0]) {
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      newTeam.image = evt.target.result;
-      finishTeamAdd(newTeam);
-    };
-    reader.readAsDataURL(fileInput.files[0]);
-  } else {
-    finishTeamAdd(newTeam);
-  }
+  saveWorkingData();
+  renderAll();
+  e.target.reset();
+  initDateInputs();
 
-  function finishTeamAdd(teamObj) {
-    if (!DATA.team) DATA.team = [];
-    DATA.team.push(teamObj);
-    saveWorkingData();
-    renderAll();
-    e.target.reset();
-    initDateInputs();
-    ['subDps','support'].forEach(role => {
-      const slotDiv = document.getElementById('slot-' + role);
-      const rows = slotDiv.querySelectorAll('.slot-row');
-      rows.forEach((row, i) => { if (i > 0) row.remove(); });
-      slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = '');
-    });
-    ['mainDps','sustain'].forEach(role => {
-      const slotDiv = document.getElementById('slot-' + role);
-      slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = '');
-    });
-    document.getElementById('team-cost-preview').value = '';
-    document.getElementById('team-pv-preview').value   = '';
-    if(fileInput) fileInput.value = '';
-    populateSlotDropdowns();
-  }
+  // Reset visually
+  document.getElementById('slot-mainDps').innerHTML = slotTemplate('mainDps', false);
+  document.getElementById('slot-subDps').innerHTML = slotTemplate('subDps', false);
+  document.getElementById('slot-support').innerHTML = slotTemplate('support', false);
+  document.getElementById('slot-sustain').innerHTML = slotTemplate('sustain', false);
+  populateSlotDropdowns();
+
+  document.getElementById('team-cost-preview').value = '';
+  document.getElementById('team-pv-preview').value   = '';
 });
 
-// ============ Character (auto-computed) ============
+// ROSTER
 let rosterFilter = 'all';
 let rosterSort   = { key: 'totalPullValue', dir: -1 };
-
 function getRosterRows() {
-  let rows = DATA.roster.map((r, idx) => ({ ...r, _idx: idx }));
+  let rows = (DATA.roster||[]).map((r, idx) => ({ ...r, _idx: idx }));
   if (rosterFilter === 'Limited')  rows = rows.filter(r => r.source === 'Limited');
   else if (rosterFilter === 'Standard') rows = rows.filter(r => r.source === 'Standard');
   else if (rosterFilter === 'other')    rows = rows.filter(r => r.source !== 'Limited' && r.source !== 'Standard');
@@ -823,7 +835,6 @@ function getRosterRows() {
   });
   return rows;
 }
-
 function renderRoster() {
   const rows = getRosterRows();
   const body = document.getElementById('rosterBody');
@@ -847,12 +858,9 @@ function renderRoster() {
       <td><button class="btn-del" data-section="roster" data-idx="${r._idx}" title="Delete">✕</button></td>
     </tr>`;
   }).join('');
-
-  // Update charNameList datalist
   const dl = document.getElementById('charNameList');
   if (dl) dl.innerHTML = getAllCharNames().map(n => `<option value="${n}">`).join('');
 }
-
 document.getElementById('rosterTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('.tab');
   if (!btn) return;
@@ -861,7 +869,6 @@ document.getElementById('rosterTabs').addEventListener('click', (e) => {
   rosterFilter = btn.dataset.filter;
   renderRoster();
 });
-
 document.getElementById('rosterTable').querySelector('thead').addEventListener('click', (e) => {
   const th = e.target.closest('th');
   if (!th || !th.dataset.sort) return;
@@ -870,18 +877,16 @@ document.getElementById('rosterTable').querySelector('thead').addEventListener('
   rosterSort.key = key;
   renderRoster();
 });
-
-// Only "Set Type" is needed — Eidolon/Pull values computed automatically
 document.getElementById('form-character').addEventListener('submit', (e) => {
   e.preventDefault();
   const fd   = new FormData(e.target);
   const name = fd.get('name').trim();
   const src  = fd.get('source');
-  // Find existing roster entry and update source, or add a placeholder
-  const existing = DATA.roster.find(r => normName(r.name) === normName(name));
+  const existing = (DATA.roster||[]).find(r => normName(r.name) === normName(name));
   if (existing) {
     existing.source = src;
   } else {
+    if(!DATA.roster) DATA.roster = [];
     DATA.roster.push({ name, source: src, eidolon: 'NoE', signature: 'S0', pullValueEidolon: 0, pullValueSignature: 0, totalPullValue: 0, pullPercent: 0 });
   }
   recomputeRosterPercent();
@@ -890,9 +895,9 @@ document.getElementById('form-character').addEventListener('submit', (e) => {
   e.target.reset();
 });
 
-// ============ StellarJade ============
+// STELLAR JADE
 function renderStellarJade() {
-  const rows       = DATA.stellarJade;
+  const rows       = DATA.stellarJade || [];
   const totalJade  = rows.reduce((s, r) => s + (r.jade  || 0), 0);
   const totalPasses= rows.reduce((s, r) => s + (r.passes|| 0), 0);
   const totalPulls = totalJade / 160 + totalPasses;
@@ -906,7 +911,6 @@ function renderStellarJade() {
   document.getElementById('jadeStats').innerHTML = stats.map(s => `
     <div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
 
-  // Build per-version summary
   const versionTotals = {};
   rows.forEach(r => {
     const ver = getVersionForDate(r.date, VERSION_SCHEDULE);
@@ -915,7 +919,6 @@ function renderStellarJade() {
     versionTotals[ver].passes += r.passes || 0;
   });
 
-  // Show versions from 4.3(1/2) to current+1
   const today = new Date().toISOString().split('T')[0];
   const relevantVersions = VERSION_SCHEDULE.filter(v => v.start <= today || versionTotals[v.label]);
 
@@ -925,7 +928,7 @@ function renderStellarJade() {
         const pulls = d.jade / 160 + d.passes;
         const isActive = today >= v.start && today < v.end;
         return `<div class="version-card ${isActive ? 'version-active' : ''}">
-          <div class="version-label">${v.label}</div>
+          <div class="version-label">Version ${v.label}</div>
           <div class="version-dates">${formatDate(v.start)} – ${formatDate(v.end)}</div>
           <div class="version-jade">${fmt(d.jade,0)} <span class="vunit">SJ</span></div>
           <div class="version-passes">${fmt(d.passes,0)} <span class="vunit">Pass</span></div>
@@ -939,10 +942,10 @@ function renderStellarJade() {
     r => [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), r.activity, fmt(r.jade,0), fmt(r.passes,0)],
     (a, b) => b.r.date.localeCompare(a.r.date));
 }
-
 document.getElementById('form-stellarjade').addEventListener('submit', (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
+  if(!DATA.stellarJade) DATA.stellarJade = [];
   DATA.stellarJade.push({ date: fd.get('date'), activity: fd.get('activity').trim(), jade: Number(fd.get('jade'))||0, passes: Number(fd.get('passes'))||0 });
   sortByDate(DATA.stellarJade);
   saveWorkingData();
@@ -951,7 +954,7 @@ document.getElementById('form-stellarjade').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
-// ============ Export / Import / Reset ============
+// EXPORT / IMPORT
 function downloadFile(filename, content, mime) {
   const blob = new Blob([content], { type: mime });
   const url  = URL.createObjectURL(blob);
@@ -960,12 +963,10 @@ function downloadFile(filename, content, mime) {
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 }
-
 document.getElementById('btnExport').addEventListener('click', () => {
   const header = `// Warp Record HSR — exported ${new Date().toLocaleString('en-US')}\n`;
   downloadFile('data.js', header + `const HSR_DATA = ${JSON.stringify(DATA, null, 2)};\n`, 'text/javascript');
 });
-
 document.getElementById('importFile').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -990,36 +991,13 @@ document.getElementById('importFile').addEventListener('change', (e) => {
   };
   reader.readAsText(file);
 });
-
 document.getElementById('btnReset').addEventListener('click', () => {
   if (!confirm('Reset to default data? All browser-saved changes will be deleted.')) return;
   localStorage.removeItem(STORAGE_KEY);
-  DATA = JSON.parse(JSON.stringify(HSR_DATA));
+  DATA = typeof HSR_DATA !== 'undefined' ? JSON.parse(JSON.stringify(HSR_DATA)) : {};
   saveWorkingData();
   renderAll();
 });
-
-// ============ Render all ============
-function renderAll() {
-  computeRosterFromHistory();
-  buildOverview();
-  renderLimited();
-  renderManageLimited();
-  renderStandard();
-  renderManageStandard();
-  renderFreebies();
-  renderManageFreebies();
-  renderCalc();
-  renderPriority();
-  renderTeam();
-  renderRoster();
-  renderStellarJade();
-  populateSlotDropdowns();
-}
-
-// ============ Init ============
-initDateInputs();
-renderAll();
 
 // ============ Table Filters ============
 document.querySelectorAll('.table-filter').forEach(input => {
@@ -1046,3 +1024,24 @@ document.querySelectorAll('.table-filter').forEach(input => {
     }
   });
 });
+
+// Init
+function renderAll() {
+  computeRosterFromHistory();
+  buildOverview();
+  renderLimited();
+  renderManageLimited();
+  renderStandard();
+  renderManageStandard();
+  renderFreebies();
+  renderManageFreebies();
+  renderCalc();
+  renderPriority();
+  renderTeam();
+  renderRoster();
+  renderStellarJade();
+  populateSlotDropdowns();
+}
+
+initDateInputs();
+renderAll();
