@@ -97,6 +97,13 @@ function getVersionSchedule() {
   return schedule;
 }
 const VERSION_SCHEDULE = getVersionSchedule();
+function getVersionForDate(dateStr, schedule) {
+  for (const v of schedule) { if (dateStr >= v.start && dateStr < v.end) return v.label; } return '—';
+}
+
+function getFullVersionForDate(dateStr, schedule) {
+  for (const v of schedule) { if (dateStr >= v.start && dateStr < v.end) return v.fullLabel; } return '—';
+}
 
 // ============ Main nav / page switching ============
 document.getElementById('mainNav').addEventListener('click', (e) => {
