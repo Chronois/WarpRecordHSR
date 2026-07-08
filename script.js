@@ -291,24 +291,16 @@ document.getElementById('form-priority').addEventListener('submit', (e) => {
 
 // ============ CROPPER MODAL LOGIC ============
 let globalCropper = null;
-let currentCropTargetElement = null; // Elemen image <img> yang akan diupdate
+let currentCropTargetElement = null; 
 
 function openCropModal(triggerElement) {
-  // Simpan elemen image yang diklik sebagai target
   currentCropTargetElement = triggerElement.querySelector('.slot-preview') || triggerElement;
-  
-  // Tampilkan modal
   document.getElementById('cropModalOverlay').hidden = false;
-  
-  // Reset ke Tab Upload dan Step 1
   switchModalTab('upload');
   switchModalStep(1);
-  
-  // Reset input & preview
   document.getElementById('modalFileInput').value = '';
   document.getElementById('modalUrlInput').value = '';
   
-  // Deteksi jika gambar saat ini adalah default atau bukan untuk preview tab default
   const currentSrc = currentCropTargetElement.src;
   document.getElementById('modalDefaultPreview').src = currentSrc.includes('viewBox') ? DEFAULT_AVATAR : currentSrc;
 }
@@ -318,11 +310,8 @@ function closeCropModal() {
   if(globalCropper) { globalCropper.destroy(); globalCropper = null; }
 }
 
-// Logic untuk Tab Step 1
 document.querySelectorAll('.modal-tab').forEach(tab => {
-  tab.addEventListener('click', (e) => {
-    switchModalTab(e.target.dataset.tab);
-  });
+  tab.addEventListener('click', (e) => { switchModalTab(e.target.dataset.tab); });
 });
 
 function switchModalTab(tabId) {
@@ -334,26 +323,17 @@ function switchModalTab(tabId) {
 
 function switchModalStep(step) {
   if(step === 1) {
-    document.getElementById('modalStep1').classList.add('active');
-    document.getElementById('modalStep2').classList.remove('active');
-    document.getElementById('modalBody1').hidden = false;
-    document.getElementById('modalBody2').hidden = true;
-    document.getElementById('btnModalPrev').hidden = true;
-    document.getElementById('btnModalNext').hidden = false;
-    document.getElementById('btnModalSubmit').hidden = true;
+    document.getElementById('modalStep1').classList.add('active'); document.getElementById('modalStep2').classList.remove('active');
+    document.getElementById('modalBody1').hidden = false; document.getElementById('modalBody2').hidden = true;
+    document.getElementById('btnModalPrev').hidden = true; document.getElementById('btnModalNext').hidden = false; document.getElementById('btnModalSubmit').hidden = true;
     if(globalCropper) { globalCropper.destroy(); globalCropper = null; }
   } else {
-    document.getElementById('modalStep1').classList.remove('active');
-    document.getElementById('modalStep2').classList.add('active');
-    document.getElementById('modalBody1').hidden = true;
-    document.getElementById('modalBody2').hidden = false;
-    document.getElementById('btnModalPrev').hidden = false;
-    document.getElementById('btnModalNext').hidden = true;
-    document.getElementById('btnModalSubmit').hidden = false;
+    document.getElementById('modalStep1').classList.remove('active'); document.getElementById('modalStep2').classList.add('active');
+    document.getElementById('modalBody1').hidden = true; document.getElementById('modalBody2').hidden = false;
+    document.getElementById('btnModalPrev').hidden = false; document.getElementById('btnModalNext').hidden = true; document.getElementById('btnModalSubmit').hidden = false;
   }
 }
 
-// Navigasi Next / Previous
 document.getElementById('btnModalPrev').addEventListener('click', () => switchModalStep(1));
 document.getElementById('btnModalNext').addEventListener('click', () => {
   const activeTab = document.querySelector('.modal-tab.active').dataset.tab;
@@ -363,65 +343,66 @@ document.getElementById('btnModalNext').addEventListener('click', () => {
     const file = document.getElementById('modalFileInput').files[0];
     if (!file) return alert('Please upload a file first!');
     sourceImg = URL.createObjectURL(file);
-    initCropper(sourceImg);
+    initCropper(sourceImg, false);
   } 
   else if (activeTab === 'url') {
     const url = document.getElementById('modalUrlInput').value.trim();
     if (!url) return alert('Please enter a URL!');
     sourceImg = url;
-    initCropper(sourceImg);
+    initCropper(sourceImg, true);
   } 
   else if (activeTab === 'default') {
     sourceImg = document.getElementById('modalDefaultPreview').src;
-    initCropper(sourceImg);
+    initCropper(sourceImg, false);
   }
 });
 
-function initCropper(src) {
+function initCropper(src, isUrl) {
   const imgElement = document.getElementById('modalTargetImg');
   
-  // Set crossOrigin to anonymous for URLs
-  imgElement.crossOrigin = "Anonymous";
-  imgElement.src = src;
+  // PERBAIKAN: JANGAN set crossOrigin anonymous kalau file-nya dari HP/Laptop lokal
+  if (isUrl) {
+    imgElement.crossOrigin = "Anonymous";
+  } else {
+    imgElement.removeAttribute('crossOrigin');
+  }
   
-  // Pindah ke step 2
+  imgElement.src = src;
   switchModalStep(2);
   
-  // Tunggu image load sebelum start cropper
   imgElement.onload = () => {
     if(globalCropper) globalCropper.destroy();
     globalCropper = new Cropper(imgElement, {
-      aspectRatio: 3 / 4,
-      viewMode: 1,
-      dragMode: 'move',
-      autoCropArea: 1,
-      background: false,
-      checkCrossOrigin: false
+      aspectRatio: 3 / 4, viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false, checkCrossOrigin: false // Penting untuk bypass error cek dari Cropper.js
     });
   };
   
-  imgElement.onerror = () => {
-    alert("Could not load image. If it's a URL, it might be blocked by CORS.");
-    switchModalStep(1);
-  };
+  imgElement.onerror = () => { alert("Could not load image. If it's a URL, it might be blocked by CORS."); switchModalStep(1); };
 }
 
-// Submit / Crop
 document.getElementById('btnModalSubmit').addEventListener('click', () => {
   if (!globalCropper) return;
   try {
-    // Kompres ke ukuran kecil agar storage tidak penuh
     const canvas = globalCropper.getCroppedCanvas({ width: 240, height: 320 });
-    const finalBase64 = canvas.toDataURL('image/webp', 0.85); // Gunakan WEBP untuk kompresi maksimal
+    if (!canvas) throw new Error("Canvas is empty");
     
-    // Terapkan ke target
+    // PERBAIKAN: Gunakan format JPEG (bukan WEBP) karena lebih kompatibel di banyak browser, aman untuk Canvas base64
+    const finalBase64 = canvas.toDataURL('image/jpeg', 0.85); 
     currentCropTargetElement.src = finalBase64;
     closeCropModal();
   } catch(err) {
-    alert("Failed to crop image (likely a CORS issue from the URL). Please try downloading and uploading it instead.");
+    console.error(err);
+    alert("Failed to crop image (Browser security/CORS issue). Please try using a downloaded image file instead of a URL.");
   }
 });
 
+// Listener untuk file upload (biar ketika user klik/drag file, namanya tampil/otomatis next step)
+document.getElementById('modalFileInput').addEventListener('change', (e) => {
+  if (e.target.files && e.target.files[0]) {
+     document.querySelector('.upload-zone span').textContent = "✅";
+     document.querySelector('.upload-zone').innerHTML += `<br><span style="color:var(--gold-soft)">${e.target.files[0].name} selected</span>`;
+  }
+});
 
 // ============ Team & Roster Auto Image Logic ============
 function getAllCharNames() {
@@ -442,13 +423,10 @@ function populateSlotDropdowns() {
   });
 }
 
-// Event listener di form team untuk Auto-Fetch gambar dari roster
 document.getElementById('form-team').addEventListener('change', (e) => {
-  // Jika yang diganti adalah select name, otomatis ambil gambar
   if (e.target.classList.contains('slot-name')) {
       const name = e.target.value;
       const imgEl = e.target.closest('.slot-row').querySelector('.slot-preview');
-      
       const rosterChar = (DATA.roster||[]).find(r => r.name === name);
       if (rosterChar && rosterChar.img) {
           imgEl.src = rosterChar.img;
