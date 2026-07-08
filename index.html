@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- Tambahan: Cropper.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 <link rel="stylesheet" href="style.css">
 <style>
   .station-label-name {
@@ -32,9 +34,9 @@
   .tc-pv { font-weight: 700; color: var(--gold-soft); font-size: 14px; }
 
   .slot-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
-  .slot-img-upload { width: 60px; height: 60px; background: var(--surface-2); border-radius: 8px; border: 1px dashed var(--text-dim); overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer; }
-  .slot-preview { width:100%; height:100%; object-fit:cover; transition: 0.2s; }
-  .slot-file { position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0; cursor: pointer; }
+  .slot-img-upload { width: 60px; height: 60px; background: var(--surface-2); border-radius: 8px; border: 1px dashed var(--text-dim); overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer; transition: 0.2s; }
+  .slot-img-upload:hover { border-color: var(--cyan); }
+  .slot-preview { width:100%; height:100%; object-fit:cover; transition: 0.2s; pointer-events: none; }
   .slot-inputs { display: flex; flex-direction: column; gap: 8px; flex: 1; }
   .slot-top, .slot-bottom { display: flex; gap: 8px; align-items: center; }
   .slot-name, .slot-eidolon, .slot-sign { padding: 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 13px; }
@@ -109,7 +111,6 @@
           <span><i style="background:var(--guaranteed)"></i>Guaranteed</span>
         </div>
       </div>
-      <p class="track-hint">Scroll sideways to follow the timeline &nbsp;→&nbsp; the distance between stations represents how long the wait was (in days)</p>
     </section>
 
     <section class="section">
@@ -312,23 +313,21 @@
         <h2>Teams You've Built</h2>
       </div>
 
-    <form class="manage-form team-form" id="form-team" data-section="team">
+      <form class="manage-form team-form" id="form-team" data-section="team">
         <div class="field" style="width: 100%; margin-bottom: 24px;">
           <label>Archetype</label>
           <input type="text" name="archetype" required placeholder="e.g. Break" style="width: 100%;">
         </div>
 
         <div class="team-masonry">
-          
           <div class="team-masonry-col">
-            
             <div class="team-slot-group">
               <div class="team-slot-label" style="color: var(--nebula);">Main DPS</div>
               <div class="team-slot" id="slot-mainDps">
                  <div class="slot-row">
-                   <div class="slot-img-upload">
+                   <!-- Berubah: Menggunakan onclick untuk panggil modal -->
+                   <div class="slot-img-upload" onclick="openCropModal(this)">
                       <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                      <input type="file" class="slot-file" accept="image/*" title="Upload Image">
                    </div>
                    <div class="slot-inputs">
                       <div class="slot-top">
@@ -351,9 +350,8 @@
               <div class="team-slot-label" style="color: var(--nebula);">Sustain</div>
               <div class="team-slot" id="slot-sustain">
                  <div class="slot-row">
-                   <div class="slot-img-upload">
+                   <div class="slot-img-upload" onclick="openCropModal(this)">
                       <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                      <input type="file" class="slot-file" accept="image/*" title="Upload Image">
                    </div>
                    <div class="slot-inputs">
                       <div class="slot-top">
@@ -371,18 +369,15 @@
                  </div>
               </div>
             </div>
-
           </div>
 
           <div class="team-masonry-col">
-            
             <div class="team-slot-group">
               <div class="team-slot-label" style="color: var(--nebula);">Sub DPS <button type="button" class="btn-add-slot" data-role="subDps">+</button></div>
               <div class="team-slot" id="slot-subDps">
                  <div class="slot-row">
-                   <div class="slot-img-upload">
+                   <div class="slot-img-upload" onclick="openCropModal(this)">
                       <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                      <input type="file" class="slot-file" accept="image/*" title="Upload Image">
                    </div>
                    <div class="slot-inputs">
                       <div class="slot-top">
@@ -405,9 +400,8 @@
               <div class="team-slot-label" style="color: var(--nebula);">Support <button type="button" class="btn-add-slot" data-role="support">+</button></div>
               <div class="team-slot" id="slot-support">
                  <div class="slot-row">
-                   <div class="slot-img-upload">
+                   <div class="slot-img-upload" onclick="openCropModal(this)">
                       <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                      <input type="file" class="slot-file" accept="image/*" title="Upload Image">
                    </div>
                    <div class="slot-inputs">
                       <div class="slot-top">
@@ -425,7 +419,6 @@
                  </div>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -441,7 +434,7 @@
           <button type="submit" class="btn-add" style="margin-bottom: 2px;">+ Add Team</button>
         </div>
       </form>
-      
+
       <div class="filter-wrap"><input type="text" class="table-filter" data-table="teamGrid" placeholder="Filter teams..."></div>
       <div class="team-grid" id="teamGrid"></div>
       <p class="track-hint">% of Total Pulls is each team's Pull Value against every warp spent on the Limited Pull banner so far.</p>
@@ -481,9 +474,8 @@
         <h2>Add / Update Character</h2>
       </div>
       <form class="manage-form char-form-layout" id="form-character" data-section="roster">
-        <div class="slot-img-upload" style="width: 70px; height: 70px; border-radius: 8px;">
+        <div class="slot-img-upload" style="width: 70px; height: 70px; border-radius: 8px;" onclick="openCropModal(this)">
           <img class="slot-preview" id="charFormImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-          <input type="file" id="charFileInput" class="slot-file" accept="image/*" title="Upload Image">
         </div>
         <div class="field field-grow">
           <label>Name</label>
@@ -592,12 +584,70 @@
     </section>
   </main>
 </div>
-  
+
 <footer class="site-footer">
-  <p>Warp Record HSR — built from a Trailblazer's own pull data. Add entries right on each tab above, or edit <code>data.js</code> by hand after every warp session.</p>
+  <p>Warp Record HSR — built from a Trailblazer's own pull data. Add entries right on each tab above, or upload your <code>.json</code> backup file.</p>
 </footer>
 
-<script src="data.js"></script>
+<!-- MODAL CROPPER.JS -->
+<div id="cropModalOverlay" class="crop-modal-overlay" hidden>
+  <div class="crop-modal-box">
+    <div class="crop-modal-header">
+      <h3>Edit portrait</h3>
+    </div>
+    
+    <div class="crop-modal-stepper">
+      <div id="modalStep1" class="step-indicator active"><div class="step-circle">1</div> Provide image</div>
+      <div id="modalStep2" class="step-indicator"><div class="step-circle">2</div> Crop image</div>
+    </div>
+
+    <!-- CONTENT STEP 1: PILIH SUMBER -->
+    <div id="modalBody1" class="crop-modal-body">
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="upload">Upload image</button>
+        <button class="modal-tab" data-tab="url">Enter image URL</button>
+        <button class="modal-tab" data-tab="default">Use default image</button>
+      </div>
+
+      <div id="tab-upload" class="modal-tab-content active">
+        <input type="file" id="modalFileInput" accept=".jpg,.jpeg,.png,.gif,.webp" hidden>
+        <div class="upload-zone" onclick="document.getElementById('modalFileInput').click()">
+          <span style="font-size: 24px; margin-bottom: 8px; display:block;">📁</span>
+          Click or drag image file to this area to upload<br>
+          <span style="opacity:0.6">Accepts .jpg .jpeg .png .gif .webp</span>
+        </div>
+      </div>
+
+      <div id="tab-url" class="modal-tab-content" hidden>
+        <input type="text" id="modalUrlInput" placeholder="Enter image URL..." style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:8px; margin-bottom:12px; outline:none;">
+        <p style="font-size:11px; color:var(--text-dim); text-align:center;">Note: Some URLs might be blocked by browser security (CORS).</p>
+      </div>
+
+      <div id="tab-default" class="modal-tab-content" hidden>
+        <div style="display:flex; justify-content:center; align-items:center; height:120px; background:var(--surface-2); border-radius:8px;">
+          <img id="modalDefaultPreview" src="" style="max-height:100px; max-width:100%; object-fit:contain;">
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT STEP 2: CROPPER -->
+    <div id="modalBody2" class="crop-modal-body" hidden style="padding: 0; background: var(--bg-deep);">
+      <div style="width: 100%; height: 350px;">
+        <img id="modalTargetImg" src="" style="display:block; max-width: 100%;">
+      </div>
+    </div>
+
+    <div class="crop-modal-footer">
+      <button class="btn-ghost" onclick="closeCropModal()">Cancel</button>
+      <button class="btn-ghost" id="btnModalPrev" hidden>Previous</button>
+      <button class="btn-add" id="btnModalNext">Next</button>
+      <button class="btn-add" id="btnModalSubmit" hidden>Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tambahan: Cropper.js Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
