@@ -359,21 +359,15 @@ document.getElementById('btnModalNext').addEventListener('click', () => {
 
 function initCropper(src, isUrl) {
   const imgElement = document.getElementById('modalTargetImg');
-  
-  // PERBAIKAN: JANGAN set crossOrigin anonymous kalau file-nya dari HP/Laptop lokal
-  if (isUrl) {
-    imgElement.crossOrigin = "Anonymous";
-  } else {
-    imgElement.removeAttribute('crossOrigin');
-  }
-  
+  if (isUrl) { imgElement.crossOrigin = "Anonymous"; } else { imgElement.removeAttribute('crossOrigin'); }
   imgElement.src = src;
   switchModalStep(2);
   
   imgElement.onload = () => {
     if(globalCropper) globalCropper.destroy();
     globalCropper = new Cropper(imgElement, {
-      aspectRatio: 3 / 4, viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false, checkCrossOrigin: false // Penting untuk bypass error cek dari Cropper.js
+      aspectRatio: 1, /* PERBAIKAN: Rasio Kotak Persegi 1:1 */
+      viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false, checkCrossOrigin: false 
     });
   };
   
@@ -383,10 +377,10 @@ function initCropper(src, isUrl) {
 document.getElementById('btnModalSubmit').addEventListener('click', () => {
   if (!globalCropper) return;
   try {
-    const canvas = globalCropper.getCroppedCanvas({ width: 240, height: 320 });
+    /* PERBAIKAN: Output Canvas disetel menjadi persegi sempurna 256x256 */
+    const canvas = globalCropper.getCroppedCanvas({ width: 256, height: 256 });
     if (!canvas) throw new Error("Canvas is empty");
     
-    // PERBAIKAN: Gunakan format JPEG (bukan WEBP) karena lebih kompatibel di banyak browser, aman untuk Canvas base64
     const finalBase64 = canvas.toDataURL('image/jpeg', 0.85); 
     currentCropTargetElement.src = finalBase64;
     closeCropModal();
@@ -396,7 +390,6 @@ document.getElementById('btnModalSubmit').addEventListener('click', () => {
   }
 });
 
-// Listener untuk file upload (biar ketika user klik/drag file, namanya tampil/otomatis next step)
 document.getElementById('modalFileInput').addEventListener('change', (e) => {
   if (e.target.files && e.target.files[0]) {
      document.querySelector('.upload-zone span').textContent = "✅";
