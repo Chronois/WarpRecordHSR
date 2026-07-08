@@ -19,13 +19,12 @@ function initDateInputs() {
 }
 
 // ============ Version schedule ============
-// Daftar tanggal rilis versi HSR berdasarkan catatan rilis resmi
 const HSR_VERSIONS = [
   { v: '1.0', date: '2023-04-26' },
   { v: '1.1', date: '2023-06-07' },
   { v: '1.2', date: '2023-07-19' },
   { v: '1.3', date: '2023-08-30' },
-  { v: '1.4', date: '2023-10-11' }, // Durasi patch lebih pendek (35 hari)
+  { v: '1.4', date: '2023-10-11' }, 
   { v: '1.5', date: '2023-11-15' },
   { v: '1.6', date: '2023-12-27' },
   { v: '2.0', date: '2024-02-06' },
@@ -57,50 +56,34 @@ const HSR_VERSIONS = [
 
 function getVersionSchedule() {
   const schedule = [];
-  
-  // Helper untuk menetapkan standar waktu UTC agar tanggal tidak mundur 1 hari akibat Timezone lokal
   const parseDate = (dStr) => new Date(dStr + 'T12:00:00Z');
   const formatIso = (d) => d.toISOString().split('T')[0];
 
   for (let i = 0; i < HSR_VERSIONS.length; i++) {
     const current = HSR_VERSIONS[i];
     const v1Start = parseDate(current.date);
-    
     let vEnd;
-    // Tentukan tanggal akhir berdasarkan dimulainya patch selanjutnya
+    
     if (i < HSR_VERSIONS.length - 1) {
         vEnd = parseDate(HSR_VERSIONS[i+1].date);
     } else {
-        // Fallback durasi 42 hari untuk versi terakhir yang terdata
         vEnd = new Date(v1Start.getTime() + 42 * 86400000);
     }
 
-    // Mengkalkulasi fase 1 dan fase 2 (1/2 dan 2/2) 
     const durationDays = Math.round((vEnd - v1Start) / 86400000);
     const halfDays = Math.floor(durationDays / 2);
-    
     const v2Start = new Date(v1Start.getTime() + halfDays * 86400000);
     
-    schedule.push({ 
-        fullLabel: current.v, 
-        label: `${current.v} (1/2)`, 
-        start: formatIso(v1Start), 
-        end: formatIso(v2Start) 
-    });
-    schedule.push({ 
-        fullLabel: current.v, 
-        label: `${current.v} (2/2)`, 
-        start: formatIso(v2Start), 
-        end: formatIso(vEnd) 
-    });
+    schedule.push({ fullLabel: current.v, label: `${current.v} (1/2)`, start: formatIso(v1Start), end: formatIso(v2Start) });
+    schedule.push({ fullLabel: current.v, label: `${current.v} (2/2)`, start: formatIso(v2Start), end: formatIso(vEnd) });
   }
   return schedule;
 }
 const VERSION_SCHEDULE = getVersionSchedule();
+
 function getVersionForDate(dateStr, schedule) {
   for (const v of schedule) { if (dateStr >= v.start && dateStr < v.end) return v.label; } return '—';
 }
-
 function getFullVersionForDate(dateStr, schedule) {
   for (const v of schedule) { if (dateStr >= v.start && dateStr < v.end) return v.fullLabel; } return '—';
 }
@@ -169,8 +152,7 @@ const MC_NAMES = ['hmc', 'rmc', 'emc', 'dmc', 'pmc'];
 function isMC(name) { return MC_NAMES.includes((name || '').trim().toLowerCase()); }
 function normName(n) { return String(n || '').trim().toLowerCase(); }
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23191d40%27/%3E%3Cpath d=%27M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90%27 fill=%27%232b2f5c%27/%3E%3C/svg%3E";
-// Database Master Karakter (Link gambar diambil dari HSR Fandom Wiki)
-// Kamu bisa menambahkan karakter baru di sini dengan format yang sama
+
 const MASTER_CHARACTERS = {
   // --- Standard ---
   "bailu": { name: "Bailu", source: "Standard", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1105.png" },
@@ -276,7 +258,6 @@ function computeRosterFromHistory() {
     else if ((r.category || '').includes('Light Cone')) { signMap[name]++; }
   });
 
-  // GABUNGKAN NAMA DARI MASTER DATABASE DENGAN HISTORY
   const allNames = new Set([
     ...Object.keys(MASTER_CHARACTERS), 
     ...Object.keys(eidoMap), 
@@ -287,17 +268,18 @@ function computeRosterFromHistory() {
   const newRoster = [];
   allNames.forEach(name => {
     if (!name) return;
-    const baseInfo = MASTER_CHARACTERS[name] || {};
+    const baseInfo = MASTER_CHARACTERS[normName(name)] || {};
     const existing = (DATA.roster || []).find(r => normName(r.name) === name);
     const source   = existing ? existing.source : (baseInfo.source || 'Unknown');
     
-    // Tentukan Image
-    let imgData = existing ? existing.img : null;
-    if (!imgData || imgData.includes('viewBox')) {
+    // Logika pengaman gambar custom
+    let imgData = null;
+    if (existing && existing.img && !existing.img.includes('viewBox')) {
+        imgData = existing.img; 
+    } else {
         imgData = baseInfo.img || null; 
     }
     
-    // Tentukan Nama Display
     const dispName = existing ? existing.name : (baseInfo.name || ((DATA.limited||[]).find(r => normName(r.name) === name)?.name || (DATA.standard||[]).find(r => normName(r.name) === name)?.name || (DATA.freebies||[]).find(r => normName(r.name) === name)?.name || name));
 
     const eidoCount = eidoMap[name] || 0; 
@@ -320,7 +302,7 @@ function computeRosterFromHistory() {
       pullValueSignature: pvSign, 
       totalPullValue: total, 
       pullPercent: 0,
-      isOwned: obtained // Flag penanda punya atau tidak
+      isOwned: obtained
     });
   });
 
@@ -523,7 +505,7 @@ function initCropper(src, isUrl) {
   imgElement.onload = () => {
     if(globalCropper) globalCropper.destroy();
     globalCropper = new Cropper(imgElement, {
-      aspectRatio: 1, /* Crop Persegi Sempurna */
+      aspectRatio: 1, 
       viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false, checkCrossOrigin: false 
     });
   };
@@ -669,7 +651,7 @@ function renderTeam() {
     if (teamSortValue === 'pvAsc') return a.pullValue - b.pullValue;
     if (teamSortValue === 'pvDesc') return b.pullValue - a.pullValue;
     
-    // Sort by Cost (mengekstrak total limited character cost dari string "X Limited + ...")
+    // Sort by Cost
     const costA = parseInt(a.cost.match(/(\d+) Limited/) ? a.cost.match(/(\d+) Limited/)[1] : 0) * 1000 + a.pullValue;
     const costB = parseInt(b.cost.match(/(\d+) Limited/) ? b.cost.match(/(\d+) Limited/)[1] : 0) * 1000 + b.pullValue;
     if (teamSortValue === 'costDesc') return costB - costA;
@@ -806,10 +788,10 @@ function renderRoster() {
     
     return `<div class="roster-card searchable-item ${unownedCls}" data-idx="${r._idx}">
         <div class="roster-img-wrap">
-    <img src="${imgSrc}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
-    ${notOwnedBadge}
-    <div class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''} roster-type-tag">${r.source}</div>
-    <button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button>
+            <img src="${imgSrc}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
+            ${notOwnedBadge}
+            <div class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''} roster-type-tag">${r.source}</div>
+            <button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button>
         </div>
         <div class="roster-info">
             <div class="roster-name" title="${r.name}">${r.name}</div>
@@ -821,6 +803,31 @@ function renderRoster() {
   }).join('');
   const dl = document.getElementById('charNameList'); if (dl) dl.innerHTML = getAllCharNames().map(n => `<option value="${n}">`).join('');
 }
+
+document.getElementById('rosterTabs').addEventListener('click', (e) => { 
+  const btn = e.target.closest('.tab'); if (!btn) return; 
+  document.querySelectorAll('#rosterTabs .tab').forEach(t => t.classList.remove('active')); 
+  btn.classList.add('active'); 
+  rosterFilter = btn.dataset.filter; 
+  renderRoster(); 
+});
+
+// LOGIKA ADD/UPDATE CHARACTER FORM (YANG SEMPAT HILANG)
+document.getElementById('form-character').addEventListener('submit', (e) => {
+  e.preventDefault(); const fd = new FormData(e.target); const name = fd.get('name').trim(); const src = fd.get('source');
+  const imgSrc = document.getElementById('charFormImg').src; const isDefault = imgSrc.includes('viewBox'); 
+  const existing = (DATA.roster||[]).find(r => normName(r.name) === normName(name));
+  
+  if (existing) { 
+      existing.source = src; 
+      if (!isDefault) existing.img = imgSrc; 
+  } else { 
+      if(!DATA.roster) DATA.roster = []; 
+      DATA.roster.push({ name, source: src, img: isDefault ? null : imgSrc, eidolon: 'NoE', signature: 'S0', pullValueEidolon: 0, pullValueSignature: 0, totalPullValue: 0, pullPercent: 0, isOwned: true }); 
+  }
+  recomputeRosterPercent(); saveWorkingData(); renderAll(); e.target.reset(); document.getElementById('charFormImg').src = DEFAULT_AVATAR; 
+});
+
 
 // ============ STELLAR JADE ============
 function renderStellarJade() {
