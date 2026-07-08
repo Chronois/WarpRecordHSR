@@ -593,6 +593,9 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 .tag.Limited{ color: var(--gold-soft); border-color: rgba(232,184,75,.4); }
 .tag.Standard{ color: var(--cyan); border-color: rgba(95,201,217,.4); }
+.tag.CelestialInvitation { color: #d2a8ff; border-color: rgba(210,168,255,.4); }
+.tag.GoldenCompanionSpirit { color: var(--gold); border-color: rgba(232,184,75,.4); }
+.tag.MainCharacter { color: #d8d8d8; border-color: rgba(216,216,216,.4); }
 .roster-type-tag {
   position: absolute;
   bottom: 8px;
