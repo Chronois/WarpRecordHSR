@@ -333,11 +333,86 @@ function bestWinStreak(rows) {
 function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   const table = document.getElementById(tableId); if (!table) return;
   const thead = table.querySelector('thead'); const tbody = table.querySelector('tbody'); const rows = DATA[section] || [];
-  thead.innerHTML = `<tr>${columnLabels.map(c => `<th>${c}</th>`).join('')}<th></th></tr>`;
+  
+  // Menambahkan kolom "Actions"
+  thead.innerHTML = `<tr>${columnLabels.map(c => `<th>${c}</th>`).join('')}<th>Actions</th></tr>`;
+  
   if (!rows || !rows.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="${columnLabels.length + 1}">No entries yet.</td></tr>`; return; }
   let indexed = rows.map((r, idx) => ({ r, idx })); if (sortFn) indexed = indexed.sort(sortFn);
-  tbody.innerHTML = indexed.map(({ r, idx }) => `<tr>${rowToCells(r).map(c => `<td>${c}</td>`).join('')}<td><button class="btn-del" data-section="${section}" data-idx="${idx}" title="Delete">✕</button></td></tr>`).join('');
+  
+  // Memasukkan 3 Tombol: Duplicate, Edit, dan Delete
+  tbody.innerHTML = indexed.map(({ r, idx }) => `<tr>${rowToCells(r).map(c => `<td>${c}</td>`).join('')}<td>
+    <div style="display:flex; gap:6px;">
+        <button type="button" class="btn-dup" onclick="dupEntry('${section}', ${idx})" title="Duplicate">⧉</button>
+        <button type="button" class="btn-edit" onclick="editEntry('${section}', ${idx})" title="Edit">✎</button>
+        <button type="button" class="btn-del" onclick="deleteEntry('${section}', ${idx})" title="Delete">✕</button>
+    </div>
+  </td></tr>`).join('');
 }
+
+// FITUR DUPLIKASI DATA TABEL
+window.dupEntry = function(section, idx) {
+  const item = DATA[section][idx];
+  
+  // Salin murni agar tidak terikat memori
+  DATA[section].push(JSON.parse(JSON.stringify(item)));
+  
+  if (section === 'priority') {
+    DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority));
+    DATA.priority.forEach((p, i) => { p.priority = String(i + 1); });
+  } else {
+    sortByDate(DATA[section]);
+    recomputeDaysSince(DATA[section]);
+  }
+  
+  saveWorkingData();
+  renderAll();
+};
+
+// FITUR EDIT DATA TABEL
+window.editEntry = function(section, idx) {
+  const item = DATA[section][idx];
+  
+  // Deteksi nama Form secara otomatis berdasarkan tabel
+  let formId = 'form-' + (section === 'stellarJade' ? 'stellarjade' : section);
+  const form = document.getElementById(formId);
+  if (!form) return;
+
+  // Isi kotak input Form dengan data dari baris yang ingin diedit
+  Object.keys(item).forEach(key => {
+    const input = form.elements[key];
+    if (input) input.value = item[key];
+  });
+
+  // Hapus data lama dari memori (Kalian harus menyimpannya ulang via form!)
+  DATA[section].splice(idx, 1);
+  
+  if (section === 'priority') {
+    DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority));
+    DATA.priority.forEach((p, i) => { p.priority = String(i + 1); });
+  } else if (['limited','standard','freebies'].includes(section)) {
+    recomputeDaysSince(DATA[section]);
+  }
+  
+  saveWorkingData();
+  renderAll();
+
+  // Memoles visual tombol saat sedang mengedit
+  const btn = form.querySelector('button[type="submit"]');
+  if (btn) {
+      const originalText = btn.textContent;
+      btn.textContent = "✓ Update Entry";
+      
+      // Kembalikan teks tombol jadi normal setelah selesai update
+      form.addEventListener('submit', function onSub() {
+          setTimeout(() => { btn.textContent = originalText; }, 100);
+          form.removeEventListener('submit', onSub);
+      });
+  }
+
+  // Geser layar langsung ke area form
+  form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
 
 // ============ Overview (Combined Char & LC) ============
 function buildOverview() {
