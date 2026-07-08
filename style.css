@@ -765,6 +765,33 @@ main, header, footer, .page{ position:relative; z-index:1; }
 input[type="date"] { color-scheme: dark; }
 input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
 
+/* Efek saat karakter belum dimiliki (Threshold mode) */
+.roster-card.unowned .roster-img-wrap img {
+  filter: grayscale(100%) brightness(0.6);
+  opacity: 0.7;
+}
+.roster-card.unowned .roster-name {
+  color: var(--text-dim);
+}
+.roster-card.unowned .roster-stats {
+  opacity: 0.4;
+}
+.unowned-tag {
+  position: absolute;
+  top: 8px; left: 8px;
+  background: rgba(226, 128, 125, 0.15);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--loss);
+  color: var(--loss);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  z-index: 2;
+  letter-spacing: 0.05em;
+}
+
 /* =========================================================
    CROPPER MODAL STYLES
    ========================================================= */
