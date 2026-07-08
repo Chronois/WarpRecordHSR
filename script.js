@@ -63,12 +63,8 @@ function getVersionSchedule() {
     const current = HSR_VERSIONS[i];
     const v1Start = parseDate(current.date);
     let vEnd;
-    
-    if (i < HSR_VERSIONS.length - 1) {
-        vEnd = parseDate(HSR_VERSIONS[i+1].date);
-    } else {
-        vEnd = new Date(v1Start.getTime() + 42 * 86400000);
-    }
+    if (i < HSR_VERSIONS.length - 1) { vEnd = parseDate(HSR_VERSIONS[i+1].date); } 
+    else { vEnd = new Date(v1Start.getTime() + 42 * 86400000); }
 
     const durationDays = Math.round((vEnd - v1Start) / 86400000);
     const halfDays = Math.floor(durationDays / 2);
@@ -289,7 +285,7 @@ function computeRosterFromHistory() {
     const signCount = signMap[lowerName] || 0; 
     let obtained = obtainedMap[lowerName] || false;
     
-    const celestialChars = ["seele", "argenti", "silver wolf", "fu xuan", "yunli", "blade"];
+    const celestialChars = ["seele", "argenti", "silver wolf", "fu xuan", "yunli", "blade", "mortenax blade"];
     const goldenChars = ["ruan mei", "robin", "huohuo", "luocha", "topaz & numby"];
     
     if (celestialChars.includes(lowerName)) {
@@ -299,29 +295,16 @@ function computeRosterFromHistory() {
     }
 
     let eidoStr = obtained ? 'E' + Math.max(0, eidoCount - 1) : 'No'; 
-    
-    if (lowerName.includes("trailblazer")) {
-        eidoStr = 'E6';
-        source = 'Main Character';
-        obtained = true; 
-    }
+    if (lowerName.includes("trailblazer")) { eidoStr = 'E6'; source = 'Main Character'; obtained = true; }
     
     const signStr = 'S' + signCount;
-    const pvEido    = eidoPullMap[lowerName] || 0; 
+    const pvEido = eidoPullMap[lowerName] || 0; 
     const pvSign = signPullMap[lowerName] || 0; 
     const total = pvEido + pvSign;
 
     newRoster.push({ 
-      name: dispName, 
-      source, 
-      img: imgData, 
-      eidolon: eidoStr, 
-      signature: signStr, 
-      pullValueEidolon: pvEido, 
-      pullValueSignature: pvSign, 
-      totalPullValue: total, 
-      pullPercent: 0,
-      isOwned: obtained 
+      name: dispName, source, img: imgData, eidolon: eidoStr, signature: signStr, 
+      pullValueEidolon: pvEido, pullValueSignature: pvSign, totalPullValue: total, pullPercent: 0, isOwned: obtained 
     });
   });
 
@@ -361,7 +344,6 @@ function buildOverview() {
   const limRows = DATA.limited || [];
   const stdRows = DATA.standard || [];
   const freebies = DATA.freebies || [];
-
   const stats = computeBannerStats(limRows, null); 
   const total5star = limRows.length + stdRows.length + freebies.length;
 
@@ -385,10 +367,9 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
   const gaps = rows.map(r => Math.max(Math.sqrt(r.daysSince || 0.5) * 22, 46));
   
   const stations = rows.map((r, i) => {
-    // Logika Pintar: Ambil gambar dari Custom Crop (Roster) atau Master Database
     const lowerName = normName(r.name);
     const rosterEntry = (DATA.roster || []).find(char => normName(char.name) === lowerName);
-    let imgSrc = DEFAULT_AVATAR; // Fallback jika Light Cone / tidak ada gambar
+    let imgSrc = DEFAULT_AVATAR;
     
     if (rosterEntry && rosterEntry.img && !rosterEntry.img.includes('viewBox')) {
         imgSrc = rosterEntry.img;
@@ -410,6 +391,7 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
   
   container.innerHTML = `<div class="track-line"><div class="track-rail"></div>${stations}<div style="margin-left:24px"></div></div>`;
 }
+
 function renderBannerStats(containerId, stats) {
   const items = [{ label: 'Total 5★', value: fmt(stats.total, 0) }, { label: 'Total Warps', value: fmt(stats.totalWarps, 0) }, { label: 'Average Pity',value: fmt(stats.avgPity, 1) }];
   if (stats.winRate !== null) items.push({ label: 'Win Rate', value: pct(stats.winRate) }); 
@@ -448,7 +430,6 @@ function renderFreebies() {
   }
   
   container.innerHTML = DATA.freebies.map(f => {
-    // Logika Pintar: Ambil gambar dari Custom Crop atau Master Database
     const lowerName = normName(f.name);
     const rosterEntry = (DATA.roster || []).find(char => normName(char.name) === lowerName);
     let imgSrc = DEFAULT_AVATAR;
@@ -459,7 +440,6 @@ function renderFreebies() {
         imgSrc = MASTER_CHARACTERS[lowerName].img;
     }
 
-    // Struktur HTML kartu diperbarui agar menampung icon
     return `<div class="freebie-card">
       <div class="freebie-header">
         <img src="${imgSrc}" class="freebie-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
@@ -473,6 +453,13 @@ function renderFreebies() {
     </div>`;
   }).join('');
 }
+
+function renderManageFreebies() { renderDeleteTable('manageTable-freebies', 'freebies', ['Date','Version','Type','Name','Event'], r => [formatDate(r.date), getFullVersionForDate(r.date, VERSION_SCHEDULE), r.category, r.name, r.event], (a, b) => b.r.date.localeCompare(a.r.date)); }
+document.getElementById('form-freebies').addEventListener('submit', (e) => {
+  e.preventDefault(); const fd = new FormData(e.target); if (!DATA.freebies) DATA.freebies = [];
+  DATA.freebies.push({ date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(), event: fd.get('event').trim(), daysSince: 0 });
+  sortByDate(DATA.freebies); recomputeDaysSince(DATA.freebies); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs();
+});
 
 function renderCalc() {
   const limChar = (DATA.limited||[]).filter(r => r.category === 'Character'); const limLC   = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
@@ -506,7 +493,6 @@ function openCropModal(triggerElement) {
   switchModalStep(1);
   document.getElementById('modalFileInput').value = '';
   document.getElementById('modalUrlInput').value = '';
-  
   const currentSrc = currentCropTargetElement.src;
   document.getElementById('modalDefaultPreview').src = currentSrc.includes('viewBox') ? DEFAULT_AVATAR : currentSrc;
 }
@@ -516,9 +502,7 @@ function closeCropModal() {
   if(globalCropper) { globalCropper.destroy(); globalCropper = null; }
 }
 
-document.querySelectorAll('.modal-tab').forEach(tab => {
-  tab.addEventListener('click', (e) => { switchModalTab(e.target.dataset.tab); });
-});
+document.querySelectorAll('.modal-tab').forEach(tab => { tab.addEventListener('click', (e) => { switchModalTab(e.target.dataset.tab); }); });
 
 function switchModalTab(tabId) {
   document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
@@ -544,20 +528,17 @@ document.getElementById('btnModalPrev').addEventListener('click', () => switchMo
 document.getElementById('btnModalNext').addEventListener('click', () => {
   const activeTab = document.querySelector('.modal-tab.active').dataset.tab;
   let sourceImg = '';
-  
   if (activeTab === 'upload') {
     const file = document.getElementById('modalFileInput').files[0];
     if (!file) return alert('Please upload a file first!');
     sourceImg = URL.createObjectURL(file);
     initCropper(sourceImg, false);
-  } 
-  else if (activeTab === 'url') {
+  } else if (activeTab === 'url') {
     const url = document.getElementById('modalUrlInput').value.trim();
     if (!url) return alert('Please enter a URL!');
     sourceImg = url;
     initCropper(sourceImg, true);
-  } 
-  else if (activeTab === 'default') {
+  } else if (activeTab === 'default') {
     sourceImg = document.getElementById('modalDefaultPreview').src;
     initCropper(sourceImg, false);
   }
@@ -568,15 +549,10 @@ function initCropper(src, isUrl) {
   if (isUrl) { imgElement.crossOrigin = "Anonymous"; } else { imgElement.removeAttribute('crossOrigin'); }
   imgElement.src = src;
   switchModalStep(2);
-  
   imgElement.onload = () => {
     if(globalCropper) globalCropper.destroy();
-    globalCropper = new Cropper(imgElement, {
-      aspectRatio: 1, 
-      viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false, checkCrossOrigin: false 
-    });
+    globalCropper = new Cropper(imgElement, { aspectRatio: 1, viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false, checkCrossOrigin: false });
   };
-  
   imgElement.onerror = () => { alert("Could not load image. If it's a URL, it might be blocked by CORS."); switchModalStep(1); };
 }
 
@@ -585,14 +561,10 @@ document.getElementById('btnModalSubmit').addEventListener('click', () => {
   try {
     const canvas = globalCropper.getCroppedCanvas({ width: 256, height: 256 });
     if (!canvas) throw new Error("Canvas is empty");
-    
     const finalBase64 = canvas.toDataURL('image/jpeg', 0.85); 
     currentCropTargetElement.src = finalBase64;
     closeCropModal();
-  } catch(err) {
-    console.error(err);
-    alert("Failed to crop image (Browser security/CORS issue). Please try using a downloaded image file instead of a URL.");
-  }
+  } catch(err) { console.error(err); alert("Failed to crop image."); }
 });
 
 document.getElementById('modalFileInput').addEventListener('change', (e) => {
@@ -610,36 +582,24 @@ function getAllCharNames() {
   (DATA.freebies||[]).forEach(r => { if (r.name) names.add(r.name); });
   return [...names].sort();
 }
-
 function populateSlotDropdowns() {
   const names = getAllCharNames();
   const optionsHtml = `<option value="">— none —</option>` + names.map(n => `<option value="${n}">${n}</option>`).join('');
-  document.querySelectorAll('.slot-name').forEach(sel => {
-    const cur = sel.value;
-    sel.innerHTML = optionsHtml;
-    if (cur) sel.value = cur;
-  });
+  document.querySelectorAll('.slot-name').forEach(sel => { const cur = sel.value; sel.innerHTML = optionsHtml; if (cur) sel.value = cur; });
 }
-
 document.getElementById('form-team').addEventListener('change', (e) => {
   if (e.target.classList.contains('slot-name')) {
       const name = e.target.value;
       const imgEl = e.target.closest('.slot-row').querySelector('.slot-preview');
       const rosterChar = (DATA.roster||[]).find(r => r.name === name);
-      if (rosterChar && rosterChar.img) {
-          imgEl.src = rosterChar.img;
-      } else {
-          imgEl.src = DEFAULT_AVATAR;
-      }
+      if (rosterChar && rosterChar.img) { imgEl.src = rosterChar.img; } else { imgEl.src = DEFAULT_AVATAR; }
   }
   updateTeamPreview();
 });
 
 const slotTemplate = (role, isRemovable) => `
   <div class="slot-row">
-     <div class="slot-img-upload" onclick="openCropModal(this)">
-        <img class="slot-preview" src="${DEFAULT_AVATAR}">
-     </div>
+     <div class="slot-img-upload" onclick="openCropModal(this)"><img class="slot-preview" src="${DEFAULT_AVATAR}"></div>
      <div class="slot-inputs">
         <div class="slot-top">
            <select class="slot-name" data-role="${role}"><option value="">— none —</option></select>
@@ -650,8 +610,7 @@ const slotTemplate = (role, isRemovable) => `
            ${isRemovable ? `<button type="button" class="btn-remove-slot">✕ Remove</button>` : ''}
         </div>
      </div>
-  </div>
-`;
+  </div>`;
 
 document.querySelectorAll('.btn-add-slot').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -666,11 +625,8 @@ document.getElementById('form-team').addEventListener('click', (e) => {
 
 function getSlotMembers(role) {
   return [...document.querySelectorAll(`#slot-${role} .slot-row`)].map(row => {
-    const name = row.querySelector('.slot-name')?.value || '';
-    const eido = row.querySelector('.slot-eidolon')?.value || 'E0';
-    const sign = row.querySelector('.slot-sign')?.value || 'S0';
-    const previewSrc = row.querySelector('.slot-preview')?.src;
-    const img = (previewSrc && !previewSrc.includes('viewBox')) ? previewSrc : DEFAULT_AVATAR;
+    const name = row.querySelector('.slot-name')?.value || ''; const eido = row.querySelector('.slot-eidolon')?.value || 'E0'; const sign = row.querySelector('.slot-sign')?.value || 'S0';
+    const previewSrc = row.querySelector('.slot-preview')?.src; const img = (previewSrc && !previewSrc.includes('viewBox')) ? previewSrc : DEFAULT_AVATAR;
     return name ? { name, eido, sign, img } : null;
   }).filter(Boolean);
 }
@@ -699,34 +655,21 @@ function updateTeamPreview() {
 }
 
 let teamSortValue = 'pvDesc';
-document.getElementById('teamSortSelect')?.addEventListener('change', (e) => {
-  teamSortValue = e.target.value;
-  renderTeam();
-});
+document.getElementById('teamSortSelect')?.addEventListener('change', (e) => { teamSortValue = e.target.value; renderTeam(); });
 
 function renderTeam() {
   const grid = document.getElementById('teamGrid'); if (!grid) return;
   const limitedTotalWarps = (DATA.limited||[]).reduce((s, r) => s + r.pity, 0);
   if (!DATA.team || !DATA.team.length) { grid.innerHTML = '<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No teams built yet.</p>'; return; }
-  
   let indexed = DATA.team.map((r, idx) => ({ ...r, _idx: idx }));
-  
-  // SORTING TEAMS
   indexed.sort((a, b) => {
-    if (teamSortValue === 'nameAsc') return a.archetype.localeCompare(b.archetype);
-    if (teamSortValue === 'nameDesc') return b.archetype.localeCompare(a.archetype);
-    if (teamSortValue === 'pvAsc') return a.pullValue - b.pullValue;
-    if (teamSortValue === 'pvDesc') return b.pullValue - a.pullValue;
-    
-    // Sort by Cost
+    if (teamSortValue === 'nameAsc') return a.archetype.localeCompare(b.archetype); if (teamSortValue === 'nameDesc') return b.archetype.localeCompare(a.archetype);
+    if (teamSortValue === 'pvAsc') return a.pullValue - b.pullValue; if (teamSortValue === 'pvDesc') return b.pullValue - a.pullValue;
     const costA = parseInt(a.cost.match(/(\d+) Limited/) ? a.cost.match(/(\d+) Limited/)[1] : 0) * 1000 + a.pullValue;
     const costB = parseInt(b.cost.match(/(\d+) Limited/) ? b.cost.match(/(\d+) Limited/)[1] : 0) * 1000 + b.pullValue;
-    if (teamSortValue === 'costDesc') return costB - costA;
-    if (teamSortValue === 'costAsc') return costA - costB;
-    
+    if (teamSortValue === 'costDesc') return costB - costA; if (teamSortValue === 'costAsc') return costA - costB;
     return b.pullValue - a.pullValue;
   });
-  
   grid.innerHTML = indexed.map((r) => {
     const subDps = Array.isArray(r.subDps) ? r.subDps.join(', ') : (r.subDps || '—'); const support = Array.isArray(r.support) ? r.support.join(', ') : (r.support || '—'); const pctVal = pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2);
     let imgHtml = ''; if (r.members && r.members.length > 0) { imgHtml = r.members.map(m => `<div class="team-image-slot" title="${m.name}"><img src="${m.img}" onerror="this.src='${DEFAULT_AVATAR}'"></div>`).join(''); } else { imgHtml = `<div class="team-image-slot"><img src="${DEFAULT_AVATAR}"></div>`; }
@@ -740,89 +683,33 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
   const fmt2 = (arr) => arr.map(m => `${m.name} ${m.eido}${m.sign}`); const allMembers = [...mainDpsSlots, ...subDpsSlots, ...supportSlots, ...sustainSlots];
   const { costStr, totalPV } = computeTeamCostAndPV(allMembers);
   if (!DATA.team) DATA.team = [];
-  
   DATA.team.push({ archetype: fd.get('archetype').trim(), mainDps: fmt2(mainDpsSlots).join(', ') || '', subDps: fmt2(subDpsSlots).join(', ') || '', support: fmt2(supportSlots).join(', ') || '', sustain: fmt2(sustainSlots).join(', ') || '', cost: costStr, pullValue: totalPV, members: allMembers });
   saveWorkingData(); renderAll(); e.target.reset(); initDateInputs();
-  
   document.querySelectorAll('.slot-preview').forEach(img => img.src = DEFAULT_AVATAR);
   ['subDps','support'].forEach(role => { const slotDiv = document.getElementById('slot-' + role); const rows = slotDiv.querySelectorAll('.slot-row'); rows.forEach((row, i) => { if (i > 0) row.remove(); }); slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = ''); });
   ['mainDps','sustain'].forEach(role => { const slotDiv = document.getElementById('slot-' + role); slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = ''); });
   document.getElementById('team-cost-preview').value = ''; document.getElementById('team-pv-preview').value = ''; populateSlotDropdowns();
-  
   document.getElementById('btnSubmitTeam').textContent = "+ Save Team";
 });
 
-// FITUR DUPLIKAT DAN EDIT TIM
-window.dupTeam = function(idx) {
-  const team = DATA.team[idx];
-  DATA.team.push(JSON.parse(JSON.stringify(team))); // Duplicate murni
-  saveWorkingData();
-  renderAll();
-}
-
+window.dupTeam = function(idx) { const team = DATA.team[idx]; DATA.team.push(JSON.parse(JSON.stringify(team))); saveWorkingData(); renderAll(); }
 window.editTeam = function(idx) {
   const team = DATA.team[idx];
-  
-  const parseRole = (str) => str.split(', ').filter(Boolean).map(s => { 
-      const lastSpace = s.lastIndexOf(' E');
-      if (lastSpace !== -1) {
-         const name = s.substring(0, lastSpace);
-         const eido = s.substring(lastSpace + 1, lastSpace + 3);
-         const sign = s.substring(lastSpace + 3, lastSpace + 5);
-         return { name, eido, sign };
-      }
-      return null;
-  }).filter(Boolean);
-
-  const parsedMain = parseRole(team.mainDps);
-  const parsedSub = parseRole(team.subDps);
-  const parsedSup = parseRole(team.support);
-  const parsedSus = parseRole(team.sustain);
-
+  const parseRole = (str) => str.split(', ').filter(Boolean).map(s => { const lastSpace = s.lastIndexOf(' E'); if (lastSpace !== -1) { return { name: s.substring(0, lastSpace), eido: s.substring(lastSpace + 1, lastSpace + 3), sign: s.substring(lastSpace + 3, lastSpace + 5) }; } return null; }).filter(Boolean);
   const populateRole = (roleName, parsedArr) => {
-    const slotDiv = document.getElementById('slot-' + roleName);
-    const rows = slotDiv.querySelectorAll('.slot-row');
-    rows.forEach((row, i) => { if (i > 0) row.remove(); }); 
-
+    const slotDiv = document.getElementById('slot-' + roleName); const rows = slotDiv.querySelectorAll('.slot-row'); rows.forEach((row, i) => { if (i > 0) row.remove(); }); 
     parsedArr.forEach((p, i) => {
-       if (i > 0) {
-           const wrapper = document.createElement('div'); 
-           wrapper.innerHTML = slotTemplate(roleName, true);
-           slotDiv.appendChild(wrapper.firstElementChild); 
-       }
-       const allRows = slotDiv.querySelectorAll('.slot-row');
-       const currentRow = allRows[i];
-       currentRow.querySelector('.slot-name').value = p.name;
-       currentRow.querySelector('.slot-eidolon').value = p.eido;
-       currentRow.querySelector('.slot-sign').value = p.sign;
-       
-       const evt = new Event('change', { bubbles: true });
-       currentRow.querySelector('.slot-name').dispatchEvent(evt);
+       if (i > 0) { const wrapper = document.createElement('div'); wrapper.innerHTML = slotTemplate(roleName, true); slotDiv.appendChild(wrapper.firstElementChild); }
+       const currentRow = slotDiv.querySelectorAll('.slot-row')[i]; currentRow.querySelector('.slot-name').value = p.name; currentRow.querySelector('.slot-eidolon').value = p.eido; currentRow.querySelector('.slot-sign').value = p.sign;
+       currentRow.querySelector('.slot-name').dispatchEvent(new Event('change', { bubbles: true }));
     });
-    if(parsedArr.length === 0) {
-       const row = slotDiv.querySelector('.slot-row');
-       row.querySelector('.slot-name').value = "";
-       row.querySelector('.slot-eidolon').value = "E0";
-       row.querySelector('.slot-sign').value = "S0";
-       row.querySelector('.slot-preview').src = DEFAULT_AVATAR;
-    }
+    if(parsedArr.length === 0) { const row = slotDiv.querySelector('.slot-row'); row.querySelector('.slot-name').value = ""; row.querySelector('.slot-eidolon').value = "E0"; row.querySelector('.slot-sign').value = "S0"; row.querySelector('.slot-preview').src = DEFAULT_AVATAR; }
   };
-
-  populateRole('mainDps', parsedMain);
-  populateRole('subDps', parsedSub);
-  populateRole('support', parsedSup);
-  populateRole('sustain', parsedSus);
-
+  populateRole('mainDps', parseRole(team.mainDps)); populateRole('subDps', parseRole(team.subDps)); populateRole('support', parseRole(team.support)); populateRole('sustain', parseRole(team.sustain));
   document.getElementById('form-team').elements['archetype'].value = team.archetype;
-  
-  DATA.team.splice(idx, 1);
-  saveWorkingData();
-  renderAll(); 
-  
-  document.getElementById('btnSubmitTeam').textContent = "✓ Update Team";
-  document.getElementById('form-team').scrollIntoView({ behavior: 'smooth' });
+  DATA.team.splice(idx, 1); saveWorkingData(); renderAll(); 
+  document.getElementById('btnSubmitTeam').textContent = "✓ Update Team"; document.getElementById('form-team').scrollIntoView({ behavior: 'smooth' });
 }
-
 
 // ============ ROSTER ============
 let rosterFilter = 'all'; let rosterSortValue = 'pullValueDesc';
@@ -831,19 +718,10 @@ document.getElementById('rosterSortSelect')?.addEventListener('change', (e) => {
 function getRosterRows() {
   let rows = (DATA.roster||[]).map((r, idx) => ({ ...r, _idx: idx }));
   if (rosterFilter === 'Limited') rows = rows.filter(r => r.source === 'Limited'); else if (rosterFilter === 'Standard') rows = rows.filter(r => r.source === 'Standard'); else if (rosterFilter === 'other') rows = rows.filter(r => r.source !== 'Limited' && r.source !== 'Standard');
-  
   rows.sort((a, b) => {
-    if (a.isOwned !== b.isOwned) {
-        return a.isOwned ? -1 : 1;
-    }
-
+    if (a.isOwned !== b.isOwned) { return a.isOwned ? -1 : 1; }
     if (rosterSortValue === 'nameAsc') return a.name.localeCompare(b.name); if (rosterSortValue === 'nameDesc') return b.name.localeCompare(a.name);
-    
-    const ea = parseInt(a.eidolon.replace('E','').replace('No','0')) || 0; 
-    const sa = parseInt(a.signature.replace('S','')) || 0; 
-    const eb = parseInt(b.eidolon.replace('E','').replace('No','0')) || 0; 
-    const sb = parseInt(b.signature.replace('S','')) || 0;
-    
+    const ea = parseInt(a.eidolon.replace('E','').replace('No','0')) || 0; const sa = parseInt(a.signature.replace('S','')) || 0; const eb = parseInt(b.eidolon.replace('E','').replace('No','0')) || 0; const sb = parseInt(b.signature.replace('S','')) || 0;
     if (rosterSortValue === 'eidolonDesc') { if (eb !== ea) return eb - ea; return b.totalPullValue - a.totalPullValue; }
     if (rosterSortValue === 'costDesc') { const costA = ea + sa; const costB = eb + sb; if (costB !== costA) return costB - costA; return b.totalPullValue - a.totalPullValue; }
     return b.totalPullValue - a.totalPullValue;
@@ -858,55 +736,27 @@ function renderRoster() {
     const eidoCls = r.eidolon === 'No' ? '' : 'style="color:var(--gold-soft);font-weight:700"'; 
     const signCls = r.signature === 'S0' ? '' : 'style="color:var(--cyan);font-weight:700"'; 
     const imgSrc = r.img || DEFAULT_AVATAR;
-    
     const unownedCls = r.isOwned ? '' : 'unowned';
     const notOwnedBadge = r.isOwned ? '' : `<div class="unowned-tag">NOT OWNED</div>`;
-    
     const tagClass = r.source.replace(/\s+/g, '');
     
     return `<div class="roster-card searchable-item ${unownedCls}" data-idx="${r._idx}">
-        <div class="roster-img-wrap">
-            <img src="${imgSrc}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
-            ${notOwnedBadge}
-            <div class="tag ${tagClass} roster-type-tag">${r.source}</div>
-            <button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button>
-        </div>
-        <div class="roster-info">
-            <div class="roster-name" title="${r.name}">${r.name}</div>
-            <div class="roster-stats"><span>Eidolon: <span ${eidoCls}>${r.eidolon}</span></span><span>Sign: <span ${signCls}>${r.signature}</span></span></div>
-            <div class="roster-stats" style="margin-top: 4px;"><span>PV: <span style="color:var(--text)">${fmt(r.pullValueEidolon, 0)}</span></span><span>PV: <span style="color:var(--text)">${fmt(r.pullValueSignature, 0)}</span></span></div>
-            <div class="roster-stats" style="margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;"><span>Total Pull Value: <span style="color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</span></span></div>
-        </div>
+        <div class="roster-img-wrap"><img src="${imgSrc}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">${notOwnedBadge}<div class="tag ${tagClass} roster-type-tag">${r.source}</div><button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button></div>
+        <div class="roster-info"><div class="roster-name" title="${r.name}">${r.name}</div><div class="roster-stats"><span>Eidolon: <span ${eidoCls}>${r.eidolon}</span></span><span>Sign: <span ${signCls}>${r.signature}</span></span></div><div class="roster-stats" style="margin-top: 4px;"><span>PV: <span style="color:var(--text)">${fmt(r.pullValueEidolon, 0)}</span></span><span>PV: <span style="color:var(--text)">${fmt(r.pullValueSignature, 0)}</span></span></div><div class="roster-stats" style="margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;"><span>Total Pull Value: <span style="color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</span></span></div></div>
     </div>`;
   }).join('');
   const dl = document.getElementById('charNameList'); if (dl) dl.innerHTML = getAllCharNames().map(n => `<option value="${n}">`).join('');
 }
-
-document.getElementById('rosterTabs').addEventListener('click', (e) => { 
-  const btn = e.target.closest('.tab'); if (!btn) return; 
-  document.querySelectorAll('#rosterTabs .tab').forEach(t => t.classList.remove('active')); 
-  btn.classList.add('active'); 
-  rosterFilter = btn.dataset.filter; 
-  renderRoster(); 
-});
-
+document.getElementById('rosterTabs').addEventListener('click', (e) => { const btn = e.target.closest('.tab'); if (!btn) return; document.querySelectorAll('#rosterTabs .tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); rosterFilter = btn.dataset.filter; renderRoster(); });
 document.getElementById('form-character').addEventListener('submit', (e) => {
   e.preventDefault(); const fd = new FormData(e.target); const name = fd.get('name').trim(); const src = fd.get('source');
   const imgSrc = document.getElementById('charFormImg').src; const isDefault = imgSrc.includes('viewBox'); 
   const existing = (DATA.roster||[]).find(r => normName(r.name) === normName(name));
-  
-  if (existing) { 
-      existing.source = src; 
-      if (!isDefault) existing.img = imgSrc; 
-  } else { 
-      if(!DATA.roster) DATA.roster = []; 
-      DATA.roster.push({ name, source: src, img: isDefault ? null : imgSrc, eidolon: 'No', signature: 'S0', pullValueEidolon: 0, pullValueSignature: 0, totalPullValue: 0, pullPercent: 0, isOwned: true }); 
-  }
+  if (existing) { existing.source = src; if (!isDefault) existing.img = imgSrc; } else { if(!DATA.roster) DATA.roster = []; DATA.roster.push({ name, source: src, img: isDefault ? null : imgSrc, eidolon: 'No', signature: 'S0', pullValueEidolon: 0, pullValueSignature: 0, totalPullValue: 0, pullPercent: 0, isOwned: true }); }
   recomputeRosterPercent(); saveWorkingData(); renderAll(); e.target.reset(); document.getElementById('charFormImg').src = DEFAULT_AVATAR; 
 });
 
-
-// ============ STELLAR JADE ============
+// ============ STELLAR JADE & MANAGEMENT ============
 function renderStellarJade() {
   const rows = DATA.stellarJade || []; const totalJade = rows.reduce((s, r) => s + (r.jade || 0), 0); const totalPasses= rows.reduce((s, r) => s + (r.passes|| 0), 0); const totalPulls = totalJade / 160 + totalPasses;
   document.getElementById('jadeStats').innerHTML = [{ label: 'Total Stellar Jade', value: fmt(totalJade, 0) }, { label: 'Total Star Rail Passes',value: fmt(totalPasses, 0) }, { label: 'Pulls Available', value: fmt(totalPulls, 1) }, { label: 'Logged Entries', value: fmt(rows.length, 0) }].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
@@ -915,55 +765,12 @@ function renderStellarJade() {
   document.getElementById('versionGrid').innerHTML = relevantVersions.length ? relevantVersions.map(v => { const d = versionTotals[v.label] || { jade: 0, passes: 0 }; const pulls = d.jade / 160 + d.passes; const isActive = today >= v.start && today < v.end; return `<div class="version-card ${isActive ? 'version-active' : ''}"><div class="version-label">Version ${v.label}</div><div class="version-dates">${formatDate(v.start)} – ${formatDate(v.end)}</div><div class="version-jade">${fmt(d.jade,0)} <span class="vunit">SJ</span></div><div class="version-passes">${fmt(d.passes,0)} <span class="vunit">Pass</span></div><div class="version-pulls">${fmt(pulls,1)} pulls</div></div>`; }).join('') : `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`;
   renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','Stellar Jade','Star Rail Pass'], r => [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), r.activity, fmt(r.jade,0), fmt(r.passes,0)], (a, b) => b.r.date.localeCompare(a.r.date));
 }
-document.getElementById('form-stellarjade').addEventListener('submit', (e) => {
-  e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = [];
-  DATA.stellarJade.push({ date: fd.get('date'), activity: fd.get('activity').trim(), jade: Number(fd.get('jade'))||0, passes: Number(fd.get('passes'))||0 });
-  sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs();
-});
+document.getElementById('form-stellarjade').addEventListener('submit', (e) => { e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; DATA.stellarJade.push({ date: fd.get('date'), activity: fd.get('activity').trim(), jade: Number(fd.get('jade'))||0, passes: Number(fd.get('passes'))||0 }); sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs(); });
+document.querySelectorAll('.table-filter').forEach(input => { input.addEventListener('input', (e) => { const term = e.target.value.toLowerCase(); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return; if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } } else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } }); });
+document.addEventListener('click', (e) => { if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { const th = e.target; const table = th.closest('table'); const tbody = table.querySelector('tbody'); const idx = Array.from(th.parentNode.children).indexOf(th); const isAsc = th.classList.contains('asc'); table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); th.classList.add(isAsc ? 'desc' : 'asc'); const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); rows.sort((a, b) => { const aText = a.children[idx].textContent.trim(); const bText = b.children[idx].textContent.trim(); const aNum = parseFloat(aText.replace(/,/g, '')); const bNum = parseFloat(bText.replace(/,/g, '')); if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum; return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); }); tbody.append(...rows); } });
+document.getElementById('btnDownloadJson')?.addEventListener('click', () => { const content = JSON.stringify(DATA, null, 2); const blob = new Blob([content], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+document.getElementById('uploadJsonFile')?.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { try { const text = reader.result.trim(); let parsed; if (text.startsWith('{')) { parsed = JSON.parse(text); } else { const m = text.match(/const\s+HSR_DATA\s*=\s*(\{[\s\S]*\})\s*;?\s*$/); if (!m) throw new Error('Unrecognized file format.'); parsed = JSON.parse(m[1]); } ['limited','standard','freebies','roster','priority','team','stellarJade'].forEach(k => { if (!parsed[k]) parsed[k] = []; }); DATA = parsed; saveWorkingData(); renderAll(); alert('Data loaded successfully from file!'); } catch (err) { alert('Failed to load file.\nError: ' + err.message); } finally { e.target.value = ''; } }; reader.readAsText(file); });
+document.getElementById('btnResetData')?.addEventListener('click', () => { if (!confirm('Clear all data? This action cannot be undone.')) return; localStorage.removeItem(STORAGE_KEY); DATA = { limited: [], standard: [], freebies: [], roster: [], priority: [], team: [], stellarJade: [] }; saveWorkingData(); renderAll(); alert('Data cleared.'); });
 
-// ============ Table & Grid Filters ============
-document.querySelectorAll('.table-filter').forEach(input => {
-  input.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase(); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return;
-    if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } } 
-    else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); }
-  });
-});
-document.addEventListener('click', (e) => {
-  if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) {
-    const th = e.target; const table = th.closest('table'); const tbody = table.querySelector('tbody'); const idx = Array.from(th.parentNode.children).indexOf(th); const isAsc = th.classList.contains('asc');
-    table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); th.classList.add(isAsc ? 'desc' : 'asc');
-    const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)'));
-    rows.sort((a, b) => { const aText = a.children[idx].textContent.trim(); const bText = b.children[idx].textContent.trim(); const aNum = parseFloat(aText.replace(/,/g, '')); const bNum = parseFloat(bText.replace(/,/g, '')); if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum; return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); });
-    tbody.append(...rows);
-  }
-});
-
-// ============ DATA MANAGEMENT ============
-document.getElementById('btnDownloadJson')?.addEventListener('click', () => {
-  const content = JSON.stringify(DATA, null, 2); const blob = new Blob([content], { type: 'application/json' }); const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-});
-document.getElementById('uploadJsonFile')?.addEventListener('change', (e) => {
-  const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const text = reader.result.trim(); let parsed;
-      if (text.startsWith('{')) { parsed = JSON.parse(text); } else { const m = text.match(/const\s+HSR_DATA\s*=\s*(\{[\s\S]*\})\s*;?\s*$/); if (!m) throw new Error('Unrecognized file format. Make sure it is a valid JSON backup.'); parsed = JSON.parse(m[1]); }
-      ['limited','standard','freebies','roster','priority','team','stellarJade'].forEach(k => { if (!parsed[k]) parsed[k] = []; });
-      DATA = parsed; saveWorkingData(); renderAll(); alert('Data loaded successfully from file!');
-    } catch (err) { alert('Failed to load file.\nError: ' + err.message); } finally { e.target.value = ''; }
-  }; reader.readAsText(file);
-});
-document.getElementById('btnResetData')?.addEventListener('click', () => {
-  if (!confirm('Clear all data? This action cannot be undone.')) return; localStorage.removeItem(STORAGE_KEY);
-  DATA = { limited: [], standard: [], freebies: [], roster: [], priority: [], team: [], stellarJade: [] }; saveWorkingData(); renderAll(); alert('Data cleared.');
-});
-
-// ============ Init ============
-function renderAll() {
-  computeRosterFromHistory(); buildOverview(); renderLimited(); renderManageLimited(); renderStandard(); renderManageStandard();
-  renderFreebies(); renderManageFreebies(); renderCalc(); renderPriority(); renderTeam(); renderRoster(); renderStellarJade(); populateSlotDropdowns();
-}
-initDateInputs();
-renderAll();
+function renderAll() { computeRosterFromHistory(); buildOverview(); renderLimited(); renderManageLimited(); renderStandard(); renderManageStandard(); renderFreebies(); renderManageFreebies(); renderCalc(); renderPriority(); renderTeam(); renderRoster(); renderStellarJade(); populateSlotDropdowns(); }
+initDateInputs(); renderAll();
