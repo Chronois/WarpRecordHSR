@@ -14,14 +14,14 @@
 <div class="stars" id="stars"></div>
 
 <nav class="main-nav" id="mainNav" aria-label="Sheets">
-  <button class="nav-item active" data-page="limitedhistory">LimitedHistory<span class="nav-caret">▾</span></button>
-  <button class="nav-item" data-page="standardhistory">StandardHistory<span class="nav-caret">▾</span></button>
-  <button class="nav-item" data-page="freebies">Freebies<span class="nav-caret">▾</span></button>
-  <button class="nav-item" data-page="calc">Calc<span class="nav-caret">▾</span></button>
-  <button class="nav-item" data-page="priority">Priority<span class="nav-caret">▾</span></button>
-  <button class="nav-item" data-page="team">Team<span class="nav-caret">▾</span></button>
-  <button class="nav-item" data-page="character">Character<span class="nav-caret">▾</span></button>
-  <button class="nav-item" data-page="stellarjade">StellarJade<span class="nav-caret">▾</span></button>
+  <button class="nav-item active" data-page="limitedhistory">LimitedHistory</button>
+  <button class="nav-item" data-page="standardhistory">StandardHistory</button>
+  <button class="nav-item" data-page="freebies">Freebies</button>
+  <button class="nav-item" data-page="calc">Calc</button>
+  <button class="nav-item" data-page="priority">Priority</button>
+  <button class="nav-item" data-page="team">Team</button>
+  <button class="nav-item" data-page="character">Character</button>
+  <button class="nav-item" data-page="stellarjade">StellarJade</button>
 </nav>
 
 <div class="util-bar">
@@ -289,46 +289,86 @@
         <span class="eyebrow">Compositions</span>
         <h2>Teams You've Built</h2>
       </div>
-      <form class="manage-form" id="form-team" data-section="team">
-        <div class="field field-grow">
+
+      <form class="manage-form team-form" id="form-team" data-section="team">
+        <!-- Row 1: Archetype -->
+        <div class="field field-grow" style="flex-basis:100%">
           <label>Archetype</label>
           <input type="text" name="archetype" required placeholder="e.g. Break">
         </div>
-        <div class="field field-grow">
-          <label>Main DPS</label>
-          <input type="text" name="mainDps" placeholder="e.g. Firefly E1S1">
+
+        <!-- Main DPS -->
+        <div class="team-slot-group">
+          <div class="team-slot-label">Main DPS</div>
+          <div class="team-slot" id="slot-mainDps">
+            <div class="slot-row">
+              <select class="slot-name" data-role="mainDps"><option value="">— none —</option></select>
+              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
+              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
+            </div>
+          </div>
         </div>
-        <div class="field field-grow">
-          <label>Sub DPS</label>
-          <input type="text" name="subDps" placeholder="e.g. Kafka E2S1">
+
+        <!-- Sub DPS (multi) -->
+        <div class="team-slot-group">
+          <div class="team-slot-label">Sub DPS <button type="button" class="btn-add-slot" data-role="subDps">+</button></div>
+          <div class="team-slot" id="slot-subDps">
+            <div class="slot-row">
+              <select class="slot-name" data-role="subDps"><option value="">— none —</option></select>
+              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
+              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
+              <button type="button" class="btn-remove-slot">✕</button>
+            </div>
+          </div>
         </div>
-        <div class="field field-grow">
-          <label>Support</label>
-          <input type="text" name="support" placeholder="e.g. Ruan Mei E2S0">
+
+        <!-- Support (multi) -->
+        <div class="team-slot-group">
+          <div class="team-slot-label">Support <button type="button" class="btn-add-slot" data-role="support">+</button></div>
+          <div class="team-slot" id="slot-support">
+            <div class="slot-row">
+              <select class="slot-name" data-role="support"><option value="">— none —</option></select>
+              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
+              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
+              <button type="button" class="btn-remove-slot">✕</button>
+            </div>
+          </div>
         </div>
-        <div class="field field-grow">
-          <label>Sustain</label>
-          <input type="text" name="sustain" placeholder="e.g. Lingsha E0S0">
+
+        <!-- Sustain -->
+        <div class="team-slot-group">
+          <div class="team-slot-label">Sustain</div>
+          <div class="team-slot" id="slot-sustain">
+            <div class="slot-row">
+              <select class="slot-name" data-role="sustain"><option value="">— none —</option></select>
+              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
+              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
+            </div>
+          </div>
         </div>
+
+        <!-- Cost & Pull Value (auto) -->
         <div class="field field-grow">
-          <label>Cost</label>
-          <input type="text" name="cost" required placeholder="e.g. 6 Limited + 2 Freebies">
+          <label>Cost (Auto)</label>
+          <input type="text" id="team-cost-preview" readonly placeholder="Will be computed..." style="opacity:0.6;cursor:default">
         </div>
         <div class="field field-narrow">
-          <label>Pull Value</label>
-          <input type="number" name="pullValue" min="0" required>
+          <label>Pull Value (Auto)</label>
+          <input type="number" id="team-pv-preview" readonly placeholder="—" style="opacity:0.6;cursor:default">
         </div>
-        <button type="submit" class="btn-add">+ Add Team</button>
+
+        <button type="submit" class="btn-add" style="align-self:flex-end">+ Add Team</button>
       </form>
+
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-team"><thead></thead><tbody></tbody></table>
       </div>
-      <p class="track-hint">% of Total Pulls is each team's Pull Value against every Stellar Jade spent on the LimitedHistory banner so far.</p>
+      <p class="track-hint">% of Total Pulls is each team's Pull Value against every warp spent on the LimitedHistory banner so far.</p>
     </section>
   </main>
 </div>
 
-<!-- CHARACTER -->
+<!-- CHARACTER (auto-computed) -->
 <div class="page" id="page-character" hidden>
   <main>
     <section class="section">
@@ -342,16 +382,19 @@
           <button class="tab" data-filter="other">Other</button>
         </div>
       </div>
+      <p class="track-hint" style="margin-bottom:16px">Pull Value &amp; Eidolon/Signature are computed automatically from LimitedHistory, StandardHistory, and Freebies. Use the form below to set each character's <em>type</em> (Limited / Standard / etc.) — that is the only field you need to fill in.</p>
       <div class="roster-table-wrap">
         <table class="roster-table" id="rosterTable">
           <thead>
             <tr>
               <th data-sort="name">Name</th>
-              <th data-sort="source">Source</th>
+              <th data-sort="source">Type</th>
               <th data-sort="eidolon">Eidolon</th>
-              <th data-sort="signature">Signature</th>
-              <th data-sort="totalPullValue">Pull Value</th>
-              <th data-sort="pullPercent">% of Total</th>
+              <th data-sort="signature">Sign</th>
+              <th data-sort="pullValueEidolon">Pull (Eidolon)</th>
+              <th data-sort="pullValueSignature">Pull (Sign)</th>
+              <th data-sort="totalPullValue">Total Pull</th>
+              <th data-sort="pullPercent">Pull %</th>
               <th></th>
             </tr>
           </thead>
@@ -362,41 +405,25 @@
 
     <section class="section">
       <div class="section-head">
-        <span class="eyebrow">Log a Character</span>
-        <h2>Add to Character</h2>
+        <span class="eyebrow">Set Character Type</span>
+        <h2>Add / Update Character Type</h2>
       </div>
       <form class="manage-form" id="form-character" data-section="roster">
         <div class="field field-grow">
           <label>Name</label>
-          <input type="text" name="name" required placeholder="e.g. Feixiao">
+          <input type="text" name="name" required placeholder="e.g. Feixiao" list="charNameList">
+          <datalist id="charNameList"></datalist>
         </div>
         <div class="field field-grow">
-          <label>Source</label>
-          <input type="text" name="source" required placeholder="Limited / Standard" list="sourceOptions">
-          <datalist id="sourceOptions">
-            <option value="Limited">
-            <option value="Standard">
-            <option value="Celestial Invitation">
-            <option value="Golden Companion Spirit">
-          </datalist>
+          <label>Type</label>
+          <select name="source" required>
+            <option value="Limited">Limited</option>
+            <option value="Standard">Standard</option>
+            <option value="Celestial Invitation">Celestial Invitation</option>
+            <option value="Golden Companion Spirit">Golden Companion Spirit</option>
+          </select>
         </div>
-        <div class="field field-narrow">
-          <label>Eidolon</label>
-          <input type="text" name="eidolon" required placeholder="E0 / NoE">
-        </div>
-        <div class="field field-narrow">
-          <label>Signature</label>
-          <input type="text" name="signature" required placeholder="S0 / NoS">
-        </div>
-        <div class="field field-narrow">
-          <label>Eidolon Value</label>
-          <input type="number" name="pullValueEidolon" min="0" step="1" value="0">
-        </div>
-        <div class="field field-narrow">
-          <label>Signature Value</label>
-          <input type="number" name="pullValueSignature" min="0" step="1" value="0">
-        </div>
-        <button type="submit" class="btn-add">+ Add Character</button>
+        <button type="submit" class="btn-add">+ Set Type</button>
       </form>
     </section>
   </main>
@@ -411,6 +438,15 @@
         <h2>Stellar Jade &amp; Passes</h2>
       </div>
       <div class="banner-stats" id="jadeStats"></div>
+    </section>
+
+    <!-- Version summary -->
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">By Version</span>
+        <h2>Perolehan per Versi</h2>
+      </div>
+      <div class="version-grid" id="versionGrid"></div>
     </section>
 
     <section class="section">
