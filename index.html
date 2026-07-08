@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-  /* Tambahan Style Ekstra agar sesuai permintaan tanpa merusak CSS lama */
+  /* Tambahan CSS untuk Filter dan Team Cards */
   .filter-wrap { margin-bottom: 16px; }
   .filter-input {
     background: var(--bg); border: 1px solid var(--border); color: var(--text);
@@ -30,7 +30,7 @@
   .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
   .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
   .team-image-row { display: flex; height: 90px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
-  .team-image-slot { flex: 1; border-right: 1px solid var(--border); display: flex; justify-content: center; align-items: center; overflow: hidden; }
+  .team-image-slot { flex: 1; border-right: 1px solid var(--border); display: flex; justify-content: center; align-items: center; overflow: hidden; background: #191d40; }
   .team-image-slot:last-child { border-right: none; }
   .team-image-slot img { width: 100%; height: 100%; object-fit: cover; }
   .team-card-content { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
@@ -39,6 +39,19 @@
   .tc-val { color: var(--text); font-weight: 600; text-align: right; }
   .tc-footer { margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.05); display: flex; justify-content: space-between; align-items: center; }
   .tc-pv { font-weight: 700; color: var(--gold-soft); font-size: 14px; }
+
+  /* Slot Upload & Selector Style */
+  .slot-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
+  .slot-img-upload { width: 60px; height: 60px; background: var(--surface-2); border-radius: 8px; border: 1px dashed var(--text-dim); overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer; }
+  .slot-preview { width:100%; height:100%; object-fit:cover; transition: 0.2s; }
+  .slot-file { position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0; cursor: pointer; }
+  .slot-inputs { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .slot-top, .slot-bottom { display: flex; gap: 8px; align-items: center; }
+  .slot-name, .slot-eidolon, .slot-sign { padding: 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 13px; }
+  .slot-name { flex: 1; min-width: 120px; }
+  .slot-eidolon { width: 70px; }
+  .slot-sign { width: 80px; }
+  .btn-remove-slot { padding: 6px 12px; border-radius: 6px; background: rgba(226,128,125,0.1); border: 1px solid var(--loss); color: var(--loss); cursor:pointer; font-size: 11px; font-weight:bold; }
 </style>
 </head>
 <body>
@@ -79,7 +92,6 @@
   </div>
 </header>
 
-<!-- LIMITED HISTORY -->
 <div class="page" id="page-limitedhistory">
   <main>
     <section class="section">
@@ -146,7 +158,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
-      <div class="filter-wrap"><input type="text" class="filter-input" data-table="manageTable-limited" placeholder="Filter records..."></div>
+      <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-limited" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-limited"><thead></thead><tbody></tbody></table>
       </div>
@@ -154,7 +166,6 @@
   </main>
 </div>
 
-<!-- STANDARD HISTORY -->
 <div class="page" id="page-standardhistory" hidden>
   <main>
     <section class="section">
@@ -195,7 +206,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
-      <div class="filter-wrap"><input type="text" class="filter-input" data-table="manageTable-standard" placeholder="Filter records..."></div>
+      <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-standard" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-standard"><thead></thead><tbody></tbody></table>
       </div>
@@ -203,7 +214,6 @@
   </main>
 </div>
 
-<!-- FREEBIES -->
 <div class="page" id="page-freebies" hidden>
   <main>
     <section class="section">
@@ -241,7 +251,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Reward</button>
       </form>
-      <div class="filter-wrap"><input type="text" class="filter-input" data-table="manageTable-freebies" placeholder="Filter records..."></div>
+      <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-freebies" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-freebies"><thead></thead><tbody></tbody></table>
       </div>
@@ -249,7 +259,6 @@
   </main>
 </div>
 
-<!-- CALC -->
 <div class="page" id="page-calc" hidden>
   <main>
     <section class="section">
@@ -269,7 +278,6 @@
   </main>
 </div>
 
-<!-- PRIORITY -->
 <div class="page" id="page-priority" hidden>
   <main>
     <section class="section">
@@ -299,7 +307,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add to Wishlist</button>
       </form>
-      <div class="filter-wrap"><input type="text" class="filter-input" data-table="manageTable-priority" placeholder="Filter records..."></div>
+      <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-priority" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-priority"><thead></thead><tbody></tbody></table>
       </div>
@@ -307,7 +315,6 @@
   </main>
 </div>
 
-<!-- TEAM -->
 <div class="page" id="page-team" hidden>
   <main>
     <section class="section">
@@ -317,37 +324,111 @@
       </div>
 
       <form class="manage-form team-form" id="form-team" data-section="team">
-        <!-- Row 1: Archetype -->
         <div class="field field-grow" style="flex-basis:100%">
           <label>Archetype</label>
           <input type="text" name="archetype" required placeholder="e.g. Break">
         </div>
 
-        <!-- Main DPS -->
         <div class="team-slot-group" style="flex-basis: 100%;">
           <div class="team-slot-label" style="margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; color: var(--nebula);">Main DPS</div>
-          <div class="team-slot" id="slot-mainDps"></div>
+          <div class="team-slot" id="slot-mainDps">
+             <div class="slot-row">
+               <div class="slot-img-upload">
+                  <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
+                  <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+               </div>
+               <div class="slot-inputs">
+                  <div class="slot-top">
+                    <select class="slot-name" data-role="mainDps"><option value="">— none —</option></select>
+                    <select class="slot-eidolon">
+                       <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
+                    </select>
+                  </div>
+                  <div class="slot-bottom">
+                    <select class="slot-sign">
+                       <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
+                    </select>
+                  </div>
+               </div>
+             </div>
+          </div>
         </div>
 
-        <!-- Sub DPS (multi) -->
         <div class="team-slot-group" style="flex-basis: 100%;">
           <div class="team-slot-label" style="margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; color: var(--nebula);">Sub DPS <button type="button" class="btn-add-slot" data-role="subDps">+</button></div>
-          <div class="team-slot" id="slot-subDps"></div>
+          <div class="team-slot" id="slot-subDps">
+             <div class="slot-row">
+               <div class="slot-img-upload">
+                  <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
+                  <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+               </div>
+               <div class="slot-inputs">
+                  <div class="slot-top">
+                    <select class="slot-name" data-role="subDps"><option value="">— none —</option></select>
+                    <select class="slot-eidolon">
+                       <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
+                    </select>
+                  </div>
+                  <div class="slot-bottom">
+                    <select class="slot-sign">
+                       <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
+                    </select>
+                  </div>
+               </div>
+             </div>
+          </div>
         </div>
 
-        <!-- Support (multi) -->
         <div class="team-slot-group" style="flex-basis: 100%;">
           <div class="team-slot-label" style="margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; color: var(--nebula);">Support <button type="button" class="btn-add-slot" data-role="support">+</button></div>
-          <div class="team-slot" id="slot-support"></div>
+          <div class="team-slot" id="slot-support">
+             <div class="slot-row">
+               <div class="slot-img-upload">
+                  <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
+                  <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+               </div>
+               <div class="slot-inputs">
+                  <div class="slot-top">
+                    <select class="slot-name" data-role="support"><option value="">— none —</option></select>
+                    <select class="slot-eidolon">
+                       <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
+                    </select>
+                  </div>
+                  <div class="slot-bottom">
+                    <select class="slot-sign">
+                       <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
+                    </select>
+                  </div>
+               </div>
+             </div>
+          </div>
         </div>
 
-        <!-- Sustain -->
         <div class="team-slot-group" style="flex-basis: 100%;">
           <div class="team-slot-label" style="margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; color: var(--nebula);">Sustain</div>
-          <div class="team-slot" id="slot-sustain"></div>
+          <div class="team-slot" id="slot-sustain">
+             <div class="slot-row">
+               <div class="slot-img-upload">
+                  <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
+                  <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+               </div>
+               <div class="slot-inputs">
+                  <div class="slot-top">
+                    <select class="slot-name" data-role="sustain"><option value="">— none —</option></select>
+                    <select class="slot-eidolon">
+                       <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
+                    </select>
+                  </div>
+                  <div class="slot-bottom">
+                    <select class="slot-sign">
+                       <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
+                    </select>
+                  </div>
+               </div>
+             </div>
+          </div>
         </div>
 
-        <!-- Cost & Pull Value (auto) -->
         <div class="field field-grow">
           <label>Cost (Auto)</label>
           <input type="text" id="team-cost-preview" readonly placeholder="Will be computed..." style="opacity:0.6;cursor:default">
@@ -360,14 +441,13 @@
         <button type="submit" class="btn-add" style="align-self:flex-end; flex-basis: 100%; margin-top: 10px;">+ Add Team</button>
       </form>
 
-      <div class="filter-wrap"><input type="text" class="filter-input" data-table="teamGrid" placeholder="Filter teams..."></div>
+      <div class="filter-wrap"><input type="text" class="table-filter" data-table="teamGrid" placeholder="Filter teams..."></div>
       <div class="team-grid" id="teamGrid"></div>
       <p class="track-hint">% of Total Pulls is each team's Pull Value against every warp spent on the Limited Pull banner so far.</p>
     </section>
   </main>
 </div>
 
-<!-- CHARACTER (auto-computed) -->
 <div class="page" id="page-character" hidden>
   <main>
     <section class="section">
@@ -382,7 +462,7 @@
         </div>
       </div>
       <p class="track-hint" style="margin-bottom:16px">Pull Value &amp; Eidolon/Signature are computed automatically from Limited Pull, Standard Pull, and Freebies. Use the form below to set each character's <em>type</em> (Limited / Standard / etc.) — that is the only field you need to fill in.</p>
-      <div class="filter-wrap"><input type="text" class="filter-input" data-table="rosterTable" placeholder="Filter records..."></div>
+      <div class="filter-wrap"><input type="text" class="table-filter" data-table="rosterTable" placeholder="Filter records..."></div>
       <div class="roster-table-wrap">
         <table class="roster-table" id="rosterTable">
           <thead>
@@ -429,7 +509,6 @@
   </main>
 </div>
 
-<!-- STELLAR JADE -->
 <div class="page" id="page-stellarjade" hidden>
   <main>
     <section class="section">
@@ -440,7 +519,6 @@
       <div class="banner-stats" id="jadeStats"></div>
     </section>
 
-    <!-- Version summary -->
     <section class="section">
       <div class="section-head">
         <span class="eyebrow">By Version</span>
@@ -492,7 +570,7 @@
         </div>
         <button type="submit" class="btn-add">+ Add Transaction</button>
       </form>
-      <div class="filter-wrap"><input type="text" class="filter-input" data-table="manageTable-stellarjade" placeholder="Filter records..."></div>
+      <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-stellarjade" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-stellarjade"><thead></thead><tbody></tbody></table>
       </div>
