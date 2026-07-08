@@ -38,7 +38,6 @@ function getVersionSchedule() {
   let curMajor = VERSION_START.major;
   let curMinor = VERSION_START.minor;
   
-  // Mencari versi awal (mundur 40 iterasi dari 4.3)
   for(let i=0; i < Math.abs(startIdx); i++) {
      if (curMinor === 0) {
          curMajor--;
@@ -48,7 +47,6 @@ function getVersionSchedule() {
      }
   }
   
-  // Build jadwal dari versi lama sampai 20 versi ke depan
   for (let i = startIdx; i <= 20; i++) {
     const v1Start = new Date(baseDate + i * VERSION_DAYS * 86400000);
     const v2Start = new Date(v1Start.getTime() + HALF_DAYS * 86400000);
@@ -69,7 +67,6 @@ function getVersionSchedule() {
       end:   vEnd.toISOString().split('T')[0],
     });
     
-    // Update versi (batas sampai x.8)
     if (curMinor >= 8) {
         curMajor++;
         curMinor = 0;
@@ -137,39 +134,20 @@ function saveWorkingData() {
   }
 }
 
-// Event Listener when profile dropdown is changed
-document.getElementById('profileSwitcher')?.addEventListener('change', (e) => {
-  CURRENT_PROFILE = e.target.value;
-  localStorage.setItem('hsr_current_profile', CURRENT_PROFILE);
-  DATA = loadWorkingData();
-  renderAll(); // Re-render the entire page with the new profile data
-});
+function recomputeDaysSince(rows) {
+  const groups = {};
+  rows.forEach(r => { (groups[r.category] = groups[r.category] || []).push(r); });
+  Object.values(groups).forEach(group => {
+    group.sort((a, b) => a.date.localeCompare(b.date));
+    let prevDate = null;
+    group.forEach(r => {
+      r.daysSince = prevDate === null ? 0 : daysBetween(r.date, prevDate);
+      prevDate = r.date;
+    });
+  });
+}
 
-// Update Reset function to only reset the currently active profile
-document.getElementById('btnReset').addEventListener('click', () => {
-  if (!confirm(`Reset data for profile "${CURRENT_PROFILE}"? All browser-saved changes for this profile will be deleted.`)) return;
-  localStorage.removeItem(getStorageKey());
-  DATA = typeof HSR_DATA !== 'undefined' ? JSON.parse(JSON.stringify(HSR_DATA)) : {};
-  saveWorkingData();
-  renderAll();
-});
-
-// Event Listener ketika dropdown profile diubah
-document.getElementById('profileSwitcher')?.addEventListener('change', (e) => {
-  CURRENT_PROFILE = e.target.value;
-  localStorage.setItem('hsr_current_profile', CURRENT_PROFILE);
-  DATA = loadWorkingData();
-  renderAll(); // Render ulang seluruh halaman dengan data profil baru
-});
-
-// Update fungsi Reset agar hanya mereset profil yang sedang aktif
-document.getElementById('btnReset').addEventListener('click', () => {
-  if (!confirm(`Reset data for profile "${CURRENT_PROFILE}"? All browser-saved changes for this profile will be deleted.`)) return;
-  localStorage.removeItem(getStorageKey());
-  DATA = typeof HSR_DATA !== 'undefined' ? JSON.parse(JSON.stringify(HSR_DATA)) : {};
-  saveWorkingData();
-  renderAll();
-});
+function sortByDate(rows) { rows.sort((a, b) => a.date.localeCompare(b.date)); }
 
 // ============ Global Delete Logic ============
 document.addEventListener('click', (e) => {
@@ -925,7 +903,6 @@ function getRosterRows() {
        if (costB !== costA) return costB - costA;
        return b.totalPullValue - a.totalPullValue;
     }
-    // Default: Pull Value Tertinggi
     return b.totalPullValue - a.totalPullValue;
   });
   return rows;
@@ -945,7 +922,6 @@ function renderRoster() {
     const signCls = r.signature === 'S0' ? '' : 'style="color:var(--cyan);font-weight:700"';
     const imgSrc = r.img || DEFAULT_AVATAR;
     
-    // 3. Tambahkan PV Eido, PV Sign, dan Total PV
     return `
       <div class="roster-card searchable-item" data-idx="${r._idx}">
         <div class="roster-img-wrap">
@@ -987,7 +963,6 @@ document.getElementById('rosterTabs').addEventListener('click', (e) => {
   renderRoster();
 });
 
-// Image Preview & Upload for Character form
 document.getElementById('charFileInput').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {
@@ -1073,6 +1048,7 @@ function renderStellarJade() {
     r => [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), r.activity, fmt(r.jade,0), fmt(r.passes,0)],
     (a, b) => b.r.date.localeCompare(a.r.date));
 }
+
 document.getElementById('form-stellarjade').addEventListener('submit', (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
@@ -1085,61 +1061,6 @@ document.getElementById('form-stellarjade').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
-// ============ DATA MANAGEMENT ============
-
-// 1. Download JSON file
-document.getElementById('btnDownloadJson')?.addEventListener('click', () => {
-  const content = JSON.stringify(DATA, null, 2);
-  const blob = new Blob([content], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; 
-  a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`;
-  document.body.appendChild(a); 
-  a.click(); 
-  a.remove();
-  URL.revokeObjectURL(url);
-});
-
-// 2. Upload JSON file
-document.getElementById('uploadJsonFile')?.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const text = reader.result.trim();
-      const parsed = JSON.parse(text);
-      
-      ['limited','standard','freebies','roster','priority','team','stellarJade'].forEach(k => { 
-        if (!parsed[k]) parsed[k] = []; 
-      });
-      
-      DATA = parsed;
-      saveWorkingData();
-      renderAll();
-      alert('Data loaded successfully from file!');
-    } catch (err) { 
-      alert('Failed to load file. Ensure it is a valid JSON backup.\nError: ' + err.message); 
-    } finally { 
-      e.target.value = ''; 
-    }
-  };
-  reader.readAsText(file);
-});
-
-// 3. Clear Data (Reset)
-document.getElementById('btnResetData')?.addEventListener('click', () => {
-  if (!confirm('Clear all data? This action cannot be undone.')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  
-  // Format template data kosong murni
-  DATA = { limited: [], standard: [], freebies: [], roster: [], priority: [], team: [], stellarJade: [] };
-  
-  saveWorkingData();
-  renderAll();
-  alert('Data cleared.');
-});
 // ============ Table & Grid Filters ============
 document.querySelectorAll('.table-filter').forEach(input => {
   input.addEventListener('input', (e) => {
@@ -1188,6 +1109,66 @@ document.addEventListener('click', (e) => {
     });
     tbody.append(...rows);
   }
+});
+
+// ============ DATA MANAGEMENT ============
+document.getElementById('btnDownloadJson')?.addEventListener('click', () => {
+  const content = JSON.stringify(DATA, null, 2);
+  const blob = new Blob([content], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; 
+  a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); 
+  a.click(); 
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('uploadJsonFile')?.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const text = reader.result.trim();
+      let parsed;
+      
+      // Deteksi fleksibel: mendukung JSON murni atau file .js versi lama
+      if (text.startsWith('{')) { 
+        parsed = JSON.parse(text); 
+      } else {
+        const m = text.match(/const\s+HSR_DATA\s*=\s*(\{[\s\S]*\})\s*;?\s*$/);
+        if (!m) throw new Error('Unrecognized file format. Make sure it is a valid JSON backup.');
+        parsed = JSON.parse(m[1]);
+      }
+      
+      ['limited','standard','freebies','roster','priority','team','stellarJade'].forEach(k => { 
+        if (!parsed[k]) parsed[k] = []; 
+      });
+      
+      DATA = parsed;
+      saveWorkingData();
+      renderAll();
+      alert('Data loaded successfully from file!');
+    } catch (err) { 
+      alert('Failed to load file.\nError: ' + err.message); 
+    } finally { 
+      e.target.value = ''; 
+    }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('btnResetData')?.addEventListener('click', () => {
+  if (!confirm('Clear all data? This action cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  
+  DATA = { limited: [], standard: [], freebies: [], roster: [], priority: [], team: [], stellarJade: [] };
+  
+  saveWorkingData();
+  renderAll();
+  alert('Data cleared.');
 });
 
 // ============ Init ============
