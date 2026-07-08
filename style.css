@@ -586,21 +586,23 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 
 /* =========================================================
-   TEAM SECTION (Fixed & Aligned Grid)
+   TEAM SECTION (Fixed Split Columns)
    ========================================================= */
 .team-form {
-  display: block !important; /* Mencegah form membengkokkan isinya */
+  display: block !important; 
 }
-.team-layout-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.team-split-layout {
+  display: flex;
   gap: 24px;
-  align-items: start; /* Kunci agar slot tidak ikut turun */
+  align-items: flex-start; /* Kunci utama: kolom independen & tidak memaksakan tinggi yang sama */
+  width: 100%;
 }
-.team-col {
+.team-split-col {
+  flex: 1;
+  min-width: 0; /* Mencegah elemen keluar dari kontainer */
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px; /* Jarak pas antara Main DPS - Sustain atau Sub DPS - Support */
 }
 .team-slot-group {
   display: flex;
@@ -643,7 +645,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
 .team-slot { display: flex; flex-direction: column; gap: 6px; }
 
 @media (max-width: 768px) {
-  .team-layout-grid { grid-template-columns: 1fr; }
+  .team-split-layout { flex-direction: column; }
 }
 
 .slot-row { padding: 8px 12px; gap: 12px; margin-bottom: 0; }
