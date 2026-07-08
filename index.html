@@ -57,6 +57,7 @@
   <button class="nav-item" data-page="team">Team</button>
   <button class="nav-item" data-page="character">Character</button>
   <button class="nav-item" data-page="stellarjade">Stellar Jade</button>
+  <button class="nav-item" data-page="data">Data</button>
 </nav>
 
 <div class="util-bar">
@@ -71,6 +72,7 @@
       </select>
     </div>
   </div>
+</div>
   
   <div class="util-actions">
     <button type="button" class="btn-ghost" id="btnExport">⬇ Export data.js</button>
@@ -590,6 +592,29 @@
   </main>
 </div>
 
+<div class="page" id="page-data" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Data Management</span>
+        <h2>Save & Load</h2>
+      </div>
+      <p class="track-hint" style="text-align:left; margin-bottom: 20px;">Manage your Trailblaze records here. You can copy-paste the raw JSON text below to move data between devices, or download/upload the backup file directly. Format strictly follows JSON structure.</p>
+
+      <div class="data-actions" style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+        <button type="button" class="btn-ghost" id="btnCopyJson">📋 Copy Text</button>
+        <button type="button" class="btn-ghost" id="btnImportText">💾 Apply Text</button>
+        <button type="button" class="btn-ghost" id="btnDownloadJson">⬇ Download .json</button>
+        <label class="btn-ghost" for="uploadJsonFile" style="margin:0;">⬆ Upload .json</label>
+        <input type="file" id="uploadJsonFile" accept=".json,application/json" hidden>
+        <button type="button" class="btn-ghost danger" id="btnResetData" style="margin-left:auto;">🗑 Clear Data</button>
+      </div>
+
+      <textarea id="dataTextarea" style="width: 100%; height: 450px; background: var(--bg-deep); color: var(--gold-soft); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: var(--font-mono); font-size: 13px; resize: vertical; outline: none;"></textarea>
+    </section>
+  </main>
+</div>
+  
 <footer class="site-footer">
   <p>Warp Record HSR — built from a Trailblazer's own pull data. Add entries right on each tab above, or edit <code>data.js</code> by hand after every warp session.</p>
 </footer>
