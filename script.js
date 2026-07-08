@@ -102,6 +102,7 @@ document.addEventListener('click', (e) => {
   if (!btn || btn.hasAttribute('onclick')) return; 
   deleteEntry(btn.dataset.section, Number(btn.dataset.idx));
 });
+
 function deleteEntry(section, idx) {
   DATA[section].splice(idx, 1);
   if (section === 'priority') {
@@ -182,8 +183,8 @@ function computeBannerStats(rows, maxPity) {
   const total = rows.length; const totalWarps = rows.reduce((s, r) => s + r.pity, 0); const avgPity = total ? totalWarps / total : 0;
   const decisive = rows.filter(r => r.result === 'W' || r.result === 'L'); const wins = rows.filter(r => r.result === 'W').length;
   const losses = rows.filter(r => r.result === 'L').length; const guaranteed = rows.filter(r => r.result === 'G').length;
-  const winRate = decisive.length ? wins / decisive.length : null; const pityRoad = maxPity ? avgPity / maxPity : null;
-  return { total, totalWarps, avgPity, wins, losses, guaranteed, winRate, pityRoad };
+  const winRate = decisive.length ? wins / decisive.length : null; 
+  return { total, totalWarps, avgPity, wins, losses, guaranteed, winRate };
 }
 function bestWinStreak(rows) {
   let best = 0, cur = 0;
@@ -199,27 +200,29 @@ function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   tbody.innerHTML = indexed.map(({ r, idx }) => `<tr>${rowToCells(r).map(c => `<td>${c}</td>`).join('')}<td><button class="btn-del" data-section="${section}" data-idx="${idx}" title="Delete">✕</button></td></tr>`).join('');
 }
 
-// ============ Overview ============
-let summaryCat = 'Character';
-document.getElementById('summaryTabs').addEventListener('click', (e) => {
-  const btn = e.target.closest('.tab'); if (!btn) return;
-  document.querySelectorAll('#summaryTabs .tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); summaryCat = btn.dataset.cat; buildOverview();
-});
+// ============ Overview (Combined Char & LC) ============
 function buildOverview() {
-  const limRows = (DATA.limited||[]).filter(r => r.category === summaryCat); const stdRows = (DATA.standard||[]).filter(r => r.category === summaryCat); const freebies = (DATA.freebies||[]).filter(r => r.category === summaryCat);
-  const maxPity = summaryCat === 'Character' ? 90 : 80; const stats = computeBannerStats(limRows, maxPity); const total5star = limRows.length + stdRows.length + freebies.length;
-  document.getElementById('statGrid').innerHTML = [
-    { label: `Total Warps (${summaryCat})`, value: fmt(stats.totalWarps, 0), sub: 'Limited pull only' },
-    { label: `Total 5★ (${summaryCat})`, value: fmt(total5star, 0), sub: `${limRows.length} lim · ${stdRows.length} std · ${freebies.length} free` },
+  const limRows = DATA.limited || [];
+  const stdRows = DATA.standard || [];
+  const freebies = DATA.freebies || [];
+
+  const stats = computeBannerStats(limRows, null); 
+  const total5star = limRows.length + stdRows.length + freebies.length;
+
+  const cards = [
+    { label: `Total Warps Spent`, value: fmt(stats.totalWarps, 0), sub: 'character + light cone (limited)' },
+    { label: `Total 5★ Obtained`, value: fmt(total5star, 0), sub: `${limRows.length} lim · ${stdRows.length} std · ${freebies.length} free` },
     { label: '50/50 Win Rate', value: stats.winRate !== null ? pct(stats.winRate) : '—', sub: `${stats.wins}W / ${stats.losses}L` },
-    { label: `Average Pity`, value: fmt(stats.avgPity, 1), sub: `out of hard pity ${maxPity}` }
-  ].map(c => `<div class="stat-card"><div class="stat-label">${c.label}</div><div class="stat-value ${c.value.length > 6 ? 'small' : ''}">${c.value}</div><div class="stat-sub">${c.sub}</div></div>`).join('');
+    { label: `Average Pity`, value: fmt(stats.avgPity, 1), sub: `combined avg pity` }
+  ];
+
+  document.getElementById('statGrid').innerHTML = cards.map(c => `<div class="stat-card"><div class="stat-label">${c.label}</div><div class="stat-value ${c.value.length > 6 ? 'small' : ''}">${c.value}</div><div class="stat-sub">${c.sub}</div></div>`).join('');
   const elMetaLim = document.getElementById('metaLimitedWarps'); if(elMetaLim) elMetaLim.textContent = fmt((DATA.limited||[]).filter(r => r.category === 'Character').reduce((s, r) => s + r.pity, 0) + (DATA.limited||[]).filter(r => r.category === 'Light Cone').reduce((s, r) => s + r.pity, 0), 0);
   const elMetaStd = document.getElementById('metaStandardWarps'); if(elMetaStd) elMetaStd.textContent = fmt((DATA.standard || []).reduce((s, r) => s + r.pity, 0), 0);
   const elMetaGen = document.getElementById('metaGenerated'); if(elMetaGen) elMetaGen.textContent = 'Last pull: ' + (DATA.limited && DATA.limited.length ? formatDate(DATA.limited[DATA.limited.length - 1].date) : '—');
 }
 
-// ============ Standard UI ============
+// ============ Standard UI (No Pity Road) ============
 function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
   if (!rows || !rows.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`; return; }
@@ -229,7 +232,7 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
 }
 function renderBannerStats(containerId, stats) {
   const items = [{ label: 'Total 5★', value: fmt(stats.total, 0) }, { label: 'Total Warps', value: fmt(stats.totalWarps, 0) }, { label: 'Average Pity',value: fmt(stats.avgPity, 1) }];
-  if (stats.winRate !== null) items.push({ label: 'Win Rate', value: pct(stats.winRate) }); if (stats.pityRoad !== null && containerId !== 'calcGrid') items.push({ label: 'Pity Road', value: pct(stats.pityRoad) });
+  if (stats.winRate !== null) items.push({ label: 'Win Rate', value: pct(stats.winRate) }); 
   document.getElementById(containerId).innerHTML = items.map(i => `<div class="bstat"><div class="stat-label">${i.label}</div><div class="stat-value">${i.value}</div></div>`).join('');
 }
 
@@ -366,7 +369,7 @@ function initCropper(src, isUrl) {
   imgElement.onload = () => {
     if(globalCropper) globalCropper.destroy();
     globalCropper = new Cropper(imgElement, {
-      aspectRatio: 1, /* PERBAIKAN: Rasio Kotak Persegi 1:1 */
+      aspectRatio: 1, /* Crop Persegi Sempurna */
       viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false, checkCrossOrigin: false 
     });
   };
@@ -377,8 +380,7 @@ function initCropper(src, isUrl) {
 document.getElementById('btnModalSubmit').addEventListener('click', () => {
   if (!globalCropper) return;
   try {
-    /* PERBAIKAN: Output Canvas disetel menjadi persegi sempurna 256x256 */
-    const canvas = globalCropper.getCroppedCanvas({ width: 1024, height: 1024 });
+    const canvas = globalCropper.getCroppedCanvas({ width: 256, height: 256 });
     if (!canvas) throw new Error("Canvas is empty");
     
     const finalBase64 = canvas.toDataURL('image/jpeg', 0.85); 
@@ -397,7 +399,7 @@ document.getElementById('modalFileInput').addEventListener('change', (e) => {
   }
 });
 
-// ============ Team & Roster Auto Image Logic ============
+// ============ Team Planner ============
 function getAllCharNames() {
   const names = new Set();
   (DATA.limited||[]).forEach(r => { if (r.name) names.add(r.name); });
@@ -493,16 +495,39 @@ function updateTeamPreview() {
   document.getElementById('team-cost-preview').value = costStr; document.getElementById('team-pv-preview').value = totalPV;
 }
 
+let teamSortValue = 'pvDesc';
+document.getElementById('teamSortSelect')?.addEventListener('change', (e) => {
+  teamSortValue = e.target.value;
+  renderTeam();
+});
+
 function renderTeam() {
   const grid = document.getElementById('teamGrid'); if (!grid) return;
   const limitedTotalWarps = (DATA.limited||[]).reduce((s, r) => s + r.pity, 0);
   if (!DATA.team || !DATA.team.length) { grid.innerHTML = '<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No teams built yet.</p>'; return; }
   
-  let indexed = DATA.team.map((r, idx) => ({ r, idx })); indexed.sort((a, b) => b.r.pullValue - a.r.pullValue);
-  grid.innerHTML = indexed.map(({ r, idx }) => {
+  let indexed = DATA.team.map((r, idx) => ({ ...r, _idx: idx }));
+  
+  // SORTING TEAMS
+  indexed.sort((a, b) => {
+    if (teamSortValue === 'nameAsc') return a.archetype.localeCompare(b.archetype);
+    if (teamSortValue === 'nameDesc') return b.archetype.localeCompare(a.archetype);
+    if (teamSortValue === 'pvAsc') return a.pullValue - b.pullValue;
+    if (teamSortValue === 'pvDesc') return b.pullValue - a.pullValue;
+    
+    // Sort by Cost (mengekstrak total limited character cost dari string "X Limited + ...")
+    const costA = parseInt(a.cost.match(/(\d+) Limited/) ? a.cost.match(/(\d+) Limited/)[1] : 0) * 1000 + a.pullValue;
+    const costB = parseInt(b.cost.match(/(\d+) Limited/) ? b.cost.match(/(\d+) Limited/)[1] : 0) * 1000 + b.pullValue;
+    if (teamSortValue === 'costDesc') return costB - costA;
+    if (teamSortValue === 'costAsc') return costA - costB;
+    
+    return b.pullValue - a.pullValue;
+  });
+  
+  grid.innerHTML = indexed.map((r) => {
     const subDps = Array.isArray(r.subDps) ? r.subDps.join(', ') : (r.subDps || '—'); const support = Array.isArray(r.support) ? r.support.join(', ') : (r.support || '—'); const pctVal = pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2);
     let imgHtml = ''; if (r.members && r.members.length > 0) { imgHtml = r.members.map(m => `<div class="team-image-slot" title="${m.name}"><img src="${m.img}" onerror="this.src='${DEFAULT_AVATAR}'"></div>`).join(''); } else { imgHtml = `<div class="team-image-slot"><img src="${DEFAULT_AVATAR}"></div>`; }
-    return `<div class="team-card searchable-item" data-idx="${idx}"><div class="team-image-row">${imgHtml}</div><div class="team-card-content"><div class="tc-arch">${r.archetype}</div><div class="tc-row"><span>Main DPS:</span><span class="tc-val">${r.mainDps || '—'}</span></div><div class="tc-row"><span>Sub DPS:</span><span class="tc-val">${subDps}</span></div><div class="tc-row"><span>Support:</span><span class="tc-val">${support}</span></div><div class="tc-row"><span>Sustain:</span><span class="tc-val">${r.sustain || '—'}</span></div><div class="tc-row"><span>Cost:</span><span class="tc-val">${r.cost || '—'}</span></div><div class="tc-footer"><span class="tc-pv">PV: ${fmt(r.pullValue, 0)} (${pctVal})</span><button class="btn-del" data-section="team" data-idx="${idx}" title="Delete">✕</button></div></div></div>`;
+    return `<div class="team-card searchable-item" data-idx="${r._idx}"><div class="team-image-row">${imgHtml}</div><div class="team-card-content"><div class="tc-arch">${r.archetype}</div><div class="tc-row"><span>Main DPS:</span><span class="tc-val">${r.mainDps || '—'}</span></div><div class="tc-row"><span>Sub DPS:</span><span class="tc-val">${subDps}</span></div><div class="tc-row"><span>Support:</span><span class="tc-val">${support}</span></div><div class="tc-row"><span>Sustain:</span><span class="tc-val">${r.sustain || '—'}</span></div><div class="tc-row"><span>Cost:</span><span class="tc-val">${r.cost || '—'}</span></div><div class="tc-footer"><span class="tc-pv">PV: ${fmt(r.pullValue, 0)} (${pctVal})</span><div class="tc-footer-actions"><button class="btn-dup" onclick="dupTeam(${r._idx})" title="Duplicate">⧉</button><button class="btn-edit" onclick="editTeam(${r._idx})" title="Edit">✎</button><button class="btn-del" data-section="team" data-idx="${r._idx}" title="Delete">✕</button></div></div></div></div>`;
   }).join('');
 }
 
@@ -512,13 +537,90 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
   const fmt2 = (arr) => arr.map(m => `${m.name} ${m.eido}${m.sign}`); const allMembers = [...mainDpsSlots, ...subDpsSlots, ...supportSlots, ...sustainSlots];
   const { costStr, totalPV } = computeTeamCostAndPV(allMembers);
   if (!DATA.team) DATA.team = [];
+  
   DATA.team.push({ archetype: fd.get('archetype').trim(), mainDps: fmt2(mainDpsSlots).join(', ') || '', subDps: fmt2(subDpsSlots).join(', ') || '', support: fmt2(supportSlots).join(', ') || '', sustain: fmt2(sustainSlots).join(', ') || '', cost: costStr, pullValue: totalPV, members: allMembers });
   saveWorkingData(); renderAll(); e.target.reset(); initDateInputs();
+  
   document.querySelectorAll('.slot-preview').forEach(img => img.src = DEFAULT_AVATAR);
   ['subDps','support'].forEach(role => { const slotDiv = document.getElementById('slot-' + role); const rows = slotDiv.querySelectorAll('.slot-row'); rows.forEach((row, i) => { if (i > 0) row.remove(); }); slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = ''); });
   ['mainDps','sustain'].forEach(role => { const slotDiv = document.getElementById('slot-' + role); slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = ''); });
   document.getElementById('team-cost-preview').value = ''; document.getElementById('team-pv-preview').value = ''; populateSlotDropdowns();
+  
+  document.getElementById('btnSubmitTeam').textContent = "+ Save Team";
 });
+
+// FITUR DUPLIKAT DAN EDIT TIM
+window.dupTeam = function(idx) {
+  const team = DATA.team[idx];
+  DATA.team.push(JSON.parse(JSON.stringify(team))); // Duplicate murni
+  saveWorkingData();
+  renderAll();
+}
+
+window.editTeam = function(idx) {
+  const team = DATA.team[idx];
+  
+  // Fungsi Helper untuk memilah raw string kembali ke opsi dropwdown
+  const parseRole = (str) => str.split(', ').filter(Boolean).map(s => { 
+      const lastSpace = s.lastIndexOf(' E');
+      if (lastSpace !== -1) {
+         const name = s.substring(0, lastSpace);
+         const eido = s.substring(lastSpace + 1, lastSpace + 3);
+         const sign = s.substring(lastSpace + 3, lastSpace + 5);
+         return { name, eido, sign };
+      }
+      return null;
+  }).filter(Boolean);
+
+  const parsedMain = parseRole(team.mainDps);
+  const parsedSub = parseRole(team.subDps);
+  const parsedSup = parseRole(team.support);
+  const parsedSus = parseRole(team.sustain);
+
+  const populateRole = (roleName, parsedArr) => {
+    const slotDiv = document.getElementById('slot-' + roleName);
+    const rows = slotDiv.querySelectorAll('.slot-row');
+    rows.forEach((row, i) => { if (i > 0) row.remove(); }); 
+
+    parsedArr.forEach((p, i) => {
+       if (i > 0) {
+           const wrapper = document.createElement('div'); 
+           wrapper.innerHTML = slotTemplate(roleName, true);
+           slotDiv.appendChild(wrapper.firstElementChild); 
+       }
+       const allRows = slotDiv.querySelectorAll('.slot-row');
+       const currentRow = allRows[i];
+       currentRow.querySelector('.slot-name').value = p.name;
+       currentRow.querySelector('.slot-eidolon').value = p.eido;
+       currentRow.querySelector('.slot-sign').value = p.sign;
+       
+       const evt = new Event('change', { bubbles: true });
+       currentRow.querySelector('.slot-name').dispatchEvent(evt);
+    });
+    if(parsedArr.length === 0) {
+       const row = slotDiv.querySelector('.slot-row');
+       row.querySelector('.slot-name').value = "";
+       row.querySelector('.slot-eidolon').value = "E0";
+       row.querySelector('.slot-sign').value = "S0";
+       row.querySelector('.slot-preview').src = DEFAULT_AVATAR;
+    }
+  };
+
+  populateRole('mainDps', parsedMain);
+  populateRole('subDps', parsedSub);
+  populateRole('support', parsedSup);
+  populateRole('sustain', parsedSus);
+
+  document.getElementById('form-team').elements['archetype'].value = team.archetype;
+  
+  DATA.team.splice(idx, 1);
+  saveWorkingData();
+  renderAll(); 
+  
+  document.getElementById('btnSubmitTeam').textContent = "✓ Update Team";
+  document.getElementById('form-team').scrollIntoView({ behavior: 'smooth' });
+}
+
 
 // ============ ROSTER ============
 let rosterFilter = 'all'; let rosterSortValue = 'pullValueDesc';
@@ -541,7 +643,9 @@ function renderRoster() {
   if (!rows.length) { grid.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`; return; }
   grid.innerHTML = rows.map(r => {
     const eidoCls = r.eidolon === 'NoE' ? '' : 'style="color:var(--gold-soft);font-weight:700"'; const signCls = r.signature === 'S0' ? '' : 'style="color:var(--cyan);font-weight:700"'; const imgSrc = r.img || DEFAULT_AVATAR;
-    return `<div class="roster-card searchable-item" data-idx="${r._idx}"><div class="roster-img-wrap"><img src="${imgSrc}" onerror="this.src='${DEFAULT_AVATAR}'"><div class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''} roster-type-tag">${r.source}</div><button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button></div><div class="roster-info"><div class="roster-name" title="${r.name}">${r.name}</div><div class="roster-stats"><span>Eidolon: <span ${eidoCls}>${r.eidolon}</span></span><span>Sign: <span ${signCls}>${r.signature}</span></span></div><div class="roster-stats" style="margin-top: 4px;"><span>PV Eido: <span style="color:var(--text)">${fmt(r.pullValueEidolon, 0)}</span></span><span>PV Sign: <span style="color:var(--text)">${fmt(r.pullValueSignature, 0)}</span></span></div><div class="roster-stats" style="margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;"><span>Total Pull Value: <span style="color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</span></span></div></div></div>`;
+    
+    // PERUBAHAN: PV Eido & PV Sign menjadi sekadar PV 
+    return `<div class="roster-card searchable-item" data-idx="${r._idx}"><div class="roster-img-wrap"><img src="${imgSrc}" onerror="this.src='${DEFAULT_AVATAR}'"><div class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''} roster-type-tag">${r.source}</div><button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button></div><div class="roster-info"><div class="roster-name" title="${r.name}">${r.name}</div><div class="roster-stats"><span>Eidolon: <span ${eidoCls}>${r.eidolon}</span></span><span>Sign: <span ${signCls}>${r.signature}</span></span></div><div class="roster-stats" style="margin-top: 4px;"><span>PV: <span style="color:var(--text)">${fmt(r.pullValueEidolon, 0)}</span></span><span>PV: <span style="color:var(--text)">${fmt(r.pullValueSignature, 0)}</span></span></div><div class="roster-stats" style="margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;"><span>Total Pull Value: <span style="color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</span></span></div></div></div>`;
   }).join('');
   const dl = document.getElementById('charNameList'); if (dl) dl.innerHTML = getAllCharNames().map(n => `<option value="${n}">`).join('');
 }
