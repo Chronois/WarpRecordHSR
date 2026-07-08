@@ -333,3 +333,16 @@ function renderAll() {
 window.addEventListener('DOMContentLoaded', () => {
   renderAll();
 });
+
+// ============ Table Filters ============
+document.querySelectorAll('.table-filter').forEach(input => {
+  input.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    const tableId = e.target.getAttribute('data-table');
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    if (!tbody) return;
+    tbody.querySelectorAll('tr').forEach(tr => {
+      tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+  });
+});
