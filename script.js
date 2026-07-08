@@ -109,13 +109,22 @@ function goToPage(page) {
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
-// ============ Working data ============
-const STORAGE_KEY = 'warpRecordHsrData_v3';
+// ============ Working data (Multi-Profile System) ============
+const BASE_STORAGE_KEY = 'warpRecordHsrData_v3_';
+let CURRENT_PROFILE = localStorage.getItem('hsr_current_profile') || 'main';
+
+const profileSelect = document.getElementById('profileSwitcher');
+if (profileSelect) profileSelect.value = CURRENT_PROFILE;
+
+function getStorageKey() {
+  return BASE_STORAGE_KEY + CURRENT_PROFILE;
+}
+
 let DATA = loadWorkingData();
 
 function loadWorkingData() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey());
     if (raw) return JSON.parse(raw);
   } catch (e) { console.warn('Failed to load from browser storage.', e); }
   return typeof HSR_DATA !== 'undefined' ? JSON.parse(JSON.stringify(HSR_DATA)) : {};
@@ -124,33 +133,35 @@ function loadWorkingData() {
 function saveWorkingData() {
   const statusEl = document.getElementById('saveStatus');
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+    localStorage.setItem(getStorageKey(), JSON.stringify(DATA));
     if (statusEl) {
       statusEl.textContent = 'Saved · ' + new Date().toLocaleTimeString('en-US');
       statusEl.className = 'save-status ok';
     }
   } catch (e) {
     if (statusEl) {
-      statusEl.textContent = 'Failed to save (private browsing or storage full?)';
+      statusEl.textContent = 'Failed to save (private browsing?)';
       statusEl.className = 'save-status err';
     }
   }
 }
 
-function recomputeDaysSince(rows) {
-  const groups = {};
-  rows.forEach(r => { (groups[r.category] = groups[r.category] || []).push(r); });
-  Object.values(groups).forEach(group => {
-    group.sort((a, b) => a.date.localeCompare(b.date));
-    let prevDate = null;
-    group.forEach(r => {
-      r.daysSince = prevDate === null ? 0 : daysBetween(r.date, prevDate);
-      prevDate = r.date;
-    });
-  });
-}
+// Event Listener ketika dropdown profile diubah
+document.getElementById('profileSwitcher')?.addEventListener('change', (e) => {
+  CURRENT_PROFILE = e.target.value;
+  localStorage.setItem('hsr_current_profile', CURRENT_PROFILE);
+  DATA = loadWorkingData();
+  renderAll(); // Render ulang seluruh halaman dengan data profil baru
+});
 
-function sortByDate(rows) { rows.sort((a, b) => a.date.localeCompare(b.date)); }
+// Update fungsi Reset agar hanya mereset profil yang sedang aktif
+document.getElementById('btnReset').addEventListener('click', () => {
+  if (!confirm(`Reset data for profile "${CURRENT_PROFILE}"? All browser-saved changes for this profile will be deleted.`)) return;
+  localStorage.removeItem(getStorageKey());
+  DATA = typeof HSR_DATA !== 'undefined' ? JSON.parse(JSON.stringify(HSR_DATA)) : {};
+  saveWorkingData();
+  renderAll();
+});
 
 // ============ Global Delete Logic ============
 document.addEventListener('click', (e) => {
