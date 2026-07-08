@@ -16,6 +16,7 @@ function daysBetween(a, b) {
   return Math.max(0, Math.round((new Date(a + 'T00:00:00') - new Date(b + 'T00:00:00')) / 86400000));
 }
 
+// Set today's date on all date inputs
 function initDateInputs() {
   const today = new Date().toISOString().split('T')[0];
   document.querySelectorAll('input[type="date"]').forEach(el => {
@@ -74,6 +75,9 @@ function getVersionForDate(dateStr, schedule) {
   }
   return '—';
 }
+
+// Inisialisasi secara Global agar tidak memicu error Reference Error
+const VERSION_SCHEDULE = getVersionSchedule();
 
 // ============ Main nav / page switching ============
 document.getElementById('mainNav').addEventListener('click', (e) => {
@@ -381,7 +385,7 @@ function buildOverview() {
 
 function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
-  if (!rows.length) {
+  if (!rows || !rows.length) {
     container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`;
     return;
   }
@@ -423,8 +427,6 @@ function renderLimited() {
   const rows   = (DATA.limited||[]).filter(r => r.category === currentLimitedCat);
   const maxPity = currentLimitedCat === 'Character' ? 90 : 80;
   renderBannerStats('limitedStats', computeBannerStats(rows, maxPity));
-  renderTrack('limitedTrack', maxPity, true);
-  // Re-fetch to render properly since we needed maxPity
   renderTrack('limitedTrack', rows, maxPity, true);
 }
 
@@ -448,6 +450,7 @@ function renderManageLimited() {
 document.getElementById('form-limited').addEventListener('submit', (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
+  if (!DATA.limited) DATA.limited = [];
   DATA.limited.push({ date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(), pity: Number(fd.get('pity')), result: fd.get('result'), daysSince: 0 });
   sortByDate(DATA.limited);
   recomputeDaysSince(DATA.limited);
@@ -471,6 +474,7 @@ function renderManageStandard() {
 document.getElementById('form-standard').addEventListener('submit', (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
+  if (!DATA.standard) DATA.standard = [];
   DATA.standard.push({ date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(), pity: Number(fd.get('pity')), daysSince: 0 });
   sortByDate(DATA.standard);
   recomputeDaysSince(DATA.standard);
@@ -479,6 +483,7 @@ document.getElementById('form-standard').addEventListener('submit', (e) => {
   e.target.reset();
   initDateInputs();
 });
+
 
 function renderFreebies() {
   const container = document.getElementById('freebieRow');
@@ -503,6 +508,7 @@ function renderManageFreebies() {
 document.getElementById('form-freebies').addEventListener('submit', (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
+  if (!DATA.freebies) DATA.freebies = [];
   DATA.freebies.push({ date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(), event: fd.get('event').trim(), daysSince: 0 });
   sortByDate(DATA.freebies);
   recomputeDaysSince(DATA.freebies);
@@ -592,7 +598,6 @@ document.getElementById('form-priority').addEventListener('submit', (e) => {
 });
 
 // ============ Team ============
-// Placeholder Default Image (SVG encoded, sama persis dengan Gambar 2)
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E";
 
 function getAllCharNames() {
@@ -613,7 +618,6 @@ function populateSlotDropdowns() {
   });
 }
 
-// Handler per-slot Image Upload
 document.getElementById('form-team').addEventListener('change', (e) => {
   if (e.target.classList.contains('slot-file')) {
     const file = e.target.files[0];
@@ -632,7 +636,6 @@ document.getElementById('form-team').addEventListener('change', (e) => {
   }
 });
 
-// Tambah Slot Tambahan
 const slotTemplate = (role, isRemovable) => `
   <div class="slot-row">
      <div class="slot-img-upload">
@@ -677,7 +680,6 @@ function getSlotMembers(role) {
     const eido = row.querySelector('.slot-eidolon')?.value || 'E0';
     const sign = row.querySelector('.slot-sign')?.value || 'S0';
     const previewSrc = row.querySelector('.slot-preview')?.src;
-    // Cek kalau belum dirubah dari default
     const img = (previewSrc && !previewSrc.includes('viewBox')) ? previewSrc : DEFAULT_AVATAR;
     return name ? { name, eido, sign, img } : null;
   }).filter(Boolean);
@@ -802,7 +804,7 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
     sustain:   fmt2(sustainSlots).join(', ') || '',
     cost:      costStr,
     pullValue: totalPV,
-    members:   allMembers // Menyimpan data gambar tiap slot
+    members:   allMembers
   });
 
   saveWorkingData();
@@ -810,10 +812,8 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
   e.target.reset();
   initDateInputs();
 
-  // Reset semua gambar preview kembali ke default
   document.querySelectorAll('.slot-preview').forEach(img => img.src = DEFAULT_AVATAR);
 
-  // Buang slot tambahan jika ada (menyisakan slot 1 awal saja)
   ['subDps','support'].forEach(role => {
     const slotDiv = document.getElementById('slot-' + role);
     const rows = slotDiv.querySelectorAll('.slot-row');
