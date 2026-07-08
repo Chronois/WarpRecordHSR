@@ -591,22 +591,33 @@ main, header, footer, .page{ position:relative; z-index:1; }
    TEAM SECTION
    ========================================================= */
 .team-form { display: block !important; }
-.team-masonry {
-  display: flex; flex-wrap: wrap; gap: 24px;
-  align-items: flex-start; width: 100%;
-}
-.team-masonry-col {
-  flex: 1 1 300px; display: flex; flex-direction: column; gap: 24px;
+.team-grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start; 
+  width: 100%;
 }
 .team-slot-group { display: flex; flex-direction: column; gap: 6px; }
+
+/* KUNCI PENYEJAJARAN: LABEL TINGGINYA SAMA */
 .team-slot-label {
-  font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--text-dim); display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
-  border-bottom: 1px solid var(--border); padding-bottom: 4px;
+  font-family: var(--font-mono); 
+  font-size: 10px; 
+  letter-spacing: .06em; 
+  text-transform: uppercase;
+  color: var(--text-dim); 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border); 
+  padding-bottom: 6px;
+  min-height: 32px; /* <-- Ini yang membuat posisi sejajar meski ada / tidak ada tombol + */
 }
 .team-form-bottom { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; align-items: flex-end; width: 100%; }
 
-/* PERBAIKAN TOMBOL + PADA SUB DPS & SUPPORT */
+/* TOMBOL + PADA SUB DPS & SUPPORT */
 .btn-add-slot {
   background: #f2f2f7;
   border: 1px solid #d1d1d6;
@@ -622,6 +633,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
   transition: all .15s ease;
   padding: 0;
   margin-left: 4px;
+  line-height: 0;
 }
 .btn-add-slot:hover { 
   background: #e5e5ea; 
@@ -678,7 +690,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
 .slot-row { padding: 8px 12px; gap: 12px; margin-bottom: 0; }
 .slot-inputs { gap: 4px; }
 
-/* PERBAIKAN UKURAN SLOT IMAGE (MENJADI KOTAK SEMPURNA SESUAI REFERENSI) */
+/* UKURAN SLOT IMAGE KOTAK SEMPURNA */
 .slot-img-upload { 
   width: 56px; 
   height: 56px; 
@@ -699,7 +711,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
 
 
 /* Responsive */
-@media (max-width: 640px){ .hero{ padding: 64px 18px 40px; } .section{ padding: 48px 16px; } }
+@media (max-width: 640px){ .hero{ padding: 64px 18px 40px; } .section{ padding: 48px 16px; } .team-grid-2x2 { grid-template-columns: 1fr; } }
 input[type="date"] { color-scheme: dark; }
 input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
 
