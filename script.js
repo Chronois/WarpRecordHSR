@@ -441,15 +441,38 @@ document.getElementById('form-standard').addEventListener('submit', (e) => {
 });
 
 function renderFreebies() {
-  const container = document.getElementById('freebieRow'); if (!DATA.freebies || !DATA.freebies.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`; return; }
-  container.innerHTML = DATA.freebies.map(f => `<div class="freebie-card"><div class="freebie-name">${f.name}</div><div class="freebie-event">${f.event}</div><div class="freebie-date">${formatDate(f.date)} · ${f.category}</div><div class="freebie-date" style="color:var(--cyan); margin-top:2px;">Version ${getFullVersionForDate(f.date, VERSION_SCHEDULE)}</div></div>`).join('');
+  const container = document.getElementById('freebieRow'); 
+  if (!DATA.freebies || !DATA.freebies.length) { 
+    container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`; 
+    return; 
+  }
+  
+  container.innerHTML = DATA.freebies.map(f => {
+    // Logika Pintar: Ambil gambar dari Custom Crop atau Master Database
+    const lowerName = normName(f.name);
+    const rosterEntry = (DATA.roster || []).find(char => normName(char.name) === lowerName);
+    let imgSrc = DEFAULT_AVATAR;
+    
+    if (rosterEntry && rosterEntry.img && !rosterEntry.img.includes('viewBox')) {
+        imgSrc = rosterEntry.img;
+    } else if (MASTER_CHARACTERS[lowerName] && MASTER_CHARACTERS[lowerName].img) {
+        imgSrc = MASTER_CHARACTERS[lowerName].img;
+    }
+
+    // Struktur HTML kartu diperbarui agar menampung icon
+    return `<div class="freebie-card">
+      <div class="freebie-header">
+        <img src="${imgSrc}" class="freebie-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
+        <div class="freebie-title-wrap">
+          <div class="freebie-name">${f.name}</div>
+          <div class="freebie-event">${f.event}</div>
+        </div>
+      </div>
+      <div class="freebie-date">${formatDate(f.date)} · ${f.category}</div>
+      <div class="freebie-date" style="color:var(--cyan); margin-top:2px;">Version ${getFullVersionForDate(f.date, VERSION_SCHEDULE)}</div>
+    </div>`;
+  }).join('');
 }
-function renderManageFreebies() { renderDeleteTable('manageTable-freebies', 'freebies', ['Date','Version','Type','Name','Event'], r => [formatDate(r.date), getFullVersionForDate(r.date, VERSION_SCHEDULE), r.category, r.name, r.event], (a, b) => b.r.date.localeCompare(a.r.date)); }
-document.getElementById('form-freebies').addEventListener('submit', (e) => {
-  e.preventDefault(); const fd = new FormData(e.target); if (!DATA.freebies) DATA.freebies = [];
-  DATA.freebies.push({ date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(), event: fd.get('event').trim(), daysSince: 0 });
-  sortByDate(DATA.freebies); recomputeDaysSince(DATA.freebies); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs();
-});
 
 function renderCalc() {
   const limChar = (DATA.limited||[]).filter(r => r.category === 'Character'); const limLC   = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
