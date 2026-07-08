@@ -383,7 +383,31 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
   if (!rows || !rows.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`; return; }
   const gaps = rows.map(r => Math.max(Math.sqrt(r.daysSince || 0.5) * 22, 46));
-  const stations = rows.map((r, i) => `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px"><div class="station-label-name">${r.name}</div><div class="station-tooltip"><div class="tt-name">${r.name}</div><div class="tt-meta">${formatDate(r.date)} · pity ${r.pity}${hasResult ? ' · ' + (r.result === 'W' ? '50/50 Win' : r.result === 'L' ? '50/50 Loss' : 'Guaranteed') : ''}</div></div><div class="station-dot ${hasResult ? r.result : 'G'}"></div><div class="station-pity">${r.pity}</div></div>`).join('');
+  
+  const stations = rows.map((r, i) => {
+    // Logika Pintar: Ambil gambar dari Custom Crop (Roster) atau Master Database
+    const lowerName = normName(r.name);
+    const rosterEntry = (DATA.roster || []).find(char => normName(char.name) === lowerName);
+    let imgSrc = DEFAULT_AVATAR; // Fallback jika Light Cone / tidak ada gambar
+    
+    if (rosterEntry && rosterEntry.img && !rosterEntry.img.includes('viewBox')) {
+        imgSrc = rosterEntry.img;
+    } else if (MASTER_CHARACTERS[lowerName] && MASTER_CHARACTERS[lowerName].img) {
+        imgSrc = MASTER_CHARACTERS[lowerName].img;
+    }
+
+    return `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px">
+      <div class="station-label-name">${r.name}</div>
+      <img src="${imgSrc}" class="station-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
+      <div class="station-tooltip">
+        <div class="tt-name">${r.name}</div>
+        <div class="tt-meta">${formatDate(r.date)} · pity ${r.pity}${hasResult ? ' · ' + (r.result === 'W' ? '50/50 Win' : r.result === 'L' ? '50/50 Loss' : 'Guaranteed') : ''}</div>
+      </div>
+      <div class="station-dot ${hasResult ? r.result : 'G'}"></div>
+      <div class="station-pity">${r.pity}</div>
+    </div>`;
+  }).join('');
+  
   container.innerHTML = `<div class="track-line"><div class="track-rail"></div>${stations}<div style="margin-left:24px"></div></div>`;
 }
 function renderBannerStats(containerId, stats) {
