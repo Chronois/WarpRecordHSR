@@ -545,13 +545,100 @@ document.getElementById('form-freebies').addEventListener('submit', (e) => {
 });
 
 function renderCalc() {
-  const limChar = (DATA.limited||[]).filter(r => r.category === 'Character'); const limLC   = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
-  document.getElementById('calcGrid').innerHTML = [{ label: 'Character', rows: limChar, maxPity: 90 }, { label: 'Light Cone', rows: limLC, maxPity: 80 }, { label: 'Total (Limited)', rows: DATA.limited||[], maxPity: null }].map(b => {
+  const limChar = (DATA.limited||[]).filter(r => r.category === 'Character'); 
+  const limLC   = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
+  
+  const datasets = [
+    { label: 'Character Banner', rows: limChar, maxPity: 90 }, 
+    { label: 'Light Cone Banner', rows: limLC, maxPity: 80 }, 
+    { label: 'Combined (Total)', rows: DATA.limited||[], maxPity: 90 }
+  ];
+
+  document.getElementById('calcGrid').innerHTML = datasets.map(b => {
     const s = computeBannerStats(b.rows, b.maxPity);
-    const rowsHtml = [['Total Pulls', fmt(s.total, 0)], ['Total Warps', fmt(s.totalWarps, 0)], ['Average 5★', fmt(s.avgPity, 1)], ...(s.winRate !== null ? [['Win Rate', pct(s.winRate)], ['W / L / G', `${s.wins} / ${s.losses} / ${s.guaranteed}`]] : [])].map(([label, value]) => `<div class="bstat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div></div>`).join('');
-    return `<div class="calc-col"><h3>${b.label}</h3>${rowsHtml}</div>`;
+    const totalWLG = (s.wins + s.losses + s.guaranteed) || 1; // Mencegah pembagian 0
+    const wPct = (s.wins / totalWLG) * 100;
+    const lPct = (s.losses / totalWLG) * 100;
+    const gPct = (s.guaranteed / totalWLG) * 100;
+    
+    // Logika Warna Average Pity: Hijau = Hoki, Kuning = Sedang, Merah = Hard Pity
+    const pityPct = (s.avgPity / b.maxPity) * 100;
+    let pityColor = '#4ade80'; // Hijau
+    if(s.avgPity > (b.maxPity * 0.82)) pityColor = 'var(--loss)'; 
+    else if (s.avgPity > (b.maxPity * 0.65)) pityColor = 'var(--gold-soft)';
+
+    // Logika Warna Win Rate: Merah jika di bawah 50%
+    const wrColor = s.winRate >= 0.5 ? '#4ade80' : 'var(--loss)';
+
+    return `
+      <div class="calc-col" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:18px;">
+        
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;">
+            <h3 style="margin:0; color:var(--nebula); font-size:16px; font-family:var(--font-display);">${b.label}</h3>
+            <div style="text-align:right;">
+                <span style="color:var(--text); font-weight:bold; font-size:14px;">${fmt(s.total, 0)}</span> <span style="color:var(--text-dim); font-size:12px;">5★</span>
+                <span style="color:var(--text-dim); font-size:12px; margin-left:6px;">(${fmt(s.totalWarps, 0)} Pulls)</span>
+            </div>
+        </div>
+
+        <!-- 1. Grafik Average Pity -->
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+            <span style="color:var(--text-dim);">Average Pity</span>
+            <span style="font-weight:700; color:${pityColor}">${fmt(s.avgPity, 1)} / ${b.maxPity}</span>
+          </div>
+          <div style="width:100%; height:8px; background:rgba(0,0,0,0.3); border-radius:4px; overflow:hidden;">
+            <div style="width:${pityPct}%; background:${pityColor}; height:100%; border-radius:4px; transition:width 1s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+          </div>
+        </div>
+
+        <!-- 2. Grafik Win Rate -->
+        ${s.winRate !== null ? `
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+            <span style="color:var(--text-dim);">50/50 Win Rate</span>
+            <span style="font-weight:700; color:${wrColor}">${pct(s.winRate)}</span>
+          </div>
+          <div style="width:100%; height:8px; background:rgba(0,0,0,0.3); border-radius:4px; overflow:hidden; display:flex;">
+            <div style="width:${s.winRate*100}%; background:#4ade80; height:100%; transition:width 1s ease;" title="Won: ${s.wins}"></div>
+            <div style="width:${(1-s.winRate)*100}%; background:var(--loss); height:100%; transition:width 1s ease;" title="Lost: ${s.losses}"></div>
+          </div>
+        </div>
+        ` : ''}
+
+        <!-- 3. Grafik Distribusi Total -->
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+            <span style="color:var(--text-dim);">Pull Distribution</span>
+            <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">${s.wins}W / ${s.losses}L / ${s.guaranteed}G</span>
+          </div>
+          <div style="width:100%; height:8px; background:rgba(0,0,0,0.3); border-radius:4px; overflow:hidden; display:flex;">
+            <div style="width:${wPct}%; background:#4ade80; transition:width 1s ease;" title="Win"></div>
+            <div style="width:${lPct}%; background:var(--loss); transition:width 1s ease;" title="Loss"></div>
+            <div style="width:${gPct}%; background:var(--gold-soft); transition:width 1s ease;" title="Guaranteed"></div>
+          </div>
+          <div style="display:flex; gap:12px; margin-top:8px; font-size:10px; color:var(--text-dim); justify-content:center;">
+              <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#4ade80;"></span> Win</span>
+              <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--loss);"></span> Loss</span>
+              <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold-soft);"></span> Guaranteed</span>
+          </div>
+        </div>
+
+      </div>
+    `;
   }).join('');
-  document.getElementById('streakGrid').innerHTML = [{ label: 'Character', value: bestWinStreak(limChar) }, { label: 'Light Cone', value: bestWinStreak(limLC) }, { label: 'Combined', value: bestWinStreak(DATA.limited||[]) }].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${fmt(s.value, 0)}</div></div>`).join('');
+  
+  // Mengubah tampilan Win Streak menjadi lebih menonjol
+  document.getElementById('streakGrid').innerHTML = [
+      { label: 'Character', value: bestWinStreak(limChar) }, 
+      { label: 'Light Cone', value: bestWinStreak(limLC) }, 
+      { label: 'Combined', value: bestWinStreak(DATA.limited||[]) }
+  ].map(s => `
+    <div class="bstat" style="text-align:center; padding: 20px;">
+        <div class="stat-label" style="margin-bottom:8px; letter-spacing:1px;">MAX ${s.label.toUpperCase()} WIN STREAK</div>
+        <div class="stat-value" style="color:var(--cyan); font-size:32px; font-family:var(--font-display);">${fmt(s.value, 0)}</div>
+    </div>
+  `).join('');
 }
 
 function renderPriority() {
