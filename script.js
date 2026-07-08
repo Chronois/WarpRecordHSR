@@ -19,40 +19,84 @@ function initDateInputs() {
 }
 
 // ============ Version schedule ============
-const VERSION_START = { major: 4, minor: 3, date: '2026-06-03' };
-const HALF_DAYS = 21;
-const VERSION_DAYS = 42;
+// Daftar tanggal rilis versi HSR berdasarkan catatan rilis resmi
+const HSR_VERSIONS = [
+  { v: '1.0', date: '2023-04-26' },
+  { v: '1.1', date: '2023-06-07' },
+  { v: '1.2', date: '2023-07-19' },
+  { v: '1.3', date: '2023-08-30' },
+  { v: '1.4', date: '2023-10-11' }, // Durasi patch lebih pendek (35 hari)
+  { v: '1.5', date: '2023-11-15' },
+  { v: '1.6', date: '2023-12-27' },
+  { v: '2.0', date: '2024-02-06' },
+  { v: '2.1', date: '2024-03-27' },
+  { v: '2.2', date: '2024-05-08' },
+  { v: '2.3', date: '2024-06-19' },
+  { v: '2.4', date: '2024-07-31' },
+  { v: '2.5', date: '2024-09-10' },
+  { v: '2.6', date: '2024-10-23' },
+  { v: '2.7', date: '2024-12-04' },
+  { v: '3.0', date: '2025-01-15' },
+  { v: '3.1', date: '2025-02-26' },
+  { v: '3.2', date: '2025-04-09' },
+  { v: '3.3', date: '2025-05-21' },
+  { v: '3.4', date: '2025-07-02' },
+  { v: '3.5', date: '2025-08-13' },
+  { v: '3.6', date: '2025-09-24' },
+  { v: '3.7', date: '2025-11-05' },
+  { v: '4.0', date: '2025-12-17' },
+  { v: '4.1', date: '2026-01-28' },
+  { v: '4.2', date: '2026-03-11' },
+  { v: '4.3', date: '2026-04-22' },
+  { v: '4.4', date: '2026-06-03' },
+  { v: '4.5', date: '2026-07-15' },
+  { v: '4.6', date: '2026-08-26' },
+  { v: '4.7', date: '2026-10-07' },
+  { v: '4.8', date: '2026-11-18' }
+];
 
 function getVersionSchedule() {
   const schedule = [];
-  const baseDate = new Date(VERSION_START.date + 'T00:00:00').getTime();
-  const startIdx = -40; 
-  let curMajor = VERSION_START.major;
-  let curMinor = VERSION_START.minor;
   
-  for(let i=0; i < Math.abs(startIdx); i++) {
-     if (curMinor === 0) { curMajor--; curMinor = 8; } else { curMinor--; }
-  }
-  
-  for (let i = startIdx; i <= 20; i++) {
-    const v1Start = new Date(baseDate + i * VERSION_DAYS * 86400000);
-    const v2Start = new Date(v1Start.getTime() + HALF_DAYS * 86400000);
-    const vEnd    = new Date(v1Start.getTime() + VERSION_DAYS * 86400000);
-    const fullLabel = `${curMajor}.${curMinor}`;
+  // Helper untuk menetapkan standar waktu UTC agar tanggal tidak mundur 1 hari akibat Timezone lokal
+  const parseDate = (dStr) => new Date(dStr + 'T12:00:00Z');
+  const formatIso = (d) => d.toISOString().split('T')[0];
+
+  for (let i = 0; i < HSR_VERSIONS.length; i++) {
+    const current = HSR_VERSIONS[i];
+    const v1Start = parseDate(current.date);
     
-    schedule.push({ fullLabel: fullLabel, label: `${fullLabel} (1/2)`, start: v1Start.toISOString().split('T')[0], end: v2Start.toISOString().split('T')[0] });
-    schedule.push({ fullLabel: fullLabel, label: `${fullLabel} (2/2)`, start: v2Start.toISOString().split('T')[0], end: vEnd.toISOString().split('T')[0] });
-    if (curMinor >= 8) { curMajor++; curMinor = 0; } else { curMinor++; }
+    let vEnd;
+    // Tentukan tanggal akhir berdasarkan dimulainya patch selanjutnya
+    if (i < HSR_VERSIONS.length - 1) {
+        vEnd = parseDate(HSR_VERSIONS[i+1].date);
+    } else {
+        // Fallback durasi 42 hari untuk versi terakhir yang terdata
+        vEnd = new Date(v1Start.getTime() + 42 * 86400000);
+    }
+
+    // Mengkalkulasi fase 1 dan fase 2 (1/2 dan 2/2) 
+    const durationDays = Math.round((vEnd - v1Start) / 86400000);
+    const halfDays = Math.floor(durationDays / 2);
+    
+    const v2Start = new Date(v1Start.getTime() + halfDays * 86400000);
+    
+    schedule.push({ 
+        fullLabel: current.v, 
+        label: `${current.v} (1/2)`, 
+        start: formatIso(v1Start), 
+        end: formatIso(v2Start) 
+    });
+    schedule.push({ 
+        fullLabel: current.v, 
+        label: `${current.v} (2/2)`, 
+        start: formatIso(v2Start), 
+        end: formatIso(vEnd) 
+    });
   }
   return schedule;
 }
 const VERSION_SCHEDULE = getVersionSchedule();
-function getVersionForDate(dateStr, schedule) {
-  for (const v of schedule) { if (dateStr >= v.start && dateStr < v.end) return v.label; } return '—';
-}
-function getFullVersionForDate(dateStr, schedule) {
-  for (const v of schedule) { if (dateStr >= v.start && dateStr < v.end) return v.fullLabel; } return '—';
-}
 
 // ============ Main nav / page switching ============
 document.getElementById('mainNav').addEventListener('click', (e) => {
