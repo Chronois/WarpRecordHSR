@@ -168,8 +168,7 @@ function deleteEntry(section, idx) {
 const MC_NAMES = ['hmc', 'rmc', 'emc', 'dmc', 'pmc'];
 function isMC(name) { return MC_NAMES.includes((name || '').trim().toLowerCase()); }
 function normName(n) { return String(n || '').trim().toLowerCase(); }
-const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E";
-
+const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%23191d40%27/%3E%3Cpath d=%27M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90%27 fill=%27%232b2f5c%27/%3E%3C/svg%3E";
 // Database Master Karakter (Link gambar diambil dari HSR Fandom Wiki)
 // Kamu bisa menambahkan karakter baru di sini dengan format yang sama
 const MASTER_CHARACTERS = {
@@ -778,10 +777,10 @@ function renderRoster() {
     
     return `<div class="roster-card searchable-item ${unownedCls}" data-idx="${r._idx}">
         <div class="roster-img-wrap">
-            <img src="${imgSrc}" onerror="this.src='${DEFAULT_AVATAR}'">
-            ${notOwnedBadge}
-            <div class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''} roster-type-tag">${r.source}</div>
-            <button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button>
+    <img src="${imgSrc}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
+    ${notOwnedBadge}
+    <div class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''} roster-type-tag">${r.source}</div>
+    <button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button>
         </div>
         <div class="roster-info">
             <div class="roster-name" title="${r.name}">${r.name}</div>
