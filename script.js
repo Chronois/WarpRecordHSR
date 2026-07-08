@@ -271,11 +271,11 @@ function computeRosterFromHistory() {
   const newRoster = [];
   allNames.forEach(name => {
     if (!name) return;
-    const baseInfo = MASTER_CHARACTERS[normName(name)] || {};
-    const existing = (DATA.roster || []).find(r => normName(r.name) === name);
-    const source   = existing ? existing.source : (baseInfo.source || 'Unknown');
+    const lowerName = normName(name);
+    const baseInfo = MASTER_CHARACTERS[lowerName] || {};
+    const existing = (DATA.roster || []).find(r => normName(r.name) === lowerName);
     
-    // Logika pengaman gambar custom
+    let source = existing ? existing.source : (baseInfo.source || 'Unknown');
     let imgData = null;
     if (existing && existing.img && !existing.img.includes('viewBox')) {
         imgData = existing.img; 
@@ -283,16 +283,32 @@ function computeRosterFromHistory() {
         imgData = baseInfo.img || null; 
     }
     
-    const dispName = existing ? existing.name : (baseInfo.name || ((DATA.limited||[]).find(r => normName(r.name) === name)?.name || (DATA.standard||[]).find(r => normName(r.name) === name)?.name || (DATA.freebies||[]).find(r => normName(r.name) === name)?.name || name));
+    const dispName = existing ? existing.name : (baseInfo.name || ((DATA.limited||[]).find(r => normName(r.name) === lowerName)?.name || (DATA.standard||[]).find(r => normName(r.name) === lowerName)?.name || (DATA.freebies||[]).find(r => normName(r.name) === lowerName)?.name || name));
 
-    const eidoCount = eidoMap[name] || 0; 
-    const signCount = signMap[name] || 0; 
-    const obtained = obtainedMap[name] || false;
+    const eidoCount = eidoMap[lowerName] || 0; 
+    const signCount = signMap[lowerName] || 0; 
+    let obtained = obtainedMap[lowerName] || false;
     
-    const eidoStr   = obtained ? 'E' + Math.max(0, eidoCount - 1) : 'NoE'; 
+    const celestialChars = ["seele", "argenti", "silver wolf", "silver wolf • lv. 999", "fu xuan", "yunli", "blade", "mortenax blade"];
+    const goldenChars = ["ruan mei", "robin", "huohuo", "luocha", "topaz & numby"];
+    
+    if (celestialChars.includes(lowerName)) {
+        source = 'Celestial Invitation';
+    } else if (goldenChars.includes(lowerName)) {
+        source = 'Golden Companion Spirit';
+    }
+
+    let eidoStr = obtained ? 'E' + Math.max(0, eidoCount - 1) : 'No'; 
+    
+    if (lowerName.includes("trailblazer")) {
+        eidoStr = 'E6';
+        source = 'Main Character';
+        obtained = true; 
+    }
+    
     const signStr = 'S' + signCount;
-    const pvEido    = eidoPullMap[name] || 0; 
-    const pvSign = signPullMap[name] || 0; 
+    const pvEido    = eidoPullMap[lowerName] || 0; 
+    const pvSign = signPullMap[lowerName] || 0; 
     const total = pvEido + pvSign;
 
     newRoster.push({ 
@@ -305,7 +321,7 @@ function computeRosterFromHistory() {
       pullValueSignature: pvSign, 
       totalPullValue: total, 
       pullPercent: 0,
-      isOwned: obtained
+      isOwned: obtained 
     });
   });
 
@@ -318,6 +334,7 @@ function recomputeRosterPercent() {
   const limitedTotal = DATA.roster.filter(r => r.source === 'Limited').reduce((s, r) => s + (r.totalPullValue || 0), 0);
   DATA.roster.forEach(r => { r.pullPercent = (r.source === 'Limited' && limitedTotal) ? Math.round((r.totalPullValue / limitedTotal) * 10000) / 100 : 0; });
 }
+
 function computeBannerStats(rows, maxPity) {
   const total = rows.length; const totalWarps = rows.reduce((s, r) => s + r.pity, 0); const avgPity = total ? totalWarps / total : 0;
   const decisive = rows.filter(r => r.result === 'W' || r.result === 'L'); const wins = rows.filter(r => r.result === 'W').length;
@@ -699,7 +716,6 @@ window.dupTeam = function(idx) {
 window.editTeam = function(idx) {
   const team = DATA.team[idx];
   
-  // Fungsi Helper untuk memilah raw string kembali ke opsi dropwdown
   const parseRole = (str) => str.split(', ').filter(Boolean).map(s => { 
       const lastSpace = s.lastIndexOf(' E');
       if (lastSpace !== -1) {
@@ -768,32 +784,44 @@ document.getElementById('rosterSortSelect')?.addEventListener('change', (e) => {
 function getRosterRows() {
   let rows = (DATA.roster||[]).map((r, idx) => ({ ...r, _idx: idx }));
   if (rosterFilter === 'Limited') rows = rows.filter(r => r.source === 'Limited'); else if (rosterFilter === 'Standard') rows = rows.filter(r => r.source === 'Standard'); else if (rosterFilter === 'other') rows = rows.filter(r => r.source !== 'Limited' && r.source !== 'Standard');
+  
   rows.sort((a, b) => {
+    if (a.isOwned !== b.isOwned) {
+        return a.isOwned ? -1 : 1;
+    }
+
     if (rosterSortValue === 'nameAsc') return a.name.localeCompare(b.name); if (rosterSortValue === 'nameDesc') return b.name.localeCompare(a.name);
-    const ea = parseInt(a.eidolon.replace('E','').replace('NoE','0')) || 0; const sa = parseInt(a.signature.replace('S','')) || 0; const eb = parseInt(b.eidolon.replace('E','').replace('NoE','0')) || 0; const sb = parseInt(b.signature.replace('S','')) || 0;
+    
+    const ea = parseInt(a.eidolon.replace('E','').replace('No','0')) || 0; 
+    const sa = parseInt(a.signature.replace('S','')) || 0; 
+    const eb = parseInt(b.eidolon.replace('E','').replace('No','0')) || 0; 
+    const sb = parseInt(b.signature.replace('S','')) || 0;
+    
     if (rosterSortValue === 'eidolonDesc') { if (eb !== ea) return eb - ea; return b.totalPullValue - a.totalPullValue; }
     if (rosterSortValue === 'costDesc') { const costA = ea + sa; const costB = eb + sb; if (costB !== costA) return costB - costA; return b.totalPullValue - a.totalPullValue; }
     return b.totalPullValue - a.totalPullValue;
-  }); return rows;
+  }); 
+  return rows;
 }
 
 function renderRoster() {
   const rows = getRosterRows(); const grid = document.getElementById('rosterGrid');
   if (!rows.length) { grid.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`; return; }
   grid.innerHTML = rows.map(r => {
-    const eidoCls = r.eidolon === 'NoE' ? '' : 'style="color:var(--gold-soft);font-weight:700"'; 
+    const eidoCls = r.eidolon === 'No' ? '' : 'style="color:var(--gold-soft);font-weight:700"'; 
     const signCls = r.signature === 'S0' ? '' : 'style="color:var(--cyan);font-weight:700"'; 
     const imgSrc = r.img || DEFAULT_AVATAR;
     
-    // Tentukan class jika tidak dimiliki
     const unownedCls = r.isOwned ? '' : 'unowned';
     const notOwnedBadge = r.isOwned ? '' : `<div class="unowned-tag">NOT OWNED</div>`;
+    
+    const tagClass = r.source.replace(/\s+/g, '');
     
     return `<div class="roster-card searchable-item ${unownedCls}" data-idx="${r._idx}">
         <div class="roster-img-wrap">
             <img src="${imgSrc}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
             ${notOwnedBadge}
-            <div class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''} roster-type-tag">${r.source}</div>
+            <div class="tag ${tagClass} roster-type-tag">${r.source}</div>
             <button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button>
         </div>
         <div class="roster-info">
@@ -815,7 +843,6 @@ document.getElementById('rosterTabs').addEventListener('click', (e) => {
   renderRoster(); 
 });
 
-// LOGIKA ADD/UPDATE CHARACTER FORM (YANG SEMPAT HILANG)
 document.getElementById('form-character').addEventListener('submit', (e) => {
   e.preventDefault(); const fd = new FormData(e.target); const name = fd.get('name').trim(); const src = fd.get('source');
   const imgSrc = document.getElementById('charFormImg').src; const isDefault = imgSrc.includes('viewBox'); 
@@ -826,7 +853,7 @@ document.getElementById('form-character').addEventListener('submit', (e) => {
       if (!isDefault) existing.img = imgSrc; 
   } else { 
       if(!DATA.roster) DATA.roster = []; 
-      DATA.roster.push({ name, source: src, img: isDefault ? null : imgSrc, eidolon: 'NoE', signature: 'S0', pullValueEidolon: 0, pullValueSignature: 0, totalPullValue: 0, pullPercent: 0, isOwned: true }); 
+      DATA.roster.push({ name, source: src, img: isDefault ? null : imgSrc, eidolon: 'No', signature: 'S0', pullValueEidolon: 0, pullValueSignature: 0, totalPullValue: 0, pullPercent: 0, isOwned: true }); 
   }
   recomputeRosterPercent(); saveWorkingData(); renderAll(); e.target.reset(); document.getElementById('charFormImg').src = DEFAULT_AVATAR; 
 });
