@@ -107,38 +107,24 @@ function goToPage(page) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === page));
   document.querySelectorAll('.page').forEach(p => { p.hidden = p.id !== 'page-' + page; });
   window.scrollTo({ top: 0, behavior: 'auto' });
-
-  // Auto-populate the textarea when opening the Data tab
-  if (page === 'data') {
-    document.getElementById('dataTextarea').value = JSON.stringify(DATA, null, 2);
-  }
 }
 
-// ============ Working data (Multi-Profile System) ============
-const BASE_STORAGE_KEY = 'warpRecordHsrData_v3_';
-let CURRENT_PROFILE = localStorage.getItem('hsr_current_profile') || 'main';
-
-const profileSelect = document.getElementById('profileSwitcher');
-if (profileSelect) profileSelect.value = CURRENT_PROFILE;
-
-function getStorageKey() {
-  return BASE_STORAGE_KEY + CURRENT_PROFILE;
-}
-
+// ============ Working data ============
+const STORAGE_KEY = 'warpRecordHsrData_v3';
 let DATA = loadWorkingData();
 
 function loadWorkingData() {
   try {
-    const raw = localStorage.getItem(getStorageKey());
+    const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch (e) { console.warn('Failed to load from browser storage.', e); }
-  return typeof HSR_DATA !== 'undefined' ? JSON.parse(JSON.stringify(HSR_DATA)) : {};
+  return typeof HSR_DATA !== 'undefined' ? JSON.parse(JSON.stringify(HSR_DATA)) : { limited: [], standard: [], freebies: [], roster: [], priority: [], team: [], stellarJade: [] };
 }
 
 function saveWorkingData() {
   const statusEl = document.getElementById('saveStatus');
   try {
-    localStorage.setItem(getStorageKey(), JSON.stringify(DATA));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
     if (statusEl) {
       statusEl.textContent = 'Saved · ' + new Date().toLocaleTimeString('en-US');
       statusEl.className = 'save-status ok';
@@ -1099,54 +1085,23 @@ document.getElementById('form-stellarjade').addEventListener('submit', (e) => {
   initDateInputs();
 });
 
-// ============ DATA MANAGEMENT (Fribbels/MDC Style) ============
+// ============ DATA MANAGEMENT ============
 
-// 1. Copy JSON text to clipboard
-document.getElementById('btnCopyJson')?.addEventListener('click', () => {
-  const textarea = document.getElementById('dataTextarea');
-  textarea.select();
-  document.execCommand('copy');
-  alert('Data copied to clipboard!');
-});
-
-// 2. Apply JSON text from textarea
-document.getElementById('btnImportText')?.addEventListener('click', () => {
-  try {
-    const text = document.getElementById('dataTextarea').value.trim();
-    if (!text) return alert('Textarea is empty!');
-    
-    // Validasi format file agar tidak memuat script JS aneh
-    const parsed = JSON.parse(text);
-    
-    // Pastikan array dasar ada
-    ['limited','standard','freebies','roster','priority','team','stellarJade'].forEach(k => { 
-      if (!parsed[k]) parsed[k] = []; 
-    });
-    
-    DATA = parsed;
-    saveWorkingData();
-    renderAll();
-    alert('Data successfully applied from text!');
-  } catch (err) {
-    alert('Failed to parse JSON. Please make sure the format is correct.\nError: ' + err.message);
-  }
-});
-
-// 3. Download JSON file
+// 1. Download JSON file
 document.getElementById('btnDownloadJson')?.addEventListener('click', () => {
   const content = JSON.stringify(DATA, null, 2);
   const blob = new Blob([content], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; 
-  a.download = `hsr_backup_${CURRENT_PROFILE}_${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`;
   document.body.appendChild(a); 
   a.click(); 
   a.remove();
   URL.revokeObjectURL(url);
 });
 
-// 4. Upload JSON file
+// 2. Upload JSON file
 document.getElementById('uploadJsonFile')?.addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -1163,7 +1118,6 @@ document.getElementById('uploadJsonFile')?.addEventListener('change', (e) => {
       DATA = parsed;
       saveWorkingData();
       renderAll();
-      document.getElementById('dataTextarea').value = JSON.stringify(DATA, null, 2);
       alert('Data loaded successfully from file!');
     } catch (err) { 
       alert('Failed to load file. Ensure it is a valid JSON backup.\nError: ' + err.message); 
@@ -1174,20 +1128,18 @@ document.getElementById('uploadJsonFile')?.addEventListener('change', (e) => {
   reader.readAsText(file);
 });
 
-// 5. Clear Data (Reset)
+// 3. Clear Data (Reset)
 document.getElementById('btnResetData')?.addEventListener('click', () => {
-  if (!confirm(`Clear all data for profile "${CURRENT_PROFILE}"? This action cannot be undone.`)) return;
-  localStorage.removeItem(getStorageKey());
+  if (!confirm('Clear all data? This action cannot be undone.')) return;
+  localStorage.removeItem(STORAGE_KEY);
   
   // Format template data kosong murni
   DATA = { limited: [], standard: [], freebies: [], roster: [], priority: [], team: [], stellarJade: [] };
   
   saveWorkingData();
   renderAll();
-  document.getElementById('dataTextarea').value = JSON.stringify(DATA, null, 2);
   alert('Data cleared.');
 });
-
 // ============ Table & Grid Filters ============
 document.querySelectorAll('.table-filter').forEach(input => {
   input.addEventListener('input', (e) => {
