@@ -170,6 +170,48 @@ function isMC(name) { return MC_NAMES.includes((name || '').trim().toLowerCase()
 function normName(n) { return String(n || '').trim().toLowerCase(); }
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E";
 
+// Database Master Karakter (Link gambar diambil dari HSR Fandom Wiki)
+// Kamu bisa menambahkan karakter baru di sini dengan format yang sama
+const MASTER_CHARACTERS = {
+  "seele": { name: "Seele", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/c/c5/Character_Seele_Icon.png" },
+  "jing yuan": { name: "Jing Yuan", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/e/e4/Character_Jing_Yuan_Icon.png" },
+  "silver wolf": { name: "Silver Wolf", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/c/c9/Character_Silver_Wolf_Icon.png" },
+  "luocha": { name: "Luocha", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/c/ca/Character_Luocha_Icon.png" },
+  "kafka": { name: "Kafka", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/0/0b/Character_Kafka_Icon.png" },
+  "blade": { name: "Blade", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/4/41/Character_Blade_Icon.png" },
+  "dan heng • imbibitor lunae": { name: "Dan Heng • Imbibitor Lunae", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/e/ed/Character_Dan_Heng_%E2%80%A2_Imbibitor_Lunae_Icon.png" },
+  "fu xuan": { name: "Fu Xuan", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/3/30/Character_Fu_Xuan_Icon.png" },
+  "jingliu": { name: "Jingliu", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/6/69/Character_Jingliu_Icon.png" },
+  "topaz & numby": { name: "Topaz & Numby", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/b/b5/Character_Topaz_and_Numby_Icon.png" },
+  "huohuo": { name: "Huohuo", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/e/ec/Character_Huohuo_Icon.png" },
+  "argenti": { name: "Argenti", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/9/9f/Character_Argenti_Icon.png" },
+  "ruan mei": { name: "Ruan Mei", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/1/1a/Character_Ruan_Mei_Icon.png" },
+  "dr. ratio": { name: "Dr. Ratio", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/2/23/Character_Dr._Ratio_Icon.png" },
+  "black swan": { name: "Black Swan", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/a/a2/Character_Black_Swan_Icon.png" },
+  "sparkle": { name: "Sparkle", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/2/21/Character_Sparkle_Icon.png" },
+  "acheron": { name: "Acheron", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/7/7b/Character_Acheron_Icon.png" },
+  "aventurine": { name: "Aventurine", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/4/4b/Character_Aventurine_Icon.png" },
+  "robin": { name: "Robin", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/e/e0/Character_Robin_Icon.png" },
+  "boothill": { name: "Boothill", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/3/30/Character_Boothill_Icon.png" },
+  "firefly": { name: "Firefly", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/0/07/Character_Firefly_Icon.png" },
+  "jade": { name: "Jade", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/0/0c/Character_Jade_Icon.png" },
+  "yunli": { name: "Yunli", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/d/df/Character_Yunli_Icon.png" },
+  "jiaoqiu": { name: "Jiaoqiu", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/0/09/Character_Jiaoqiu_Icon.png" },
+  "feixiao": { name: "Feixiao", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/3/30/Character_Feixiao_Icon.png" },
+  "lingsha": { name: "Lingsha", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/9/91/Character_Lingsha_Icon.png" },
+  "rappa": { name: "Rappa", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/c/c9/Character_Rappa_Icon.png" },
+  "sunday": { name: "Sunday", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/d/da/Character_Sunday_Icon.png" },
+  "fugue": { name: "Fugue", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/d/df/Character_Fugue_Icon.png" },
+  "aglaea": { name: "Aglaea", source: "Limited", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/6/66/Character_Aglaea_Icon.png" },
+  "bronya": { name: "Bronya", source: "Standard", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/9/9e/Character_Bronya_Icon.png" },
+  "gepard": { name: "Gepard", source: "Standard", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/a/ab/Character_Gepard_Icon.png" },
+  "himeko": { name: "Himeko", source: "Standard", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/6/69/Character_Himeko_Icon.png" },
+  "welt": { name: "Welt", source: "Standard", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/5/5a/Character_Welt_Icon.png" },
+  "bailu": { name: "Bailu", source: "Standard", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/b/be/Character_Bailu_Icon.png" },
+  "yanqing": { name: "Yanqing", source: "Standard", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/e/e0/Character_Yanqing_Icon.png" },
+  "clara": { name: "Clara", source: "Standard", img: "https://static.wikia.nocookie.net/houkai-star-rail/images/0/05/Character_Clara_Icon.png" }
+};
+
 function computeRosterFromHistory() {
   const charHistory   = (DATA.limited || []).filter(r => r.category === 'Character');
   const lcHistory     = (DATA.limited || []).filter(r => r.category === 'Light Cone');
@@ -206,26 +248,59 @@ function computeRosterFromHistory() {
     else if ((r.category || '').includes('Light Cone')) { signMap[name]++; }
   });
 
-  const allNames = new Set([...Object.keys(eidoMap), ...Object.keys(signMap), ...(DATA.roster || []).map(r => normName(r.name))]);
+  // GABUNGKAN NAMA DARI MASTER DATABASE DENGAN HISTORY
+  const allNames = new Set([
+    ...Object.keys(MASTER_CHARACTERS), 
+    ...Object.keys(eidoMap), 
+    ...Object.keys(signMap), 
+    ...(DATA.roster || []).map(r => normName(r.name))
+  ]);
+  
   const newRoster = [];
   allNames.forEach(name => {
     if (!name) return;
+    const baseInfo = MASTER_CHARACTERS[name] || {};
     const existing = (DATA.roster || []).find(r => normName(r.name) === name);
-    const source   = existing ? existing.source : 'Unknown';
-    const imgData  = existing ? existing.img : null;
-    const dispName = existing ? existing.name : ((DATA.limited||[]).find(r => normName(r.name) === name)?.name || (DATA.standard||[]).find(r => normName(r.name) === name)?.name || (DATA.freebies||[]).find(r => normName(r.name) === name)?.name || name);
+    const source   = existing ? existing.source : (baseInfo.source || 'Unknown');
+    
+    // Tentukan Image
+    let imgData = existing ? existing.img : null;
+    if (!imgData || imgData.includes('viewBox')) {
+        imgData = baseInfo.img || null; 
+    }
+    
+    // Tentukan Nama Display
+    const dispName = existing ? existing.name : (baseInfo.name || ((DATA.limited||[]).find(r => normName(r.name) === name)?.name || (DATA.standard||[]).find(r => normName(r.name) === name)?.name || (DATA.freebies||[]).find(r => normName(r.name) === name)?.name || name));
 
-    const eidoCount = eidoMap[name] || 0; const signCount = signMap[name] || 0; const obtained = obtainedMap[name] || false;
-    const eidoStr   = obtained ? 'E' + Math.max(0, eidoCount - 1) : 'NoE'; const signStr = 'S' + signCount;
-    const pvEido    = eidoPullMap[name] || 0; const pvSign = signPullMap[name] || 0; const total = pvEido + pvSign;
+    const eidoCount = eidoMap[name] || 0; 
+    const signCount = signMap[name] || 0; 
+    const obtained = obtainedMap[name] || false;
+    
+    const eidoStr   = obtained ? 'E' + Math.max(0, eidoCount - 1) : 'NoE'; 
+    const signStr = 'S' + signCount;
+    const pvEido    = eidoPullMap[name] || 0; 
+    const pvSign = signPullMap[name] || 0; 
+    const total = pvEido + pvSign;
 
-    newRoster.push({ name: dispName, source, img: imgData, eidolon: eidoStr, signature: signStr, pullValueEidolon: pvEido, pullValueSignature: pvSign, totalPullValue: total, pullPercent: 0 });
+    newRoster.push({ 
+      name: dispName, 
+      source, 
+      img: imgData, 
+      eidolon: eidoStr, 
+      signature: signStr, 
+      pullValueEidolon: pvEido, 
+      pullValueSignature: pvSign, 
+      totalPullValue: total, 
+      pullPercent: 0,
+      isOwned: obtained // Flag penanda punya atau tidak
+    });
   });
 
   newRoster.sort((a, b) => b.totalPullValue - a.totalPullValue);
   DATA.roster = newRoster;
   recomputeRosterPercent();
 }
+
 function recomputeRosterPercent() {
   const limitedTotal = DATA.roster.filter(r => r.source === 'Limited').reduce((s, r) => s + (r.totalPullValue || 0), 0);
   DATA.roster.forEach(r => { r.pullPercent = (r.source === 'Limited' && limitedTotal) ? Math.round((r.totalPullValue / limitedTotal) * 10000) / 100 : 0; });
@@ -693,23 +768,31 @@ function renderRoster() {
   const rows = getRosterRows(); const grid = document.getElementById('rosterGrid');
   if (!rows.length) { grid.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`; return; }
   grid.innerHTML = rows.map(r => {
-    const eidoCls = r.eidolon === 'NoE' ? '' : 'style="color:var(--gold-soft);font-weight:700"'; const signCls = r.signature === 'S0' ? '' : 'style="color:var(--cyan);font-weight:700"'; const imgSrc = r.img || DEFAULT_AVATAR;
+    const eidoCls = r.eidolon === 'NoE' ? '' : 'style="color:var(--gold-soft);font-weight:700"'; 
+    const signCls = r.signature === 'S0' ? '' : 'style="color:var(--cyan);font-weight:700"'; 
+    const imgSrc = r.img || DEFAULT_AVATAR;
     
-    // PERUBAHAN: PV Eido & PV Sign menjadi sekadar PV 
-    return `<div class="roster-card searchable-item" data-idx="${r._idx}"><div class="roster-img-wrap"><img src="${imgSrc}" onerror="this.src='${DEFAULT_AVATAR}'"><div class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''} roster-type-tag">${r.source}</div><button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button></div><div class="roster-info"><div class="roster-name" title="${r.name}">${r.name}</div><div class="roster-stats"><span>Eidolon: <span ${eidoCls}>${r.eidolon}</span></span><span>Sign: <span ${signCls}>${r.signature}</span></span></div><div class="roster-stats" style="margin-top: 4px;"><span>PV: <span style="color:var(--text)">${fmt(r.pullValueEidolon, 0)}</span></span><span>PV: <span style="color:var(--text)">${fmt(r.pullValueSignature, 0)}</span></span></div><div class="roster-stats" style="margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;"><span>Total Pull Value: <span style="color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</span></span></div></div></div>`;
+    // Tentukan class jika tidak dimiliki
+    const unownedCls = r.isOwned ? '' : 'unowned';
+    const notOwnedBadge = r.isOwned ? '' : `<div class="unowned-tag">NOT OWNED</div>`;
+    
+    return `<div class="roster-card searchable-item ${unownedCls}" data-idx="${r._idx}">
+        <div class="roster-img-wrap">
+            <img src="${imgSrc}" onerror="this.src='${DEFAULT_AVATAR}'">
+            ${notOwnedBadge}
+            <div class="tag ${r.source === 'Limited' ? 'Limited' : r.source === 'Standard' ? 'Standard' : ''} roster-type-tag">${r.source}</div>
+            <button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button>
+        </div>
+        <div class="roster-info">
+            <div class="roster-name" title="${r.name}">${r.name}</div>
+            <div class="roster-stats"><span>Eidolon: <span ${eidoCls}>${r.eidolon}</span></span><span>Sign: <span ${signCls}>${r.signature}</span></span></div>
+            <div class="roster-stats" style="margin-top: 4px;"><span>PV: <span style="color:var(--text)">${fmt(r.pullValueEidolon, 0)}</span></span><span>PV: <span style="color:var(--text)">${fmt(r.pullValueSignature, 0)}</span></span></div>
+            <div class="roster-stats" style="margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;"><span>Total Pull Value: <span style="color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</span></span></div>
+        </div>
+    </div>`;
   }).join('');
   const dl = document.getElementById('charNameList'); if (dl) dl.innerHTML = getAllCharNames().map(n => `<option value="${n}">`).join('');
 }
-document.getElementById('rosterTabs').addEventListener('click', (e) => { const btn = e.target.closest('.tab'); if (!btn) return; document.querySelectorAll('#rosterTabs .tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); rosterFilter = btn.dataset.filter; renderRoster(); });
-
-document.getElementById('form-character').addEventListener('submit', (e) => {
-  e.preventDefault(); const fd = new FormData(e.target); const name = fd.get('name').trim(); const src = fd.get('source');
-  const imgSrc = document.getElementById('charFormImg').src; const isDefault = imgSrc.includes('viewBox'); 
-  const existing = (DATA.roster||[]).find(r => normName(r.name) === normName(name));
-  if (existing) { existing.source = src; if (!isDefault) existing.img = imgSrc; } 
-  else { if(!DATA.roster) DATA.roster = []; DATA.roster.push({ name, source: src, img: isDefault ? null : imgSrc, eidolon: 'NoE', signature: 'S0', pullValueEidolon: 0, pullValueSignature: 0, totalPullValue: 0, pullPercent: 0 }); }
-  recomputeRosterPercent(); saveWorkingData(); renderAll(); e.target.reset(); document.getElementById('charFormImg').src = DEFAULT_AVATAR; 
-});
 
 // ============ STELLAR JADE ============
 function renderStellarJade() {
