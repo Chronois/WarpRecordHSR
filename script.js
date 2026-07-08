@@ -16,7 +16,6 @@ function daysBetween(a, b) {
   return Math.max(0, Math.round((new Date(a + 'T00:00:00') - new Date(b + 'T00:00:00')) / 86400000));
 }
 
-// Set today's date on all date inputs
 function initDateInputs() {
   const today = new Date().toISOString().split('T')[0];
   document.querySelectorAll('input[type="date"]').forEach(el => {
@@ -424,6 +423,8 @@ function renderLimited() {
   const rows   = (DATA.limited||[]).filter(r => r.category === currentLimitedCat);
   const maxPity = currentLimitedCat === 'Character' ? 90 : 80;
   renderBannerStats('limitedStats', computeBannerStats(rows, maxPity));
+  renderTrack('limitedTrack', maxPity, true);
+  // Re-fetch to render properly since we needed maxPity
   renderTrack('limitedTrack', rows, maxPity, true);
 }
 
@@ -478,8 +479,6 @@ document.getElementById('form-standard').addEventListener('submit', (e) => {
   e.target.reset();
   initDateInputs();
 });
-
-const VERSION_SCHEDULE = getVersionSchedule();
 
 function renderFreebies() {
   const container = document.getElementById('freebieRow');
@@ -593,6 +592,9 @@ document.getElementById('form-priority').addEventListener('submit', (e) => {
 });
 
 // ============ Team ============
+// Placeholder Default Image (SVG encoded, sama persis dengan Gambar 2)
+const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E";
+
 function getAllCharNames() {
   const names = new Set();
   (DATA.limited||[]).forEach(r => { if (r.name) names.add(r.name); });
@@ -611,33 +613,7 @@ function populateSlotDropdowns() {
   });
 }
 
-// UI Template for Team Slots
-const slotTemplate = (role, isRemovable) => `
-  <div class="slot-row" style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
-     <div class="slot-img-upload" style="width: 80px; height: 80px; background: var(--surface-2); border-radius: 8px; border: 1px dashed var(--text-dim); overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer;">
-        <img class="slot-preview" src="image_bfed43.png" style="width:100%; height:100%; object-fit:cover; opacity: 0.5; transition: 0.2s;">
-        <input type="file" class="slot-file" accept="image/*" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0; cursor: pointer;">
-     </div>
-     <div class="slot-inputs" style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
-        <div style="display: flex; gap: 8px;">
-           <select class="slot-name" data-role="${role}" style="flex: 1; padding: 6px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text);"><option value="">— none —</option></select>
-           <select class="slot-eidolon" style="width: 70px; padding: 6px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text);">${[0,1,2,3,4,5,6].map(i=>`<option value="E${i}">E${i}</option>`).join('')}</select>
-        </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-           <select class="slot-sign" style="width: 90px; padding: 6px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text);">${[0,1,2,3,4,5].map(i=>`<option value="S${i}">S${i}</option>`).join('')}</select>
-           ${isRemovable ? `<button type="button" class="btn-remove-slot" style="padding: 6px 12px; border-radius: 6px; background: rgba(226,128,125,0.1); border: 1px solid var(--loss); color: var(--loss); cursor:pointer; font-size: 11px;">✕ Remove</button>` : ''}
-        </div>
-     </div>
-  </div>
-`;
-
-// Initialize Team default form slots
-document.getElementById('slot-mainDps').innerHTML = slotTemplate('mainDps', false);
-document.getElementById('slot-subDps').innerHTML = slotTemplate('subDps', false);
-document.getElementById('slot-support').innerHTML = slotTemplate('support', false);
-document.getElementById('slot-sustain').innerHTML = slotTemplate('sustain', false);
-
-// Image Upload Preview Listener
+// Handler per-slot Image Upload
 document.getElementById('form-team').addEventListener('change', (e) => {
   if (e.target.classList.contains('slot-file')) {
     const file = e.target.files[0];
@@ -647,7 +623,6 @@ document.getElementById('form-team').addEventListener('change', (e) => {
         const img = e.target.previousElementSibling;
         if (img && img.classList.contains('slot-preview')) {
           img.src = evt.target.result;
-          img.style.opacity = '1';
         }
       };
       reader.readAsDataURL(file);
@@ -657,6 +632,26 @@ document.getElementById('form-team').addEventListener('change', (e) => {
   }
 });
 
+// Tambah Slot Tambahan
+const slotTemplate = (role, isRemovable) => `
+  <div class="slot-row">
+     <div class="slot-img-upload">
+        <img class="slot-preview" src="${DEFAULT_AVATAR}">
+        <input type="file" class="slot-file" accept="image/*" title="Upload Image">
+     </div>
+     <div class="slot-inputs">
+        <div class="slot-top">
+           <select class="slot-name" data-role="${role}"><option value="">— none —</option></select>
+           <select class="slot-eidolon">${[0,1,2,3,4,5,6].map(i=>`<option value="E${i}">E${i}</option>`).join('')}</select>
+        </div>
+        <div class="slot-bottom">
+           <select class="slot-sign">${[0,1,2,3,4,5].map(i=>`<option value="S${i}">S${i}</option>`).join('')}</select>
+           ${isRemovable ? `<button type="button" class="btn-remove-slot">✕ Remove</button>` : ''}
+        </div>
+     </div>
+  </div>
+`;
+
 document.querySelectorAll('.btn-add-slot').forEach(btn => {
   btn.addEventListener('click', () => {
     const role    = btn.dataset.role;
@@ -664,8 +659,6 @@ document.querySelectorAll('.btn-add-slot').forEach(btn => {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = slotTemplate(role, true);
     slotDiv.appendChild(wrapper.firstElementChild);
-    
-    // Refresh names dropdown for the new select
     populateSlotDropdowns();
     updateTeamPreview();
   });
@@ -683,8 +676,9 @@ function getSlotMembers(role) {
     const name = row.querySelector('.slot-name')?.value || '';
     const eido = row.querySelector('.slot-eidolon')?.value || 'E0';
     const sign = row.querySelector('.slot-sign')?.value || 'S0';
-    const preview = row.querySelector('.slot-preview');
-    const img = (preview && !preview.src.includes('image_bfed43.png')) ? preview.src : null;
+    const previewSrc = row.querySelector('.slot-preview')?.src;
+    // Cek kalau belum dirubah dari default
+    const img = (previewSrc && !previewSrc.includes('viewBox')) ? previewSrc : DEFAULT_AVATAR;
     return name ? { name, eido, sign, img } : null;
   }).filter(Boolean);
 }
@@ -748,23 +742,31 @@ function renderTeam() {
   indexed.sort((a, b) => b.r.pullValue - a.r.pullValue);
   
   grid.innerHTML = indexed.map(({ r, idx }) => {
-    const subDps = Array.isArray(r.subDps) ? r.subDps.join(', ') : r.subDps;
-    const support = Array.isArray(r.support) ? r.support.join(', ') : r.support;
+    const subDps = Array.isArray(r.subDps) ? r.subDps.join(', ') : (r.subDps || '—');
+    const support = Array.isArray(r.support) ? r.support.join(', ') : (r.support || '—');
     const pctVal = pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2);
     
-    const imgs = r.images || [];
-    const imgHtml = imgs.map(img => `<div class="team-image-slot"><img src="${img}" onerror="this.src='image_bfed43.png'"></div>`).join('');
+    let imgHtml = '';
+    if (r.members && r.members.length > 0) {
+       imgHtml = r.members.map(m => `
+         <div class="team-image-slot" title="${m.name}">
+            <img src="${m.img}" onerror="this.src='${DEFAULT_AVATAR}'">
+         </div>
+       `).join('');
+    } else {
+       imgHtml = `<div class="team-image-slot"><img src="${DEFAULT_AVATAR}"></div>`;
+    }
 
     return `
       <div class="team-card searchable-item" data-idx="${idx}">
         <div class="team-image-row">
-            ${imgHtml || `<div class="team-image-slot"><img src="image_bfed43.png"></div>`}
+            ${imgHtml}
         </div>
         <div class="team-card-content">
           <div class="tc-arch">${r.archetype}</div>
           <div class="tc-row"><span>Main DPS:</span><span class="tc-val">${r.mainDps || '—'}</span></div>
-          <div class="tc-row"><span>Sub DPS:</span><span class="tc-val">${subDps || '—'}</span></div>
-          <div class="tc-row"><span>Support:</span><span class="tc-val">${support || '—'}</span></div>
+          <div class="tc-row"><span>Sub DPS:</span><span class="tc-val">${subDps}</span></div>
+          <div class="tc-row"><span>Support:</span><span class="tc-val">${support}</span></div>
           <div class="tc-row"><span>Sustain:</span><span class="tc-val">${r.sustain || '—'}</span></div>
           <div class="tc-row"><span>Cost:</span><span class="tc-val">${r.cost || '—'}</span></div>
           <div class="tc-footer">
@@ -787,21 +789,20 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
   const sustainSlots = getSlotMembers('sustain');
 
   const fmt2 = (arr) => arr.map(m => `${m.name} ${m.eido}${m.sign}`);
-
   const allMembers = [...mainDpsSlots, ...subDpsSlots, ...supportSlots, ...sustainSlots];
+  
   const { costStr, totalPV } = computeTeamCostAndPV(allMembers);
-  const images = allMembers.map(m => m.img || 'image_bfed43.png');
 
   if (!DATA.team) DATA.team = [];
   DATA.team.push({
     archetype: fd.get('archetype').trim(),
     mainDps:   fmt2(mainDpsSlots).join(', ') || '',
-    subDps:    fmt2(subDpsSlots),
-    support:   fmt2(supportSlots),
+    subDps:    fmt2(subDpsSlots).join(', ') || '',
+    support:   fmt2(supportSlots).join(', ') || '',
     sustain:   fmt2(sustainSlots).join(', ') || '',
     cost:      costStr,
     pullValue: totalPV,
-    images:    images
+    members:   allMembers // Menyimpan data gambar tiap slot
   });
 
   saveWorkingData();
@@ -809,15 +810,24 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
   e.target.reset();
   initDateInputs();
 
-  // Reset visually
-  document.getElementById('slot-mainDps').innerHTML = slotTemplate('mainDps', false);
-  document.getElementById('slot-subDps').innerHTML = slotTemplate('subDps', false);
-  document.getElementById('slot-support').innerHTML = slotTemplate('support', false);
-  document.getElementById('slot-sustain').innerHTML = slotTemplate('sustain', false);
-  populateSlotDropdowns();
+  // Reset semua gambar preview kembali ke default
+  document.querySelectorAll('.slot-preview').forEach(img => img.src = DEFAULT_AVATAR);
+
+  // Buang slot tambahan jika ada (menyisakan slot 1 awal saja)
+  ['subDps','support'].forEach(role => {
+    const slotDiv = document.getElementById('slot-' + role);
+    const rows = slotDiv.querySelectorAll('.slot-row');
+    rows.forEach((row, i) => { if (i > 0) row.remove(); });
+    slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = '');
+  });
+  ['mainDps','sustain'].forEach(role => {
+    const slotDiv = document.getElementById('slot-' + role);
+    slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = '');
+  });
 
   document.getElementById('team-cost-preview').value = '';
   document.getElementById('team-pv-preview').value   = '';
+  populateSlotDropdowns();
 });
 
 // ROSTER
