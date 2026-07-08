@@ -251,12 +251,13 @@ function computeRosterFromHistory() {
     if (!name) return;
     const baseInfo = MASTER_CHARACTERS[name] || {};
     const existing = (DATA.roster || []).find(r => normName(r.name) === name);
-    const source   = existing ? existing.source : (baseInfo.source || 'Unknown');
     
     // Tentukan Image
-    let imgData = existing ? existing.img : null;
-    if (!imgData || imgData.includes('viewBox')) {
-        imgData = baseInfo.img || null; 
+   let imgData = null;
+    if (existing && existing.img && !existing.img.includes('viewBox')) {
+        imgData = existing.img; // Gunakan gambar yang sudah di-crop manual
+    } else {
+        imgData = baseInfo.img || null; // Gunakan dari database jika belum ada
     }
     
     // Tentukan Nama Display
