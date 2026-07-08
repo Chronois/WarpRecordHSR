@@ -378,7 +378,7 @@ document.getElementById('btnModalSubmit').addEventListener('click', () => {
   if (!globalCropper) return;
   try {
     /* PERBAIKAN: Output Canvas disetel menjadi persegi sempurna 256x256 */
-    const canvas = globalCropper.getCroppedCanvas({ width: 256, height: 256 });
+    const canvas = globalCropper.getCroppedCanvas({ width: 1024, height: 1024 });
     if (!canvas) throw new Error("Canvas is empty");
     
     const finalBase64 = canvas.toDataURL('image/jpeg', 0.85); 
