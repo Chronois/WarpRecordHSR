@@ -482,15 +482,18 @@ document.getElementById('limitedTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('.tab'); if (!btn) return;
   document.querySelectorAll('#limitedTabs .tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); currentLimitedCat = btn.dataset.cat; renderLimited();
 });
-function renderManageLimited() { renderDeleteTable('manageTable-limited', 'limited', ['Date','Type','Name','Pity','Result','Days Since'], r => [formatDate(r.date), r.category, r.name, r.pity, r.result === 'W' ? 'Win' : r.result === 'L' ? 'Loss' : 'Guaranteed', r.daysSince], (a, b) => b.r.date.localeCompare(a.r.date)); }
-document.getElementById('form-limited').addEventListener('submit', (e) => {
-  e.preventDefault(); const fd = new FormData(e.target); if (!DATA.limited) DATA.limited = [];
-  DATA.limited.push({ date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(), pity: Number(fd.get('pity')), result: fd.get('result'), daysSince: 0 });
-  sortByDate(DATA.limited); recomputeDaysSince(DATA.limited); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs();
-});
+function renderManageLimited() { 
+  renderDeleteTable('manageTable-limited', 'limited', ['Date','Type','Name','Pity','Result','Days Since'], 
+  r => [formatDate(r.date), r.category, r.name, r.pity, r.result === 'W' ? 'Win' : r.result === 'L' ? 'Loss' : 'Guaranteed', r.daysSince], 
+  (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; }); 
+}
 
 function renderStandard() { const rows = DATA.standard || []; renderBannerStats('standardStats', computeBannerStats(rows, 80)); renderTrack('standardTrack', rows, 80, false); }
-function renderManageStandard() { renderDeleteTable('manageTable-standard', 'standard', ['Date','Type','Name','Pity','Days Since'], r => [formatDate(r.date), r.category, r.name, r.pity, r.daysSince], (a, b) => b.r.date.localeCompare(a.r.date)); }
+function renderManageStandard() { 
+  renderDeleteTable('manageTable-standard', 'standard', ['Date','Type','Name','Pity','Days Since'], 
+  r => [formatDate(r.date), r.category, r.name, r.pity, r.daysSince], 
+  (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; }); 
+}
 document.getElementById('form-standard').addEventListener('submit', (e) => {
   e.preventDefault(); const fd = new FormData(e.target); if (!DATA.standard) DATA.standard = [];
   DATA.standard.push({ date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(), pity: Number(fd.get('pity')), daysSince: 0 });
@@ -529,7 +532,11 @@ function renderFreebies() {
   }).join('');
 }
 
-function renderManageFreebies() { renderDeleteTable('manageTable-freebies', 'freebies', ['Date','Version','Type','Name','Event'], r => [formatDate(r.date), getFullVersionForDate(r.date, VERSION_SCHEDULE), r.category, r.name, r.event], (a, b) => b.r.date.localeCompare(a.r.date)); }
+function renderManageFreebies() { 
+  renderDeleteTable('manageTable-freebies', 'freebies', ['Date','Version','Type','Name','Event'], 
+  r => [formatDate(r.date), getFullVersionForDate(r.date, VERSION_SCHEDULE), r.category, r.name, r.event], 
+  (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; }); 
+}
 document.getElementById('form-freebies').addEventListener('submit', (e) => {
   e.preventDefault(); const fd = new FormData(e.target); if (!DATA.freebies) DATA.freebies = [];
   DATA.freebies.push({ date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(), event: fd.get('event').trim(), daysSince: 0 });
@@ -886,7 +893,11 @@ function renderStellarJade() {
   const versionTotals = {}; rows.forEach(r => { const ver = getVersionForDate(r.date, VERSION_SCHEDULE); if (!versionTotals[ver]) versionTotals[ver] = { jade: 0, passes: 0 }; versionTotals[ver].jade += r.jade || 0; versionTotals[ver].passes += r.passes || 0; });
   const today = new Date().toISOString().split('T')[0]; const relevantVersions = VERSION_SCHEDULE.filter(v => v.start <= today || versionTotals[v.label]);
   document.getElementById('versionGrid').innerHTML = relevantVersions.length ? relevantVersions.map(v => { const d = versionTotals[v.label] || { jade: 0, passes: 0 }; const pulls = d.jade / 160 + d.passes; const isActive = today >= v.start && today < v.end; return `<div class="version-card ${isActive ? 'version-active' : ''}"><div class="version-label">Version ${v.label}</div><div class="version-dates">${formatDate(v.start)} – ${formatDate(v.end)}</div><div class="version-jade">${fmt(d.jade,0)} <span class="vunit">SJ</span></div><div class="version-passes">${fmt(d.passes,0)} <span class="vunit">Pass</span></div><div class="version-pulls">${fmt(pulls,1)} pulls</div></div>`; }).join('') : `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`;
-  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','Stellar Jade','Star Rail Pass'], r => [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), r.activity, fmt(r.jade,0), fmt(r.passes,0)], (a, b) => b.r.date.localeCompare(a.r.date));
+  
+  // Ganti baris ini:
+  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','Stellar Jade','Star Rail Pass'], 
+  r => [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), r.activity, fmt(r.jade,0), fmt(r.passes,0)], 
+  (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; });
 }
 document.getElementById('form-stellarjade').addEventListener('submit', (e) => { e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; DATA.stellarJade.push({ date: fd.get('date'), activity: fd.get('activity').trim(), jade: Number(fd.get('jade'))||0, passes: Number(fd.get('passes'))||0 }); sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs(); });
 document.querySelectorAll('.table-filter').forEach(input => { input.addEventListener('input', (e) => { const term = e.target.value.toLowerCase(); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return; if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } } else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } }); });
