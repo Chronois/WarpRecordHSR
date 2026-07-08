@@ -7,7 +7,8 @@ function pct(n, d = 1) { return fmt(n * 100, d) + '%'; }
 function formatDate(iso) {
   if (!iso) return '—';
   const parts = iso.split('-');
-  if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  // Ubah urutan array: parts[0] = Tahun, parts[1] = Bulan, parts[2] = Tanggal
+  if (parts.length === 3) return `${parts[0]}/${parts[1]}/${parts[2]}`;
   return iso;
 }
 function daysBetween(a, b) {
