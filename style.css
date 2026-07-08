@@ -34,7 +34,7 @@ body{
   overflow-x:hidden;
 }
 
-/* MAIN NAV — styled after spreadsheet sheet tabs */
+/* MAIN NAV */
 .main-nav{
   position: sticky;
   top: 0;
@@ -76,9 +76,9 @@ body{
   border-bottom-color: var(--gold);
   border-radius: 6px 6px 0 0;
 }
-.nav-caret{ font-size: 8px; opacity:.5; }
+.nav-caret{ display: none; }
 
-/* UTILITY BAR — export / import / reset, visible on every page */
+/* UTILITY BAR */
 .util-bar{
   position: sticky;
   top: 45px;
@@ -254,7 +254,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
   margin-top: 4px;
 }
 
-/* BANNER STATS (compact row) */
+/* BANNER STATS */
 .banner-stats{
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
@@ -298,7 +298,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 .calc-col .bstat{ padding: 10px 14px; }
 
-/* TRACK (signature element) */
+/* TRACK */
 .track-wrap{
   background: var(--surface);
   border: 1px solid var(--border);
@@ -378,8 +378,6 @@ main, header, footer, .page{ position:relative; z-index:1; }
   text-align:center;
   margin-top: 14px;
 }
-
-/* legend */
 .legend{
   display:flex;
   gap: 18px;
@@ -414,68 +412,7 @@ main, header, footer, .page{ position:relative; z-index:1; }
 .freebie-event{ color: var(--nebula); font-size: 12px; margin-top: 2px;}
 .freebie-date{ font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-top: 8px; }
 
-/* ROSTER TABLE */
-.roster-table-wrap{
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: auto;
-  max-height: 560px;
-}
-.roster-table{
-  width:100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-.roster-table thead th{
-  position: sticky; top:0;
-  background: var(--surface-2);
-  text-align:left;
-  padding: 12px 16px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: .04em;
-  color: var(--text-dim);
-  cursor:pointer;
-  border-bottom: 1px solid var(--border);
-  white-space:nowrap;
-}
-.roster-table thead th:hover{ color: var(--gold-soft); }
-.roster-table thead th:not([data-sort]){ cursor: default; }
-.roster-table thead th:not([data-sort]):hover{ color: var(--text-dim); }
-.roster-table tbody td{
-  padding: 10px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.04);
-}
-.roster-table tbody tr:hover{ background: rgba(157,124,232,.06); }
-.roster-table td.name{ font-weight:600; }
-.tag{
-  display:inline-block;
-  font-family: var(--font-mono);
-  font-size:10px;
-  padding: 2px 8px;
-  border-radius: 100px;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-}
-.tag.Limited{ color: var(--gold-soft); border-color: rgba(232,184,75,.4); }
-.tag.Standard{ color: var(--cyan); border-color: rgba(95,201,217,.4); }
-
-/* FOOTER */
-.site-footer{
-  text-align:center;
-  padding: 40px 24px 60px;
-  color: var(--text-dim);
-  font-size: 12px;
-}
-.site-footer code{
-  background: var(--surface);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-}
-
-/* MANAGE DATA (per-page add forms) */
+/* MANAGE DATA FORMS */
 .save-status{
   font-family: var(--font-mono);
   font-size: 12px;
@@ -576,7 +513,21 @@ main, header, footer, .page{ position:relative; z-index:1; }
   color: var(--text-dim);
   border-bottom: 1px solid var(--border);
   white-space:nowrap;
+  cursor: pointer; /* Menambahkan cursor pointer untuk global sort */
+  user-select: none;
 }
+.manage-table thead th:hover { color: var(--gold-soft); }
+/* Styling Sort Arrow pada Table Header */
+.manage-table thead th::after {
+  content: '';
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 10px;
+  opacity: 0.5;
+}
+.manage-table thead th.asc::after { content: '▲'; opacity: 1; color: var(--gold); }
+.manage-table thead th.desc::after { content: '▼'; opacity: 1; color: var(--gold); }
+
 .manage-table tbody td{
   padding: 9px 16px;
   border-bottom: 1px solid rgba(255,255,255,.04);
@@ -601,25 +552,43 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 .btn-del:hover{ border-color: var(--loss); background: rgba(226,128,125,.12); }
 
-/* responsive */
-@media (max-width: 640px){
-  .hero{ padding: 64px 18px 40px; }
-  .section{ padding: 48px 16px; }
+/* TAGS */
+.tag{
+  display:inline-block;
+  font-family: var(--font-mono);
+  font-size:10px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.tag.Limited{ color: var(--gold-soft); border-color: rgba(232,184,75,.4); }
+.tag.Standard{ color: var(--cyan); border-color: rgba(95,201,217,.4); }
+.roster-type-tag {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(10,12,24,.8);
+  backdrop-filter: blur(4px);
 }
 
-/* ── Nav: hapus caret ─────────────────────────────── */
-.nav-caret { display: none; }
-
-/* ── Date input styling ───────────────────────────── */
-input[type="date"] {
-  color-scheme: dark;
+/* FOOTER */
+.site-footer{
+  text-align:center;
+  padding: 40px 24px 60px;
+  color: var(--text-dim);
+  font-size: 12px;
 }
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
-  cursor: pointer;
+.site-footer code{
+  background: var(--surface);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
 }
 
-/* ── Team form slots ──────────────────────────────── */
+/* =========================================================
+   TEAM SECTION (Compact & Refined)
+   ========================================================= */
 .team-form {
   flex-direction: column;
   gap: 16px;
@@ -651,44 +620,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   transition: all .15s ease;
 }
 .btn-add-slot:hover { border-color: var(--gold); background: rgba(232,184,75,.15); }
-
 .team-slot { display: flex; flex-direction: column; gap: 6px; }
 
-.slot-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.slot-row .slot-name {
-  flex: 1 1 180px;
-  min-width: 140px;
-}
-.slot-row .slot-eidolon,
-.slot-row .slot-sign {
-  flex: 0 0 70px;
-}
-.btn-remove-slot {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--loss);
-  width: 26px; height: 26px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  flex-shrink: 0;
-}
-.btn-remove-slot:hover { border-color: var(--loss); background: rgba(226,128,125,.12); }
-
-/* ── Team form bottom row ─────────────────────────── */
-.team-form .team-bottom-row {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-/* ── Version grid (StellarJade) ───────────────────── */
+/* Version Grid (StellarJade) */
 .version-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -719,26 +653,131 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   color: var(--text-dim);
   margin-bottom: 10px;
 }
-.version-jade {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--cyan);
-}
-.version-passes {
-  font-size: 14px;
-  color: var(--text-dim);
-}
+.version-jade { font-size: 18px; font-weight: 700; color: var(--cyan); }
+.version-passes { font-size: 14px; color: var(--text-dim); }
 .version-pulls {
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--gold-soft);
   margin-top: 4px;
 }
-.vunit {
-  font-size: 10px;
+.vunit { font-size: 10px; color: var(--text-dim); font-family: var(--font-mono); }
+
+/* =========================================================
+   UPDATED: FILTER STYLING
+   ========================================================= */
+.table-filter {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  width: 100%;
+  max-width: 320px;
+  transition: border-color .15s ease;
+  outline: none;
+  margin-bottom: 16px;
+}
+.table-filter:focus { border-color: var(--nebula); }
+
+/* =========================================================
+   UPDATED: PAGE CHARACTER GRID
+   ========================================================= */
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.roster-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform .15s ease, border-color .15s ease;
+}
+.roster-card:hover { transform: translateY(-3px); border-color: var(--nebula); }
+.roster-img-wrap {
+  height: 220px;
+  background: var(--surface-2);
+  position: relative;
+  overflow: hidden;
+}
+.roster-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.roster-info {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.roster-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--gold-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.roster-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
   color: var(--text-dim);
-  font-family: var(--font-mono);
+}
+.roster-stats span { color: var(--text); font-weight: 600; }
+.roster-del-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(226,128,125,.15);
+  border: 1px solid var(--loss);
+  color: var(--loss);
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .2s;
+  z-index: 10;
+}
+.roster-card:hover .roster-del-btn { opacity: 1; }
+.char-form-layout { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+
+/* =========================================================
+   UPDATED: COMPACT TEAM PAGE RESPONSIVENESS
+   ========================================================= */
+@media (min-width: 768px) {
+  .team-form { 
+    display: flex; 
+    flex-direction: row; 
+    flex-wrap: wrap; 
+  }
+  .team-slot-group { 
+    flex-basis: calc(50% - 8px) !important; 
+  }
+}
+.slot-row { padding: 8px 12px; gap: 12px; margin-bottom: 0; }
+.slot-img-upload { width: 45px; height: 45px; }
+.slot-inputs { gap: 4px; }
+
+/* Responsive adjustments */
+@media (max-width: 640px){
+  .hero{ padding: 64px 18px 40px; }
+  .section{ padding: 48px 16px; }
 }
 
-/* ── Roster table extra cols ──────────────────────── */
-.roster-table thead th, .roster-table tbody td { min-width: 70px; }
+/* Date picker fixes */
+input[type="date"] { color-scheme: dark; }
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
