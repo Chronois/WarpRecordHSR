@@ -208,7 +208,7 @@ const MASTER_CHARACTERS = {
   "silver wolf": { name: "Silver Wolf", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1006.png" },
   "silver wolf • lv. 999": { name: "Silver Wolf • Lv. 999", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1506.png" },
   "sparkle": { name: "Sparkle", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1306.png" },
-  "sparxie": { name: "Sparxie", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1401.png" },
+  "sparxie": { name: "Sparxie", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1501.png" },
   "sunday": { name: "Sunday", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1313.png" },
   "the dahlia": { name: "The Dahlia", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1321.png" },
   "the herta": { name: "The Herta", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1401.png" },
