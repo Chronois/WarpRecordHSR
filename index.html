@@ -9,15 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-  /* Tambahan CSS untuk Filter dan Team Cards */
   .filter-wrap { margin-bottom: 16px; }
-  .filter-input {
-    background: var(--bg); border: 1px solid var(--border); color: var(--text);
-    padding: 8px 12px; border-radius: 8px; font-family: var(--font-body); font-size: 13px;
-    width: 100%; max-width: 300px; transition: border-color .15s ease; outline: none;
-  }
-  .filter-input:focus { border-color: var(--nebula); }
-  
   .station-label-name {
     font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);
     margin-bottom: 8px; text-align: center; white-space: nowrap; width: 60px;
@@ -40,7 +32,6 @@
   .tc-footer { margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.05); display: flex; justify-content: space-between; align-items: center; }
   .tc-pv { font-weight: 700; color: var(--gold-soft); font-size: 14px; }
 
-  /* Slot Upload & Selector Style */
   .slot-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
   .slot-img-upload { width: 60px; height: 60px; background: var(--surface-2); border-radius: 8px; border: 1px dashed var(--text-dim); overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer; }
   .slot-preview { width:100%; height:100%; object-fit:cover; transition: 0.2s; }
@@ -98,6 +89,10 @@
       <div class="section-head">
         <span class="eyebrow">Overview</span>
         <h2>Trailblaze Summary</h2>
+        <div class="tabs" id="summaryTabs" style="margin-top: 12px;">
+          <button class="tab active" data-cat="Character">Character</button>
+          <button class="tab" data-cat="Light Cone">Light Cone</button>
+        </div>
       </div>
       <div class="stat-grid" id="statGrid"></div>
     </section>
@@ -461,34 +456,20 @@
           <button class="tab" data-filter="other">Other</button>
         </div>
       </div>
-      <p class="track-hint" style="margin-bottom:16px">Pull Value &amp; Eidolon/Signature are computed automatically from Limited Pull, Standard Pull, and Freebies. Use the form below to set each character's <em>type</em> (Limited / Standard / etc.) — that is the only field you need to fill in.</p>
-      <div class="filter-wrap"><input type="text" class="table-filter" data-table="rosterTable" placeholder="Filter records..."></div>
-      <div class="roster-table-wrap">
-        <table class="roster-table" id="rosterTable">
-          <thead>
-            <tr>
-              <th data-sort="name">Name</th>
-              <th data-sort="source">Type</th>
-              <th data-sort="eidolon">Eidolon</th>
-              <th data-sort="signature">Sign</th>
-              <th data-sort="pullValueEidolon">Pull (Eidolon)</th>
-              <th data-sort="pullValueSignature">Pull (Sign)</th>
-              <th data-sort="totalPullValue">Total Pull</th>
-              <th data-sort="pullPercent">Pull %</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="rosterBody"></tbody>
-        </table>
-      </div>
+      <div class="filter-wrap"><input type="text" class="table-filter" data-table="rosterGrid" placeholder="Filter characters..."></div>
+      <div class="roster-grid" id="rosterGrid"></div>
     </section>
 
     <section class="section">
       <div class="section-head">
-        <span class="eyebrow">Set Character Type</span>
-        <h2>Add / Update Character Type</h2>
+        <span class="eyebrow">Set Character Type & Image</span>
+        <h2>Add / Update Character</h2>
       </div>
-      <form class="manage-form" id="form-character" data-section="roster">
+      <form class="manage-form char-form-layout" id="form-character" data-section="roster">
+        <div class="slot-img-upload" style="width: 70px; height: 70px; border-radius: 8px;">
+          <img class="slot-preview" id="charFormImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
+          <input type="file" id="charFileInput" class="slot-file" accept="image/*" title="Upload Image">
+        </div>
         <div class="field field-grow">
           <label>Name</label>
           <input type="text" name="name" required placeholder="e.g. Feixiao" list="charNameList">
@@ -503,7 +484,7 @@
             <option value="Golden Companion Spirit">Golden Companion Spirit</option>
           </select>
         </div>
-        <button type="submit" class="btn-add">+ Set Type</button>
+        <button type="submit" class="btn-add">+ Save Character</button>
       </form>
     </section>
   </main>
