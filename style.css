@@ -613,15 +613,15 @@ main, header, footer, .page{ position:relative; z-index:1; }
   margin-bottom: 8px;
   border-bottom: 1px solid var(--border); 
   padding-bottom: 6px;
-  min-height: 32px; /* <-- Ini yang membuat posisi sejajar meski ada / tidak ada tombol + */
+  min-height: 32px; /* <-- Menjamin sejajar */
 }
 .team-form-bottom { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; align-items: flex-end; width: 100%; }
 
-/* TOMBOL + PADA SUB DPS & SUPPORT */
+/* PERBAIKAN TOMBOL + (MENYATU DENGAN TEMA GELAP) */
 .btn-add-slot {
-  background: #f2f2f7;
-  border: 1px solid #d1d1d6;
-  color: #1c1c1e;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
   width: 20px; 
   height: 20px;
   border-radius: 4px;
@@ -632,12 +632,13 @@ main, header, footer, .page{ position:relative; z-index:1; }
   justify-content: center;
   transition: all .15s ease;
   padding: 0;
-  margin-left: 4px;
+  margin-left: 6px;
   line-height: 0;
 }
 .btn-add-slot:hover { 
-  background: #e5e5ea; 
-  border-color: #c7c7cc; 
+  background: var(--border); 
+  border-color: var(--nebula); 
+  color: var(--text);
 }
 
 /* Version Grid (StellarJade) */
