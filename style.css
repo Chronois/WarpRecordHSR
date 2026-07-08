@@ -586,17 +586,23 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 
 /* =========================================================
-   TEAM SECTION (Perfect 2x2 Grid)
+   TEAM SECTION (2 Independent Columns)
    ========================================================= */
 .team-form {
   display: block !important; 
 }
-.team-grid-2x2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.team-masonry {
+  display: flex;
+  flex-wrap: wrap;
   gap: 24px;
-  align-items: start; /* Mengunci item agar tetap di atas tanpa memaksa tarik ulur tinggi */
+  align-items: flex-start; /* Mencegah kolom saling menyamakan tinggi */
   width: 100%;
+}
+.team-masonry-col {
+  flex: 1 1 300px; /* Lebar fleksibel, tidak akan mengecil di bawah 300px */
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* Jarak vertikal yang konsisten antar kotak */
 }
 .team-slot-group {
   display: flex;
@@ -637,10 +643,6 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 .btn-add-slot:hover { border-color: var(--gold); background: rgba(232,184,75,.15); }
 .team-slot { display: flex; flex-direction: column; gap: 6px; }
-
-@media (max-width: 768px) {
-  .team-grid-2x2 { grid-template-columns: 1fr; }
-}
 
 .slot-row { padding: 8px 12px; gap: 12px; margin-bottom: 0; }
 .slot-img-upload { width: 45px; height: 45px; }
