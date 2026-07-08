@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta name="referrer" content="no-referrer">
-  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Warp Record HSR</title>
@@ -12,12 +11,32 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 <link rel="stylesheet" href="style.css">
 <style>
+  <style>
   .station-label-name {
     font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);
-    margin-bottom: 8px; text-align: center; white-space: nowrap; width: 60px;
+    margin-bottom: 40px; /* Diubah menjadi 40px agar ada ruang untuk icon */
+    text-align: center; white-space: nowrap; width: 60px;
     overflow: hidden; text-overflow: ellipsis; position: absolute; bottom: 100%; left: 50%;
     transform: translateX(-50%); pointer-events: none;
   }
+  
+  /* Tambahkan blok CSS baru ini untuk icon */
+  .station-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--surface);
+    object-fit: cover;
+    position: absolute;
+    bottom: 100%;
+    margin-bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface-2);
+    z-index: 2;
+    pointer-events: none;
+  }
+
   .station { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
   .station-dot { margin-top: auto; }
   
