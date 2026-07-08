@@ -14,192 +14,493 @@
 <div class="stars" id="stars"></div>
 
 <nav class="main-nav" id="mainNav" aria-label="Sheets">
-  <button class="nav-item active" data-page="limitedhistory">Limited Pull</button>
-  <button class="nav-item" data-page="standardhistory">Standard Pull</button>
+  <button class="nav-item active" data-page="limitedhistory">LimitedHistory</button>
+  <button class="nav-item" data-page="standardhistory">StandardHistory</button>
   <button class="nav-item" data-page="freebies">Freebies</button>
-  <button class="nav-item" data-page="calc">Stats</button>
+  <button class="nav-item" data-page="calc">Calc</button>
   <button class="nav-item" data-page="priority">Priority</button>
   <button class="nav-item" data-page="team">Team</button>
   <button class="nav-item" data-page="character">Character</button>
-  <button class="nav-item" data-page="stellarjade">Stellar Jade</button>
+  <button class="nav-item" data-page="stellarjade">StellarJade</button>
 </nav>
 
-<div class="app-container">
-  <header class="dashboard-header">
-    <h1 class="site-title">Astral Express Warp Depot</h1>
-    <p class="site-subtitle">Every warp is a stop along the line. This is the record of your pull journey — station to station, every 50/50 win and loss, down to the last Stellar Jade.</p>
-    
-    <div class="overview-grid">
-      <div class="overview-card">
-        <div class="card-label">Limited Warps</div>
-        <div class="card-value" id="stat-limited-warps">0</div>
-      </div>
-      <div class="overview-card">
-        <div class="card-label">Standard Warps</div>
-        <div class="card-value" id="stat-standard-warps">0</div>
-      </div>
-      <div class="overview-card">
-        <div class="card-label">Stellar Jade Balance</div>
-        <div class="card-value text-gold" id="stat-jade-balance">0</div>
-      </div>
-    </div>
-  </header>
+<div class="util-bar">
+  <span class="save-status" id="saveStatus">—</span>
+  <div class="util-actions">
+    <button type="button" class="btn-ghost" id="btnExport">⬇ Export data.js</button>
+    <label class="btn-ghost" for="importFile">⬆ Import data.js</label>
+    <input type="file" id="importFile" accept=".js,.json,application/json,text/javascript" hidden>
+    <button type="button" class="btn-ghost danger" id="btnReset">↺ Reset to Default</button>
+  </div>
+</div>
 
-  <main class="content-area">
-    <!-- Limited Pull Page -->
-    <section id="page-limitedhistory" class="page-section active">
-      <h2>Limited Pull History</h2>
-      <div class="filter-container" style="margin-bottom: 15px;">
-        <input type="text" class="table-filter" data-target="table-limited" placeholder="Filter Limited Pull data..." style="padding: 8px; width: 100%; max-width: 300px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+<header class="hero">
+  <div class="hero-eyebrow">TRAILBLAZE LOG // ASTRAL EXPRESS</div>
+  <h1 class="hero-title">Warp Record HSR</h1>
+  <p class="hero-sub">Every warp is a stop along the line. This is the record of your pull journey — station to station, every 50/50 win and loss, down to the last Stellar Jade.</p>
+  <div class="hero-meta">
+    <span id="metaGenerated">—</span>
+    <span class="dot">·</span>
+    <span id="metaTotalWarps">—</span> warps logged
+  </div>
+</header>
+
+<!-- LIMITED HISTORY -->
+<div class="page" id="page-limitedhistory">
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Overview</span>
+        <h2>Journey Status</h2>
       </div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="table-limited">
-          <thead>
-            <tr><th>Time</th><th>Category</th><th>Name</th><th>Pity</th><th>Result</th><th>Days Since</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+      <div class="stat-grid" id="statGrid"></div>
     </section>
 
-    <!-- Standard Pull Page -->
-    <section id="page-standardhistory" class="page-section">
-      <h2>Standard Pull History</h2>
-      <div class="filter-container" style="margin-bottom: 15px;">
-        <input type="text" class="table-filter" data-target="table-standard" placeholder="Filter Standard Pull data..." style="padding: 8px; width: 100%; max-width: 300px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
-      </div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="table-standard">
-          <thead>
-            <tr><th>Time</th><th>Category</th><th>Name</th><th>Pity</th><th>Days Since</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Freebies Page -->
-    <section id="page-freebies" class="page-section">
-      <h2>Gift from Hoyo</h2>
-      <div class="filter-container" style="margin-bottom: 15px;">
-        <input type="text" class="table-filter" data-target="table-freebies" placeholder="Filter Freebies data..." style="padding: 8px; width: 100%; max-width: 300px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
-      </div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="table-freebies">
-          <thead>
-            <tr><th>Time</th><th>Category</th><th>Name</th><th>Version</th><th>Event</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Stats Page -->
-    <section id="page-calc" class="page-section">
-      <h2>Warp Statistics & Calculations</h2>
-      <div class="filter-container" style="margin-bottom: 15px;">
-        <input type="text" class="table-filter" data-target="table-calc" placeholder="Filter Stats data..." style="padding: 8px; width: 100%; max-width: 300px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
-      </div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="table-calc">
-          <thead>
-            <tr><th>Metric</th><th>Value</th><th>Rate Up</th><th>Rate</th><th>Luck Multiplier</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Priority Page -->
-    <section id="page-priority" class="page-section">
-      <h2>Pull Priority Planner</h2>
-      <form id="form-priority" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
-        <div>
-          <label style="display:block; font-size:12px; margin-bottom: 4px;">Priority</label>
-          <input type="number" id="input-prio-num" min="1" required style="width:70px; padding:8px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Featured Banner · Limited</span>
+        <h2>Main Warp Line</h2>
+        <div class="tabs" id="limitedTabs">
+          <button class="tab active" data-cat="Character">Character</button>
+          <button class="tab" data-cat="Light Cone">Light Cone</button>
         </div>
-        <div>
-          <label style="display:block; font-size:12px; margin-bottom: 4px;">Target Name</label>
-          <input type="text" id="input-prio-name" required style="padding:8px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+      </div>
+      <div class="banner-stats" id="limitedStats"></div>
+      <div class="track-wrap">
+        <div class="track-scroll" id="limitedTrack"></div>
+        <div class="legend">
+          <span><i style="background:var(--win)"></i>50/50 Win</span>
+          <span><i style="background:var(--loss)"></i>50/50 Loss</span>
+          <span><i style="background:var(--guaranteed)"></i>Guaranteed</span>
         </div>
-        <div>
-          <label style="display:block; font-size:12px; margin-bottom: 4px;">Type</label>
-          <select id="input-prio-type" style="padding:8px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+      </div>
+      <p class="track-hint">Scroll sideways to follow the timeline &nbsp;→&nbsp; the distance between stations represents how long the wait was (in days)</p>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Log a Pull</span>
+        <h2>Add to LimitedHistory</h2>
+      </div>
+      <form class="manage-form" id="form-limited" data-section="limited">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select name="category" required>
             <option value="Character">Character</option>
-            <option value="Lightcone">Lightcone</option>
+            <option value="Light Cone">Light Cone</option>
           </select>
         </div>
-        <div>
-          <label style="display:block; font-size:12px; margin-bottom: 4px;">Archetype</label>
-          <input type="text" id="input-prio-arch" required style="padding:8px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+        <div class="field field-grow">
+          <label>Name</label>
+          <input type="text" name="name" required placeholder="e.g. Feixiao">
         </div>
-        <button type="submit" class="btn-add" style="padding:8px 16px; height:37px; background: var(--gold); color: #000; font-weight: bold; border: none; border-radius: 6px; cursor: pointer;">Add Target</button>
+        <div class="field field-narrow">
+          <label>Pity</label>
+          <input type="number" name="pity" min="1" max="90" required>
+        </div>
+        <div class="field">
+          <label>50/50 Result</label>
+          <select name="result" required>
+            <option value="W">Win</option>
+            <option value="L">Loss</option>
+            <option value="G">Guaranteed</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
-      <div class="filter-container" style="margin-bottom: 15px;">
-        <input type="text" class="table-filter" data-target="table-priority" placeholder="Filter Priority data..." style="padding: 8px; width: 100%; max-width: 300px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
-      </div>
       <div class="manage-table-wrap">
-        <table class="manage-table" id="table-priority">
+        <table class="manage-table" id="manageTable-limited"><thead></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- STANDARD HISTORY -->
+<div class="page" id="page-standardhistory" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Standard Banner</span>
+        <h2>Reserve Line</h2>
+      </div>
+      <div class="banner-stats" id="standardStats"></div>
+      <div class="track-wrap">
+        <div class="track-scroll" id="standardTrack"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Log a Pull</span>
+        <h2>Add to StandardHistory</h2>
+      </div>
+      <form class="manage-form" id="form-standard" data-section="standard">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select name="category" required>
+            <option value="Character">Character</option>
+            <option value="Light Cone">Light Cone</option>
+          </select>
+        </div>
+        <div class="field field-grow">
+          <label>Name</label>
+          <input type="text" name="name" required placeholder="e.g. Gepard">
+        </div>
+        <div class="field field-narrow">
+          <label>Pity</label>
+          <input type="number" name="pity" min="1" max="80" required>
+        </div>
+        <button type="submit" class="btn-add">+ Add Pull</button>
+      </form>
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable-standard"><thead></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- FREEBIES -->
+<div class="page" id="page-freebies" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Free Rewards</span>
+        <h2>Parcels from Herta Space Station</h2>
+      </div>
+      <div class="freebie-row" id="freebieRow"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Log a Reward</span>
+        <h2>Add to Freebies</h2>
+      </div>
+      <form class="manage-form" id="form-freebies" data-section="freebies">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select name="category" required>
+            <option value="Character">Character</option>
+            <option value="Light Cone">Light Cone</option>
+          </select>
+        </div>
+        <div class="field field-grow">
+          <label>Name</label>
+          <input type="text" name="name" required placeholder="e.g. Dr. Ratio">
+        </div>
+        <div class="field field-grow">
+          <label>Event</label>
+          <input type="text" name="event" required placeholder="e.g. Golden Companion Spirit">
+        </div>
+        <button type="submit" class="btn-add">+ Add Reward</button>
+      </form>
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable-freebies"><thead></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- CALC -->
+<div class="page" id="page-calc" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Derived Stats</span>
+        <h2>The Numbers Behind the Warps</h2>
+      </div>
+      <div class="calc-grid" id="calcGrid"></div>
+    </section>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Streaks</span>
+        <h2>Best 50/50 Win Streak</h2>
+      </div>
+      <div class="banner-stats" id="streakGrid"></div>
+    </section>
+  </main>
+</div>
+
+<!-- PRIORITY -->
+<div class="page" id="page-priority" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Wishlist</span>
+        <h2>Next Up, in Order</h2>
+      </div>
+      <form class="manage-form" id="form-priority" data-section="priority">
+        <div class="field field-narrow">
+          <label>Priority</label>
+          <input type="number" name="priority" min="1" required>
+        </div>
+        <div class="field field-grow">
+          <label>Name</label>
+          <input type="text" name="name" required placeholder="e.g. Feixiao E1">
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <select name="type" required>
+            <option value="Character">Character</option>
+            <option value="Light Cone">Light Cone</option>
+          </select>
+        </div>
+        <div class="field field-grow">
+          <label>Archetype</label>
+          <input type="text" name="archetype" required placeholder="e.g. Break">
+        </div>
+        <div class="field field-narrow">
+          <label>Min Pulls</label>
+          <input type="number" name="minPulls" min="0" required>
+        </div>
+        <div class="field field-narrow">
+          <label>Median Pulls</label>
+          <input type="number" name="medianPulls" min="0" step="0.5" required>
+        </div>
+        <div class="field field-narrow">
+          <label>Max Pulls</label>
+          <input type="number" name="maxPulls" min="0" required>
+        </div>
+        <button type="submit" class="btn-add">+ Add to Wishlist</button>
+      </form>
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable-priority"><thead></thead><tbody></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- TEAM -->
+<div class="page" id="page-team" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Compositions</span>
+        <h2>Teams You've Built</h2>
+      </div>
+
+      <form class="manage-form team-form" id="form-team" data-section="team">
+        <!-- Row 1: Archetype -->
+        <div class="field field-grow" style="flex-basis:100%">
+          <label>Archetype</label>
+          <input type="text" name="archetype" required placeholder="e.g. Break">
+        </div>
+
+        <!-- Main DPS -->
+        <div class="team-slot-group">
+          <div class="team-slot-label">Main DPS</div>
+          <div class="team-slot" id="slot-mainDps">
+            <div class="slot-row">
+              <select class="slot-name" data-role="mainDps"><option value="">— none —</option></select>
+              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
+              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub DPS (multi) -->
+        <div class="team-slot-group">
+          <div class="team-slot-label">Sub DPS <button type="button" class="btn-add-slot" data-role="subDps">+</button></div>
+          <div class="team-slot" id="slot-subDps">
+            <div class="slot-row">
+              <select class="slot-name" data-role="subDps"><option value="">— none —</option></select>
+              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
+              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
+              <button type="button" class="btn-remove-slot">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support (multi) -->
+        <div class="team-slot-group">
+          <div class="team-slot-label">Support <button type="button" class="btn-add-slot" data-role="support">+</button></div>
+          <div class="team-slot" id="slot-support">
+            <div class="slot-row">
+              <select class="slot-name" data-role="support"><option value="">— none —</option></select>
+              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
+              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
+              <button type="button" class="btn-remove-slot">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sustain -->
+        <div class="team-slot-group">
+          <div class="team-slot-label">Sustain</div>
+          <div class="team-slot" id="slot-sustain">
+            <div class="slot-row">
+              <select class="slot-name" data-role="sustain"><option value="">— none —</option></select>
+              <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
+              <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cost & Pull Value (auto) -->
+        <div class="field field-grow">
+          <label>Cost (Auto)</label>
+          <input type="text" id="team-cost-preview" readonly placeholder="Will be computed..." style="opacity:0.6;cursor:default">
+        </div>
+        <div class="field field-narrow">
+          <label>Pull Value (Auto)</label>
+          <input type="number" id="team-pv-preview" readonly placeholder="—" style="opacity:0.6;cursor:default">
+        </div>
+
+        <button type="submit" class="btn-add" style="align-self:flex-end">+ Add Team</button>
+      </form>
+
+      <div class="manage-table-wrap">
+        <table class="manage-table" id="manageTable-team"><thead></thead><tbody></tbody></table>
+      </div>
+      <p class="track-hint">% of Total Pulls is each team's Pull Value against every warp spent on the LimitedHistory banner so far.</p>
+    </section>
+  </main>
+</div>
+
+<!-- CHARACTER (auto-computed) -->
+<div class="page" id="page-character" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Passenger Cabin</span>
+        <h2>Collected Roster</h2>
+        <div class="tabs" id="rosterTabs">
+          <button class="tab active" data-filter="all">All</button>
+          <button class="tab" data-filter="Limited">Limited</button>
+          <button class="tab" data-filter="Standard">Standard</button>
+          <button class="tab" data-filter="other">Other</button>
+        </div>
+      </div>
+      <p class="track-hint" style="margin-bottom:16px">Pull Value &amp; Eidolon/Signature are computed automatically from LimitedHistory, StandardHistory, and Freebies. Use the form below to set each character's <em>type</em> (Limited / Standard / etc.) — that is the only field you need to fill in.</p>
+      <div class="roster-table-wrap">
+        <table class="roster-table" id="rosterTable">
           <thead>
-            <tr><th>Priority</th><th>Name</th><th>Type</th><th>Archetype</th><th>Average Pull</th><th>Worst Scenario Pull</th><th>Patch Range</th></tr>
+            <tr>
+              <th data-sort="name">Name</th>
+              <th data-sort="source">Type</th>
+              <th data-sort="eidolon">Eidolon</th>
+              <th data-sort="signature">Sign</th>
+              <th data-sort="pullValueEidolon">Pull (Eidolon)</th>
+              <th data-sort="pullValueSignature">Pull (Sign)</th>
+              <th data-sort="totalPullValue">Total Pull</th>
+              <th data-sort="pullPercent">Pull %</th>
+              <th></th>
+            </tr>
           </thead>
-          <tbody></tbody>
+          <tbody id="rosterBody"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- Team Page -->
-    <section id="page-team" class="page-section">
-      <h2>Team Lineups</h2>
-      <div class="filter-container" style="margin-bottom: 15px;">
-        <input type="text" class="table-filter" data-target="table-team" placeholder="Filter Team data..." style="padding: 8px; width: 100%; max-width: 300px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Set Character Type</span>
+        <h2>Add / Update Character Type</h2>
       </div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="table-team">
-          <thead>
-            <tr><th>Archetype</th><th>Main DPS</th><th>Sub DPS</th><th>Support 1</th><th>Support 2</th><th>Sustain</th><th>Cost</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <form class="manage-form" id="form-character" data-section="roster">
+        <div class="field field-grow">
+          <label>Name</label>
+          <input type="text" name="name" required placeholder="e.g. Feixiao" list="charNameList">
+          <datalist id="charNameList"></datalist>
+        </div>
+        <div class="field field-grow">
+          <label>Type</label>
+          <select name="source" required>
+            <option value="Limited">Limited</option>
+            <option value="Standard">Standard</option>
+            <option value="Celestial Invitation">Celestial Invitation</option>
+            <option value="Golden Companion Spirit">Golden Companion Spirit</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-add">+ Set Type</button>
+      </form>
+    </section>
+  </main>
+</div>
+
+<!-- STELLAR JADE -->
+<div class="page" id="page-stellarjade" hidden>
+  <main>
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Income Ledger</span>
+        <h2>Stellar Jade &amp; Passes</h2>
       </div>
+      <div class="banner-stats" id="jadeStats"></div>
     </section>
 
-    <!-- Character Page -->
-    <section id="page-character" class="page-section">
-      <h2>Roster / Owned Characters</h2>
-      <div class="filter-container" style="margin-bottom: 15px;">
-        <input type="text" class="table-filter" data-target="table-character" placeholder="Filter Character data..." style="padding: 8px; width: 100%; max-width: 300px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+    <!-- Version summary -->
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">By Version</span>
+        <h2>Perolehan per Versi</h2>
       </div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="table-character">
-          <thead>
-            <tr><th>Type</th><th>Name</th><th>Eidolon</th><th>Signature</th><th>Total Pull Value</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+      <div class="version-grid" id="versionGrid"></div>
     </section>
 
-    <!-- Stellar Jade Page -->
-    <section id="page-stellarjade" class="page-section">
-      <h2>Stellar Jade Ledger</h2>
-      <div class="filter-container" style="margin-bottom: 15px;">
-        <input type="text" class="table-filter" data-target="table-stellarjade" placeholder="Filter Stellar Jade ledger..." style="padding: 8px; width: 100%; max-width: 300px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+    <section class="section">
+      <div class="section-head">
+        <span class="eyebrow">Log Income</span>
+        <h2>Add a Transaction</h2>
       </div>
+      <form class="manage-form" id="form-stellarjade" data-section="stellarJade">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="field field-grow">
+          <label>Activity / Event</label>
+          <input type="text" name="activity" required placeholder="e.g. Daily + Express" list="activityOptions">
+          <datalist id="activityOptions">
+            <option value="Daily + Express">
+            <option value="Weekly CW/DU Reset">
+            <option value="Character Dialog">
+            <option value="Character Trial">
+            <option value="Event">
+            <option value="Memory of Chaos">
+            <option value="Pure Fiction">
+            <option value="Apocalyptic Shadow">
+            <option value="Nameless Glory">
+            <option value="Birthday Gift">
+            <option value="Gift of Odysses">
+            <option value="Hoyolab Login">
+            <option value="Maintenance">
+            <option value="Maps">
+            <option value="Missions">
+            <option value="Shop Reset">
+            <option value="Special Program Redeem Code">
+          </datalist>
+        </div>
+        <div class="field field-narrow">
+          <label>Stellar Jade</label>
+          <input type="number" name="jade" min="0" step="1" value="0">
+        </div>
+        <div class="field field-narrow">
+          <label>Star Rail Pass</label>
+          <input type="number" name="passes" min="0" step="1" value="0">
+        </div>
+        <button type="submit" class="btn-add">+ Add Transaction</button>
+      </form>
       <div class="manage-table-wrap">
-        <table class="manage-table" id="table-stellarjade">
-          <thead>
-            <tr><th>Version</th><th>Date</th><th>Activity / Event</th><th>Stellar Jade</th><th>Star Rail Pass</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <table class="manage-table" id="manageTable-stellarjade"><thead></thead><tbody></tbody></table>
       </div>
     </section>
   </main>
 </div>
 
 <footer class="site-footer">
-  <p>Warp Record HSR — built from a Trailblazer's own pull data.</p>
+  <p>Warp Record HSR — built from a Trailblazer's own pull data. Add entries right on each tab above, or edit <code>data.js</code> by hand after every warp session.</p>
 </footer>
 
 <script src="data.js"></script>
