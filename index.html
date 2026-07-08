@@ -60,12 +60,23 @@
 </nav>
 
 <div class="util-bar">
-  <span class="save-status" id="saveStatus">—</span>
+  <div style="display:flex; align-items:center; gap: 16px;">
+    <span class="save-status" id="saveStatus">—</span>
+    <div style="display:flex; align-items:center; gap:8px; border-left: 1px solid var(--border); padding-left: 16px;">
+      <label style="font-family:var(--font-mono); font-size:10px; color:var(--text-dim);">PROFILE</label>
+      <select id="profileSwitcher" style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:4px 8px; border-radius:6px; font-family:var(--font-body); font-size:12px; outline:none; cursor:pointer;">
+        <option value="main">Main Account (Kamu)</option>
+        <option value="abdul">Abdul's Account</option>
+        <option value="alt">Alt / Smurf Account</option>
+      </select>
+    </div>
+  </div>
+  
   <div class="util-actions">
     <button type="button" class="btn-ghost" id="btnExport">⬇ Export data.js</button>
     <label class="btn-ghost" for="importFile">⬆ Import data.js</label>
     <input type="file" id="importFile" accept=".js,.json,application/json,text/javascript" hidden>
-    <button type="button" class="btn-ghost danger" id="btnReset">↺ Reset to Default</button>
+    <button type="button" class="btn-ghost danger" id="btnReset">↺ Reset Profile</button>
   </div>
 </div>
 
