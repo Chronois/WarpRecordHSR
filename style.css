@@ -586,20 +586,22 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 
 /* =========================================================
-   TEAM SECTION (Grid Aligned Layout)
+   TEAM SECTION (Fixed & Aligned Grid)
    ========================================================= */
 .team-form {
-  flex-direction: column;
-  gap: 16px;
+  display: block !important; /* Mencegah form membengkokkan isinya */
 }
-.team-cols {
+.team-layout-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px 24px;
-  width: 100%;
-  align-items: start; /* Fixes vertical stretching misalignment */
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start; /* Kunci agar slot tidak ikut turun */
 }
-
+.team-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 .team-slot-group {
   display: flex;
   flex-direction: column;
@@ -614,6 +616,17 @@ main, header, footer, .page{ position:relative; z-index:1; }
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+.team-form-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+  align-items: flex-end;
+  width: 100%;
 }
 .btn-add-slot {
   background: var(--surface-2);
@@ -628,6 +641,14 @@ main, header, footer, .page{ position:relative; z-index:1; }
 }
 .btn-add-slot:hover { border-color: var(--gold); background: rgba(232,184,75,.15); }
 .team-slot { display: flex; flex-direction: column; gap: 6px; }
+
+@media (max-width: 768px) {
+  .team-layout-grid { grid-template-columns: 1fr; }
+}
+
+.slot-row { padding: 8px 12px; gap: 12px; margin-bottom: 0; }
+.slot-img-upload { width: 45px; height: 45px; }
+.slot-inputs { gap: 4px; }
 
 /* Version Grid (StellarJade) */
 .version-grid {
