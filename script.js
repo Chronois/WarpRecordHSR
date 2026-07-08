@@ -554,21 +554,31 @@ function renderCalc() {
     { label: 'Combined (Total)', rows: DATA.limited||[], maxPity: 90 }
   ];
 
+  // Mencari nilai "Jumlah Pull" terbanyak untuk skala grafik Bar Chart
+  const maxPulls = Math.max(...datasets.map(d => computeBannerStats(d.rows, d.maxPity).totalWarps)) || 1;
+
   document.getElementById('calcGrid').innerHTML = datasets.map(b => {
     const s = computeBannerStats(b.rows, b.maxPity);
-    const totalWLG = (s.wins + s.losses + s.guaranteed) || 1; // Mencegah pembagian 0
+    
+    // Data Stacked Bar (Pull Distribution)
+    const totalWLG = (s.wins + s.losses + s.guaranteed) || 1; 
     const wPct = (s.wins / totalWLG) * 100;
     const lPct = (s.losses / totalWLG) * 100;
     const gPct = (s.guaranteed / totalWLG) * 100;
     
-    // Logika Warna Average Pity: Hijau = Hoki, Kuning = Sedang, Merah = Hard Pity
-    const pityPct = (s.avgPity / b.maxPity) * 100;
-    let pityColor = '#4ade80'; // Hijau
-    if(s.avgPity > (b.maxPity * 0.82)) pityColor = 'var(--loss)'; 
-    else if (s.avgPity > (b.maxPity * 0.65)) pityColor = 'var(--gold-soft)';
+    // Data 100% Stacked Bar (50/50 Win Rate)
+    const winRateVal = s.winRate !== null ? s.winRate * 100 : 0;
+    const lossRateVal = s.winRate !== null ? (1 - s.winRate) * 100 : 0;
 
-    // Logika Warna Win Rate: Merah jika di bawah 50%
-    const wrColor = s.winRate >= 0.5 ? '#4ade80' : 'var(--loss)';
+    // Data Bullet Chart (Average Pity)
+    const pityPct = Math.min((s.avgPity / b.maxPity) * 100, 100);
+    // Menentukan zona warna (0-70% Hijau, 70-85% Kuning, 85%+ Merah)
+    let markerColor = '#4ade80'; 
+    if (pityPct > 85) markerColor = 'var(--loss)'; 
+    else if (pityPct > 70) markerColor = 'var(--gold-soft)';
+
+    // Data Bar Chart (Jumlah Pull)
+    const pullBarPct = (s.totalWarps / maxPulls) * 100;
 
     return `
       <div class="calc-col" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:18px;">
@@ -577,42 +587,54 @@ function renderCalc() {
             <h3 style="margin:0; color:var(--nebula); font-size:16px; font-family:var(--font-display);">${b.label}</h3>
             <div style="text-align:right;">
                 <span style="color:var(--text); font-weight:bold; font-size:14px;">${fmt(s.total, 0)}</span> <span style="color:var(--text-dim); font-size:12px;">5★</span>
-                <span style="color:var(--text-dim); font-size:12px; margin-left:6px;">(${fmt(s.totalWarps, 0)} Pulls)</span>
             </div>
         </div>
 
-        <!-- 1. Grafik Average Pity -->
+        <!-- 1. JUMLAH PULL (Bar Chart) -->
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
-            <span style="color:var(--text-dim);">Average Pity</span>
-            <span style="font-weight:700; color:${pityColor}">${fmt(s.avgPity, 1)} / ${b.maxPity}</span>
+            <span style="color:var(--text-dim);">Total Pulls</span>
+            <span style="font-weight:700; color:var(--cyan);">${fmt(s.totalWarps, 0)}</span>
           </div>
-          <div style="width:100%; height:8px; background:rgba(0,0,0,0.3); border-radius:4px; overflow:hidden;">
-            <div style="width:${pityPct}%; background:${pityColor}; height:100%; border-radius:4px; transition:width 1s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+          <div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
+            <div style="width:${pullBarPct}%; background:var(--cyan); height:100%; border-radius:4px; transition:width 1s ease;"></div>
           </div>
         </div>
 
-        <!-- 2. Grafik Win Rate -->
+        <!-- 2. AVERAGE PITY (Bullet Chart) -->
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
+            <span style="color:var(--text-dim);">Average Pity</span>
+            <span style="font-weight:700; color:${markerColor}">${fmt(s.avgPity, 1)} / ${b.maxPity}</span>
+          </div>
+          <!-- Background dibagi 3 zona: Aman (Hijau), Soft Pity (Kuning), Hard Pity (Merah) -->
+          <div style="width:100%; height:16px; background:linear-gradient(to right, rgba(74,222,128,0.15) 0%, rgba(74,222,128,0.15) 70%, rgba(234,179,8,0.15) 70%, rgba(234,179,8,0.15) 85%, rgba(226,128,125,0.15) 85%, rgba(226,128,125,0.15) 100%); border-radius:4px; position:relative; display:flex; align-items:center;">
+             <!-- Batang penanda nilai riil rata-rata -->
+             <div style="width:${pityPct}%; background:${markerColor}; height:6px; border-radius:0 3px 3px 0; z-index:2; transition:width 1s ease;"></div>
+          </div>
+        </div>
+
+        <!-- 3. 50/50 WIN RATE (100% Stacked Bar Chart) -->
         ${s.winRate !== null ? `
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
             <span style="color:var(--text-dim);">50/50 Win Rate</span>
-            <span style="font-weight:700; color:${wrColor}">${pct(s.winRate)}</span>
+            <span style="font-weight:700; color:${s.winRate >= 0.5 ? '#4ade80' : 'var(--loss)'}">${pct(s.winRate)}</span>
           </div>
-          <div style="width:100%; height:8px; background:rgba(0,0,0,0.3); border-radius:4px; overflow:hidden; display:flex;">
-            <div style="width:${s.winRate*100}%; background:#4ade80; height:100%; transition:width 1s ease;" title="Won: ${s.wins}"></div>
-            <div style="width:${(1-s.winRate)*100}%; background:var(--loss); height:100%; transition:width 1s ease;" title="Lost: ${s.losses}"></div>
+          <div style="width:100%; height:8px; border-radius:4px; overflow:hidden; display:flex; background:rgba(0,0,0,0.3);">
+            <div style="width:${winRateVal}%; background:#4ade80; height:100%; transition:width 1s ease;" title="Won: ${s.wins}"></div>
+            <div style="width:${lossRateVal}%; background:var(--loss); height:100%; transition:width 1s ease;" title="Lost: ${s.losses}"></div>
           </div>
         </div>
         ` : ''}
 
-        <!-- 3. Grafik Distribusi Total -->
+        <!-- 4. PULL DISTRIBUTION (Stacked Bar Chart) -->
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
             <span style="color:var(--text-dim);">Pull Distribution</span>
             <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">${s.wins}W / ${s.losses}L / ${s.guaranteed}G</span>
           </div>
-          <div style="width:100%; height:8px; background:rgba(0,0,0,0.3); border-radius:4px; overflow:hidden; display:flex;">
+          <div style="width:100%; height:8px; border-radius:4px; overflow:hidden; display:flex; background:rgba(0,0,0,0.3);">
             <div style="width:${wPct}%; background:#4ade80; transition:width 1s ease;" title="Win"></div>
             <div style="width:${lPct}%; background:var(--loss); transition:width 1s ease;" title="Loss"></div>
             <div style="width:${gPct}%; background:var(--gold-soft); transition:width 1s ease;" title="Guaranteed"></div>
@@ -620,7 +642,7 @@ function renderCalc() {
           <div style="display:flex; gap:12px; margin-top:8px; font-size:10px; color:var(--text-dim); justify-content:center;">
               <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#4ade80;"></span> Win</span>
               <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--loss);"></span> Loss</span>
-              <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold-soft);"></span> Guaranteed</span>
+              <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold-soft);"></span> Guar.</span>
           </div>
         </div>
 
@@ -628,7 +650,7 @@ function renderCalc() {
     `;
   }).join('');
   
-  // Mengubah tampilan Win Streak menjadi lebih menonjol
+  // Update Area Max Win Streak agar lebih estetik
   document.getElementById('streakGrid').innerHTML = [
       { label: 'Character', value: bestWinStreak(limChar) }, 
       { label: 'Light Cone', value: bestWinStreak(limLC) }, 
@@ -640,7 +662,6 @@ function renderCalc() {
     </div>
   `).join('');
 }
-
 function renderPriority() {
   if (DATA.priority) { DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority)); DATA.priority.forEach(r => { let avgPull = 85; let worstPull = 180; if ((r.type || '').toLowerCase().includes('light cone') || (r.type || '').toLowerCase().includes('lightcone')) { avgPull = 65; worstPull = 160; } r.averagePull = avgPull; r.worstPull = worstPull; }); }
   renderDeleteTable('manageTable-priority', 'priority', ['Priority','Name','Type','Archetype','Average Pull','Worst Scenario Pull','Patch (min-max)'], r => [r.priority, r.name, r.type, r.archetype, fmt(r.averagePull,0), fmt(r.worstPull,0), `${fmt(r.averagePull/100,2)}–${fmt(r.worstPull/100,2)}`], (a, b) => a.r.priority - b.r.priority);
