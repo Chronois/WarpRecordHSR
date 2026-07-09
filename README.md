@@ -1,6 +1,6 @@
 # Warp Record HSR — Honkai: Star Rail Pull Tracker
  
-A static dashboard (HTML/CSS/JS, nothing to install) built from your own HSR Pull Tracker
+A static dashboard (HTML/CSS/JS, nothing to install) built from your own HSR Pull Tracker 
 spreadsheet. It tracks pity, 50/50 win rate, luck multiplier, a "warp line" timeline, your
 character roster, pull-priority wishlist, team compositions, and Stellar Jade income — all in
 one page.
