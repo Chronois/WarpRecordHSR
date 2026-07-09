@@ -27,10 +27,10 @@ const HSR_VERSIONS = [
   { v: '2.5', date: '2024-09-10' }, { v: '2.6', date: '2024-10-23' }, { v: '2.7', date: '2024-12-04' },
   { v: '3.0', date: '2025-01-15' }, { v: '3.1', date: '2025-02-26' }, { v: '3.2', date: '2025-04-09' },
   { v: '3.3', date: '2025-05-21' }, { v: '3.4', date: '2025-07-02' }, { v: '3.5', date: '2025-08-13' },
-  { v: '3.6', date: '2025-09-24' }, { v: '3.7', date: '2025-11-05' }, { v: '4.0', date: '2025-12-17' },
-  { v: '4.1', date: '2026-01-28' }, { v: '4.2', date: '2026-03-11' }, { v: '4.3', date: '2026-04-22' },
-  { v: '4.4', date: '2026-06-03' }, { v: '4.5', date: '2026-07-15' }, { v: '4.6', date: '2026-08-26' },
-  { v: '4.7', date: '2026-10-07' }, { v: '4.8', date: '2026-11-18' }
+  { v: '3.6', date: '2025-09-24' }, { v: '3.7', date: '2025-11-05' }, { v: '3.8', date: '2025-12-17' },
+  { v: '4.0', date: '2026-02-13' }, { v: '4.1', date: '2026-03-25' }, { v: '4.2', date: '2026-04-22' },
+  { v: '4.3', date: '2026-06-01' }, { v: '4.4', date: '2026-07-15' }, { v: '4.5', date: '2026-08-26' },
+  { v: '4.6', date: '2026-10-07' }, { v: '4.7', date: '2026-11-18' }, { v: '4.8', date: '2026-12-30' }
 ];
 
 function getVersionSchedule() {
@@ -1122,15 +1122,17 @@ function renderStellarJade() {
   });
   
   const today = new Date().toISOString().split('T')[0]; 
-  const relevantVersions = Object.keys(verMap).filter(fullV => {
+  let relevantVersions = Object.keys(verMap).filter(fullV => {
       const d = verMap[fullV];
       return (d.jade1>0 || d.pass1>0 || d.jade2>0 || d.pass2>0) || (d.v1 && d.v1.start <= today);
   });
 
-  // Pemisahan 5 versi terbaru dan versi sebelumnya
-  const cutoff = Math.max(0, relevantVersions.length - 5);
-  const olderVersions = relevantVersions.slice(0, cutoff);
-  const recentVersions = relevantVersions.slice(cutoff);
+  // Urutkan versi dari yang terbaru ke terlama (Descending)
+  relevantVersions.sort((a, b) => parseFloat(b) - parseFloat(a));
+
+  // Pemisahan 5 versi terbaru dan versi lama
+  const recentVersions = relevantVersions.slice(0, 5);
+  const olderVersions = relevantVersions.slice(5);
 
   const renderCard = (fullV, isOlder) => {
       const d = verMap[fullV];
@@ -1141,13 +1143,24 @@ function renderStellarJade() {
       const tPull = pull1 + pull2;
       const isActive = d.v1 && d.v2 && today >= d.v1.start && today < d.v2.end;
       
-      // Menggunakan estimasi kasar F2P untuk versi lama jika user tidak punya data
+      // Kalkulasi jumlah hari dalam versi tersebut
+      let daysCount = 0;
+      if (d.v1 && d.v2) {
+          daysCount = daysBetween(d.v2.end, d.v1.start);
+      }
+      
+      const durationHtml = daysCount > 0 
+          ? `<div style="text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--text-dim); margin-top:6px; background:rgba(255,255,255,0.03); padding:4px; border-radius:4px; letter-spacing:0.05em;">${daysCount} Days</div>` 
+          : '';
+
+      // Tampilan untuk versi lama yang tidak memiliki data (Menggunakan F2P Estimate)
       if (isOlder && tPull === 0 && F2P_ESTIMATES[fullV]) {
           return `
           <div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
             <div>
                 <div class="version-label" style="font-size:16px; color:var(--text);">Version ${fullV}</div>
                 <div class="version-dates" style="font-size:11px; color:var(--text-dim); margin-top:2px;">${formatDate(d.v1 ? d.v1.start : '')} – ${formatDate(d.v2 ? d.v2.end : '')}</div>
+                ${durationHtml}
             </div>
             <div style="background:rgba(255,255,255,0.02); padding:16px 12px; border-radius:8px; text-align:center; border: 1px dashed rgba(255,255,255,0.1); flex:1; display:flex; flex-direction:column; justify-content:center;">
                 <div style="font-size:11px; color:var(--text-dim); margin-bottom:6px;">Estimated F2P Income</div>
@@ -1158,11 +1171,13 @@ function renderStellarJade() {
           </div>`;
       }
       
+      // Tampilan Card Normal
       return `
       <div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
         <div>
             <div class="version-label" style="font-size:16px; color:var(--text);">Version ${fullV}</div>
             <div class="version-dates" style="font-size:11px; color:var(--text-dim); margin-top:2px;">${formatDate(d.v1 ? d.v1.start : '')} – ${formatDate(d.v2 ? d.v2.end : '')}</div>
+            ${durationHtml}
         </div>
         
         <div style="display:flex; flex-direction:column; gap:8px;">
@@ -1198,22 +1213,26 @@ function renderStellarJade() {
 
   let html = '';
   if (relevantVersions.length === 0) {
-      html = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`;
+      html = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px; grid-column:1/-1;">No data yet.</p>`;
   } else {
-      let olderHtml = olderVersions.map(v => renderCard(v, true)).join('');
       let recentHtml = recentVersions.map(v => renderCard(v, false)).join('');
+      let olderHtml = olderVersions.map(v => renderCard(v, true)).join('');
       
-      html = `
-        ${olderVersions.length > 0 ? `
-          <div id="olderVersionsContainer" style="display:none; grid-column: 1 / -1; margin-bottom: 8px;">
+      html = recentHtml; // Render 5 versi terbaru di urutan awal
+
+      // Jika ada versi lama, letakkan tombol Expand di bawahnya, diikuti kontainer versi lama
+      if (olderVersions.length > 0) {
+          html += `
+          <div style="grid-column: 1 / -1; margin-top: 12px; margin-bottom: 12px;">
+              <button id="btnToggleOlderVersions" class="btn-ghost" style="width:100%; padding: 14px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.03); border-radius: 10px;">
+                  ⬇ Show Previous ${olderVersions.length} Versions
+              </button>
+          </div>
+          <div id="olderVersionsContainer" style="display:none; grid-column: 1 / -1;">
              <div class="version-grid" style="opacity:0.85;">${olderHtml}</div>
           </div>
-          <div style="grid-column: 1 / -1; margin-bottom: 16px;">
-              <button id="btnToggleOlderVersions" class="btn-ghost" style="width:100%; border-style:dashed;">⬇ Show Previous ${olderVersions.length} Versions</button>
-          </div>
-        ` : ''}
-        ${recentHtml}
-      `;
+          `;
+      }
   }
   
   document.getElementById('versionGrid').innerHTML = html;
@@ -1233,7 +1252,7 @@ function renderStellarJade() {
       });
   }
 
-  // --- Bagian tabel delete tidak dirubah ---
+  // --- Bagian tabel delete ---
   renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','Stellar Jade','Star Rail Pass'], 
   r => {
       let j = parseFloat(r.jade) || 0;
@@ -1271,7 +1290,6 @@ function renderStellarJade() {
     { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
   ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
 }
-
 document.querySelectorAll('.table-filter').forEach(input => { input.addEventListener('input', (e) => { const term = e.target.value.toLowerCase(); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return; if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } } else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } }); });
 document.addEventListener('click', (e) => { if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { const th = e.target; const table = th.closest('table'); const tbody = table.querySelector('tbody'); const idx = Array.from(th.parentNode.children).indexOf(th); const isAsc = th.classList.contains('asc'); table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); th.classList.add(isAsc ? 'desc' : 'asc'); const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); rows.sort((a, b) => { const aText = a.children[idx].textContent.trim(); const bText = b.children[idx].textContent.trim(); const aNum = parseFloat(aText.replace(/,/g, '')); const bNum = parseFloat(bText.replace(/,/g, '')); if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum; return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); }); tbody.append(...rows); } });
 document.getElementById('btnDownloadJson')?.addEventListener('click', () => { const content = JSON.stringify(DATA, null, 2); const blob = new Blob([content], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
