@@ -421,9 +421,19 @@ function buildOverview() {
 function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
   if (!rows || !rows.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`; return; }
-  const gaps = rows.map(r => Math.max(Math.sqrt(r.daysSince || 0.5) * 22, 46));
   
-  const stations = rows.map((r, i) => {
+  // Membalikkan urutan array untuk visualisasi (Terbaru di kiri -> Terlama di kanan)
+  const displayRows = [...rows].reverse();
+  
+  // Menghitung jarak (gaps) yang benar untuk urutan yang sudah dibalik
+  // Jarak antar stasiun dihitung berdasarkan nilai daysSince dari tarikan yang lebih baru (sebelah kirinya)
+  const gaps = displayRows.map((r, i) => {
+    if (i === 0) return 24; // Margin tetap untuk item pertama (paling baru)
+    const newerPull = displayRows[i - 1]; 
+    return Math.max(Math.sqrt(newerPull.daysSince || 0.5) * 22, 46);
+  });
+  
+  const stations = displayRows.map((r, i) => {
     const lowerName = normName(r.name);
     const rosterEntry = (DATA.roster || []).find(char => normName(char.name) === lowerName);
     let imgSrc = DEFAULT_AVATAR;
