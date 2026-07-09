@@ -414,7 +414,7 @@ function buildOverview() {
 // ============ Track Render ============
 function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
-  if (!rows || !rows.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`; return; }
+  if (!rows || !rows.length) { container.innerHTML = `<p class="empty-text">No data yet.</p>`; return; }
   
   const displayRows = [...rows].reverse();
   const gaps = displayRows.map((r, i) => {
@@ -434,15 +434,37 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
         imgSrc = MASTER_CHARACTERS[lowerName].img;
     }
 
+    // === DINAMIKA GRAFIK BERDASARKAN TINGGI PITY ===
+    let pityColor = 'var(--gold-soft)';
+    let fontWeight = 'normal';
+    let glowEff = 'none';
+
+    // 1. Logika Warna Teks dan Efek Glow (Cahaya) Avatar
+    if (r.pity <= 35) { 
+        // Early Pity (Sangat Beruntung)
+        pityColor = 'var(--win)'; 
+        fontWeight = 'bold';
+        glowEff = '0 0 15px rgba(111,207,151,0.5)';
+    } else if (r.pity >= 75) { 
+        // Hard Pity (Sial) - Glow merah akan semakin kuat jika pity semakin mendekati 90
+        pityColor = 'var(--loss)'; 
+        fontWeight = 'bold';
+        const glowIntensity = 10 + ((r.pity - 75) * 1.5); 
+        glowEff = `0 0 ${glowIntensity}px rgba(226,128,125,0.85)`;
+    }
+
+    // 2. Logika Ukuran Titik (Membesar secara linear. Min: ~10px, Max: 26px)
+    const dotSize = 10 + (r.pity / maxPity) * 16;
+
     return `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px">
       <div class="station-label-name">${r.name}</div>
-      <img src="${imgSrc}" class="station-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
+      <img src="${imgSrc}" class="station-icon" style="box-shadow: ${glowEff};" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
       <div class="station-tooltip">
         <div class="tt-name">${r.name}</div>
         <div class="tt-meta">${formatDate(r.date)} · pity ${r.pity}${hasResult ? ' · ' + (r.result === 'W' ? '50/50 Win' : r.result === 'L' ? '50/50 Loss' : 'Guaranteed') : ''}</div>
       </div>
-      <div class="station-dot ${hasResult ? r.result : 'G'}"></div>
-      <div class="station-pity">${r.pity}</div>
+      <div class="station-dot ${hasResult ? r.result : 'G'}" style="width: ${dotSize}px; height: ${dotSize}px;"></div>
+      <div class="station-pity" style="color: ${pityColor}; font-weight: ${fontWeight};">${r.pity}</div>
     </div>`;
   }).join('');
   
