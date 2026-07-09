@@ -390,3 +390,69 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cur
 .cropper-view-box { outline: 1px solid var(--cyan); }
 .cropper-line, .cropper-point { background-color: var(--cyan); }
 }
+
+/* =========================================
+   INTERACTIVITY & ANIMATIONS UPGRADE
+   ========================================= */
+
+/* 1. Animasi Transisi Halaman (Fade In & Slide Up) */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page:not([hidden]) {
+  animation: pageFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* 2. Efek Tekan (Tactile/Squish) pada semua tombol */
+button { cursor: pointer; }
+.btn-add:active, .btn-ghost:active, .tab:active, .roster-del-btn:active,
+.btn-del:active, .btn-edit:active, .btn-dup:active, .btn-add-slot:active {
+  transform: scale(0.92) !important;
+  transition: transform 0.1s ease !important;
+}
+
+/* 3. Efek Glow saat mengetik di Form & Filter (Focus State) */
+.manage-form input:focus, .manage-form select:focus, .table-filter:focus {
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 12px rgba(95, 201, 217, 0.4) !important;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+/* 4. Interaktivitas Chart di Page Stats (Express Archive) */
+/* Hover pada Lingkaran Win Rate & Distribution */
+.calc-col div[style*="width:84px; height:84px;"] {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease !important;
+  cursor: crosshair;
+}
+.calc-col div[style*="width:84px; height:84px;"]:hover {
+  transform: scale(1.15) rotate(5deg) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6) !important;
+}
+/* Hover pada Tiang Histogram Pity Frequency */
+.calc-col div[style*="max-width:20px"] {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, height 0.5s ease !important;
+}
+.calc-col div[style*="flex:1"]:hover div[style*="max-width:20px"] {
+  background-color: var(--gold-soft) !important;
+  box-shadow: 0 0 12px var(--gold-soft) !important;
+}
+.calc-col div[style*="flex:1"]:hover span {
+  color: var(--gold-soft) !important;
+  font-weight: bold;
+}
+
+/* 5. Interaktivitas pada Tabel Log Data */
+.manage-table tbody tr {
+  transition: background-color 0.2s ease, transform 0.2s ease !important;
+}
+.manage-table tbody tr:hover {
+  background-color: rgba(95, 201, 217, 0.1) !important;
+  transform: translateX(6px) !important; /* Baris tabel bergeser sedikit ke kanan */
+}
+
+/* 6. Efek Kilau Ekstra pada Roster Card */
+.roster-card:hover {
+  box-shadow: 0 12px 28px rgba(157, 124, 232, 0.25) !important;
+}
