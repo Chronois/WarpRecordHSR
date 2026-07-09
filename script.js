@@ -864,7 +864,24 @@ function renderTeam() {
   grid.innerHTML = indexed.map((r) => {
     const subDps = Array.isArray(r.subDps) ? r.subDps.join(', ') : (r.subDps || '—'); const support = Array.isArray(r.support) ? r.support.join(', ') : (r.support || '—'); const pctVal = pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2);
     let imgHtml = ''; if (r.members && r.members.length > 0) { imgHtml = r.members.map(m => `<div class="team-image-slot" title="${m.name}"><img src="${m.img}" onerror="this.src='${DEFAULT_AVATAR}'"></div>`).join(''); } else { imgHtml = `<div class="team-image-slot"><img src="${DEFAULT_AVATAR}"></div>`; }
-    return `<div class="team-card searchable-item" data-idx="${r._idx}"><div class="team-image-row">${imgHtml}</div><div class="team-card-content"><div class="tc-arch">${r.archetype}</div><div class="tc-row"><span>Main DPS:</span><span class="tc-val">${r.mainDps || '—'}</span></div><div class="tc-row"><span>Sub DPS:</span><span class="tc-val">${subDps}</span></div><div class="tc-row"><span>Support:</span><span class="tc-val">${support}</span></div><div class="tc-row"><span>Sustain:</span><span class="tc-val">${r.sustain || '—'}</span></div><div class="tc-row"><span>Cost:</span><span class="tc-val">${r.cost || '—'}</span></div><div class="tc-footer"><span class="tc-pv">PV: ${fmt(r.pullValue, 0)} (${pctVal})</span><div class="tc-footer-actions"><button class="btn-dup" onclick="dupTeam(${r._idx})" title="Duplicate">⧉</button><button class="btn-edit" onclick="editTeam(${r._idx})" title="Edit">✎</button><button class="btn-del" data-section="team" data-idx="${r._idx}" title="Delete">✕</button></div></div></div></div>`;
+    
+    // Deteksi jika tim tidak membawa Sustain
+    const isSustainless = !r.sustain || r.sustain === '—';
+    const sustainlessClass = isSustainless ? 'sustainless' : '';
+
+    return `<div class="team-card searchable-item ${sustainlessClass}" data-idx="${r._idx}">
+        <div class="team-image-row">${imgHtml}</div>
+        <div class="team-card-content">
+            <div class="tc-arch">${r.archetype} ${isSustainless ? '<span style="font-size:10px; padding:2px 6px; background:var(--loss); color:#fff; border-radius:4px; margin-left:6px; vertical-align:middle;">0 SUSTAIN</span>' : ''}</div>
+            <div class="tc-row"><span>Main DPS:</span><span class="tc-val">${r.mainDps || '—'}</span></div>
+            <div class="tc-row"><span>Sub DPS:</span><span class="tc-val">${subDps}</span></div>
+            <div class="tc-row"><span>Support:</span><span class="tc-val">${support}</span></div>
+            <div class="tc-row"><span>Sustain:</span><span class="tc-val" ${isSustainless ? 'style="color:var(--loss);"' : ''}>${r.sustain || '—'}</span></div>
+            <div class="tc-row"><span>Cost:</span><span class="tc-val">${r.cost || '—'}</span></div>
+            <div class="tc-footer"><span class="tc-pv">PV: ${fmt(r.pullValue, 0)} (${pctVal})</span>
+            <div class="tc-footer-actions"><button class="btn-dup" onclick="dupTeam(${r._idx})" title="Duplicate">⧉</button><button class="btn-edit" onclick="editTeam(${r._idx})" title="Edit">✎</button><button class="btn-del" data-section="team" data-idx="${r._idx}" title="Delete">✕</button></div></div>
+        </div>
+    </div>`;
   }).join('');
 }
 
@@ -997,13 +1014,77 @@ document.getElementById('form-character').addEventListener('submit', (e) => {
 
 // ============ STELLAR JADE & MANAGEMENT ============
 function renderStellarJade() {
-  const rows = DATA.stellarJade || []; const totalJade = rows.reduce((s, r) => s + (r.jade || 0), 0); const totalPasses= rows.reduce((s, r) => s + (r.passes|| 0), 0); const totalPulls = totalJade / 160 + totalPasses;
-  document.getElementById('jadeStats').innerHTML = [{ label: 'Total Stellar Jade', value: fmt(totalJade, 0) }, { label: 'Total Star Rail Passes',value: fmt(totalPasses, 0) }, { label: 'Pulls Available', value: fmt(totalPulls, 1) }, { label: 'Logged Entries', value: fmt(rows.length, 0) }].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
-  const versionTotals = {}; rows.forEach(r => { const ver = getVersionForDate(r.date, VERSION_SCHEDULE); if (!versionTotals[ver]) versionTotals[ver] = { jade: 0, passes: 0 }; versionTotals[ver].jade += r.jade || 0; versionTotals[ver].passes += r.passes || 0; });
-  const today = new Date().toISOString().split('T')[0]; const relevantVersions = VERSION_SCHEDULE.filter(v => v.start <= today || versionTotals[v.label]);
-  document.getElementById('versionGrid').innerHTML = relevantVersions.length ? relevantVersions.map(v => { const d = versionTotals[v.label] || { jade: 0, passes: 0 }; const pulls = d.jade / 160 + d.passes; const isActive = today >= v.start && today < v.end; return `<div class="version-card ${isActive ? 'version-active' : ''}"><div class="version-label">Version ${v.label}</div><div class="version-dates">${formatDate(v.start)} – ${formatDate(v.end)}</div><div class="version-jade">${fmt(d.jade,0)} <span class="vunit">SJ</span></div><div class="version-passes">${fmt(d.passes,0)} <span class="vunit">Pass</span></div><div class="version-pulls">${fmt(pulls,1)} pulls</div></div>`; }).join('') : `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`;
+  const rows = DATA.stellarJade || []; 
+  const totalJade = rows.reduce((s, r) => s + (r.jade || 0), 0); 
+  const totalPasses= rows.reduce((s, r) => s + (r.passes|| 0), 0); 
+  const totalPulls = totalJade / 160 + totalPasses;
   
-  // Ganti baris ini:
+  // Menggunakan icon HSR Pulls.png di Stats Atas
+  document.getElementById('jadeStats').innerHTML = [
+    { label: 'Total Stellar Jade', value: fmt(totalJade, 0) }, 
+    { label: 'Total <img src="HSR Pulls.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(totalPasses, 0) }, 
+    { label: 'Pulls Available', value: fmt(totalPulls, 1) }, 
+    { label: 'Logged Entries', value: fmt(rows.length, 0) }
+  ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
+  
+  // Mengelompokkan berdasarkan FULL Version (1.0, 1.1, dst) tanpa memecah jadi dua kartu
+  const verMap = {};
+  VERSION_SCHEDULE.forEach(v => {
+      if (!verMap[v.fullLabel]) verMap[v.fullLabel] = { v1:null, v2:null, jade1:0, pass1:0, jade2:0, pass2:0 };
+      if (v.label.includes('1/2')) verMap[v.fullLabel].v1 = v;
+      else verMap[v.fullLabel].v2 = v;
+  });
+
+  rows.forEach(r => {
+      const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
+      if (matchedV) {
+          const fullV = matchedV.fullLabel;
+          if (matchedV.label.includes('1/2')) {
+              verMap[fullV].jade1 += r.jade || 0;
+              verMap[fullV].pass1 += r.passes || 0;
+          } else {
+              verMap[fullV].jade2 += r.jade || 0;
+              verMap[fullV].pass2 += r.passes || 0;
+          }
+      }
+  });
+  
+  const today = new Date().toISOString().split('T')[0]; 
+  const relevantVersions = Object.keys(verMap).filter(fullV => {
+      const d = verMap[fullV];
+      return (d.jade1>0 || d.pass1>0 || d.jade2>0 || d.pass2>0) || (d.v1 && d.v1.start <= today);
+  });
+  
+  document.getElementById('versionGrid').innerHTML = relevantVersions.length ? relevantVersions.map(fullV => { 
+      const d = verMap[fullV];
+      const pull1 = (d.jade1 / 160) + d.pass1;
+      const pull2 = (d.jade2 / 160) + d.pass2;
+      const tJade = d.jade1 + d.jade2;
+      const tPass = d.pass1 + d.pass2;
+      const tPull = pull1 + pull2;
+      const isActive = d.v1 && d.v2 && today >= d.v1.start && today < d.v2.end;
+      
+      return `<div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:6px;">
+        <div class="version-label" style="font-size:16px;">Version ${fullV}</div>
+        <div class="version-dates" style="margin-bottom:8px;">${formatDate(d.v1 ? d.v1.start : '')} – ${formatDate(d.v2 ? d.v2.end : '')}</div>
+        
+        <div style="display:flex; flex-direction:column; gap:4px;">
+            <div class="phase-row">
+                <span class="phase-label">Phase 1</span>
+                <span class="phase-stats">${fmt(d.jade1,0)} SJ <span style="opacity:0.3">|</span> ${fmt(d.pass1,0)} <img src="HSR Pulls.png" class="pass-icon"> <span style="opacity:0.3">|</span> ${fmt(pull1,1)} Pulls</span>
+            </div>
+            <div class="phase-row">
+                <span class="phase-label">Phase 2</span>
+                <span class="phase-stats">${fmt(d.jade2,0)} SJ <span style="opacity:0.3">|</span> ${fmt(d.pass2,0)} <img src="HSR Pulls.png" class="pass-icon"> <span style="opacity:0.3">|</span> ${fmt(pull2,1)} Pulls</span>
+            </div>
+            <div class="phase-row total-row">
+                <span class="phase-label">Total</span>
+                <span class="phase-stats">${fmt(tJade,0)} SJ <span style="opacity:0.3">|</span> ${fmt(tPass,0)} <img src="HSR Pulls.png" class="pass-icon"> <span style="opacity:0.3">|</span> ${fmt(tPull,1)} Pulls</span>
+            </div>
+        </div>
+      </div>`; 
+  }).join('') : `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`;
+  
   renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','Stellar Jade','Star Rail Pass'], 
   r => [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), r.activity, fmt(r.jade,0), fmt(r.passes,0)], 
   (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; });
