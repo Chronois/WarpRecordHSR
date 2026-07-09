@@ -398,12 +398,7 @@ function buildOverview() {
   const stats = computeBannerStats(limRows, null); 
   const total5star = limRows.length + stdRows.length + freebies.length;
 
-  const cards = [
-    { label: `Total Warps Spent`, value: fmt(stats.totalWarps, 0), sub: 'character + light cone (limited)' },
-    { label: `Total 5★ Obtained`, value: fmt(total5star, 0), sub: `${limRows.length} lim · ${stdRows.length} std · ${freebies.length} free` },
-    { label: '50/50 Win Rate', value: stats.winRate !== null ? pct(stats.winRate) : '—', sub: `${stats.wins}W / ${stats.losses}L` },
-    { label: `Average Pity`, value: fmt(stats.avgPity, 1), sub: `combined avg pity` }
-  ];
+  const cards = [    { label: `Total Warps Spent`, value: fmt(stats.totalWarps, 0), sub: 'character + light cone (limited)' },    { label: `Total 5★ Obtained`, value: fmt(total5star, 0), sub: `${limRows.length} lim · ${stdRows.length} std · ${freebies.length} free` },    { label: '50/50 Win Rate', value: stats.winRate !== null ? pct(stats.winRate) : '—', sub: `${stats.wins}W / ${stats.losses}L` },    { label: `Average Pity`, value: fmt(stats.avgPity, 1), sub: `combined avg pity` }  ];
 
   document.getElementById('statGrid').innerHTML = cards.map(c => `<div class="stat-card"><div class="stat-label">${c.label}</div><div class="stat-value ${c.value.length > 6 ? 'small' : ''}">${c.value}</div><div class="stat-sub">${c.sub}</div></div>`).join('');
   const elMetaLim = document.getElementById('metaLimitedWarps'); if(elMetaLim) elMetaLim.textContent = fmt((DATA.limited||[]).filter(r => r.category === 'Character').reduce((s, r) => s + r.pity, 0) + (DATA.limited||[]).filter(r => r.category === 'Light Cone').reduce((s, r) => s + r.pity, 0), 0);
@@ -571,10 +566,7 @@ function renderCalc() {
   const limChar = (DATA.limited||[]).filter(r => r.category === 'Character'); 
   const limLC   = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
   
-  const datasets = [
-    { label: 'Character Banner', rows: limChar, maxPity: 90 }, 
-    { label: 'Light Cone Banner', rows: limLC, maxPity: 80 }, 
-    { label: 'Combined (Total)', rows: DATA.limited||[], maxPity: 90 }
+  const datasets = [    { label: 'Character Banner', rows: limChar, maxPity: 90 },     { label: 'Light Cone Banner', rows: limLC, maxPity: 80 },     { label: 'Combined (Total)', rows: DATA.limited||[], maxPity: 90 }
   ];
 
   const maxPulls = Math.max(...datasets.map(d => computeBannerStats(d.rows, d.maxPity).totalWarps)) || 1;
@@ -674,10 +666,7 @@ function renderCalc() {
       </div>`;
   }).join('');
   
-  document.getElementById('streakGrid').innerHTML = [
-      { label: 'Character', value: bestWinStreak(limChar) }, 
-      { label: 'Light Cone', value: bestWinStreak(limLC) }, 
-      { label: 'Combined', value: bestWinStreak(DATA.limited||[]) }
+  document.getElementById('streakGrid').innerHTML = [      { label: 'Character', value: bestWinStreak(limChar) },       { label: 'Light Cone', value: bestWinStreak(limLC) },       { label: 'Combined', value: bestWinStreak(DATA.limited||[]) }
   ].map(s => `<div class="bstat" style="text-align:center; padding: 20px;"><div class="stat-label" style="margin-bottom:8px; letter-spacing:1px;">MAX ${s.label.toUpperCase()} WIN STREAK</div><div class="stat-value" style="color:var(--cyan); font-size:32px; font-family:var(--font-display);">${fmt(s.value, 0)}</div></div>`).join('');
 }
 
@@ -1122,11 +1111,7 @@ function renderStellarJade() {
   }, (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; });
 
   const totalSavingPulls = (currentJade / 160) + currentPasses;
-  document.getElementById('jadeStats').innerHTML = [
-    { label: 'Current <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">', value: fmt(currentJade, 0) }, 
-    { label: 'Current <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(currentPasses, 0) }, 
-    { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
-  ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
+  document.getElementById('jadeStats').innerHTML = [    { label: 'Current <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">', value: fmt(currentJade, 0) },     { label: 'Current <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(currentPasses, 0) },     { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }  ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
 }
 
 // ============ Form Listeners (Income & Spend) ============
