@@ -499,7 +499,10 @@ function renderFreebies() {
     return; 
   }
   
-  container.innerHTML = DATA.freebies.map(f => {
+  // Membalik urutan agar Freebies terbaru muncul pertama
+  const displayFreebies = [...DATA.freebies].reverse();
+  
+  container.innerHTML = displayFreebies.map(f => {
     const lowerName = normName(f.name);
     const rosterEntry = (DATA.roster || []).find(char => normName(char.name) === lowerName);
     let imgSrc = DEFAULT_AVATAR;
