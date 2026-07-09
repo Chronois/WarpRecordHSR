@@ -1008,21 +1008,11 @@ document.getElementById('form-character').addEventListener('submit', (e) => {
 // ============ STELLAR JADE & MANAGEMENT ============
 function renderStellarJade() {
   const rows = DATA.stellarJade || []; 
-  const totalJade = rows.reduce((s, r) => s + (r.jade || 0), 0); 
-  const totalPasses= rows.reduce((s, r) => s + (r.passes|| 0), 0); 
-  const totalSavingPulls = totalJade / 160 + totalPasses;
   
-  // Kalkulasi Total Spend berdasarkan riwayat tarikan di Limited Banner
-  const totalSpendPulls = (DATA.limited || []).reduce((s, r) => s + r.pity, 0);
-  
-  // Mengubah Top Stats: Menghapus Logged Entries, Menambahkan Spend & Saving
-  document.getElementById('jadeStats').innerHTML = [
-    { label: 'Total Stellar Jade', value: fmt(totalJade, 0) }, 
-    { label: 'Total <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(totalPasses, 0) }, 
-    { label: 'Total Spend', value: fmt(totalSpendPulls, 0) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }, 
-    { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
-  ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
-  
+  let currentJade = 0;
+  let currentPasses = 0;
+  let totalSpendPulls = 0;
+
   const verMap = {};
   VERSION_SCHEDULE.forEach(v => {
       if (!verMap[v.fullLabel]) verMap[v.fullLabel] = { v1:null, v2:null, jade1:0, pass1:0, jade2:0, pass2:0 };
@@ -1031,18 +1021,51 @@ function renderStellarJade() {
   });
 
   rows.forEach(r => {
-      const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
-      if (matchedV) {
-          const fullV = matchedV.fullLabel;
-          if (matchedV.label.includes('1/2')) {
-              verMap[fullV].jade1 += r.jade || 0;
-              verMap[fullV].pass1 += r.passes || 0;
-          } else {
-              verMap[fullV].jade2 += r.jade || 0;
-              verMap[fullV].pass2 += r.passes || 0;
+      let j = parseFloat(r.jade) || 0;
+      let p = parseFloat(r.passes) || 0;
+      let act = (r.activity || '').toLowerCase();
+      
+      // Deteksi Kata Kunci (Keyword Detection)
+      let isSaving = act.includes('saving');
+      let isSpend = act.includes('spend') || j < 0 || p < 0;
+
+      // Jika Spend: Paksa angka menjadi negatif untuk mengurangi saldo, lalu hitung total pull yang dihabiskan
+      if (isSpend) {
+          j = -Math.abs(j);
+          p = -Math.abs(p);
+          totalSpendPulls += (Math.abs(j) / 160) + Math.abs(p);
+      }
+
+      // Tambahkan ke Saldo Utama (Total Saving)
+      currentJade += j;
+      currentPasses += p;
+
+      // Version Income Records: HANYA untuk pendapatan murni (Bukan Saving, Bukan Spend)
+      if (!isSaving && !isSpend) {
+          const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
+          if (matchedV) {
+              const fullV = matchedV.fullLabel;
+              if (matchedV.label.includes('1/2')) {
+                  verMap[fullV].jade1 += j;
+                  verMap[fullV].pass1 += p;
+              } else {
+                  verMap[fullV].jade2 += j;
+                  verMap[fullV].pass2 += p;
+              }
           }
       }
   });
+
+  // Konversi saldo saat ini menjadi Pulls
+  const totalSavingPulls = (currentJade / 160) + currentPasses;
+  
+  // Mengubah Top Stats UI
+  document.getElementById('jadeStats').innerHTML = [
+    { label: 'Current Stellar Jade', value: fmt(currentJade, 0) }, 
+    { label: 'Current <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(currentPasses, 0) }, 
+    { label: 'Total Spend', value: fmt(totalSpendPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }, 
+    { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
+  ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
   
   const today = new Date().toISOString().split('T')[0]; 
   const relevantVersions = Object.keys(verMap).filter(fullV => {
@@ -1098,8 +1121,35 @@ function renderStellarJade() {
       </div>`; 
   }).join('') : `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`;
   
+  // Render Tabel Log: Menambahkan styling label [SPEND] merah dan [SAVING] biru agar sangat rapi dilihat
   renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','Stellar Jade','Star Rail Pass'], 
-  r => [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), r.activity, fmt(r.jade,0), fmt(r.passes,0)], 
+  r => {
+      let j = parseFloat(r.jade) || 0;
+      let p = parseFloat(r.passes) || 0;
+      let act = (r.activity || '').toLowerCase();
+      let isSpend = act.includes('spend') || j < 0 || p < 0;
+      let isSaving = act.includes('saving');
+      
+      let jStr = fmt(isSpend ? -Math.abs(j) : j, 0);
+      let pStr = fmt(isSpend ? -Math.abs(p) : p, 0);
+      let actDisplay = r.activity;
+      
+      // Styling Visual untuk membedakan transaksi di tabel secara estetik
+      if (isSpend) {
+          jStr = `<span style="color:var(--loss)">${jStr}</span>`;
+          pStr = `<span style="color:var(--loss)">${pStr}</span>`;
+          actDisplay = `<span style="color:var(--loss); font-weight:bold; font-size:10px; border:1px solid var(--loss); padding:2px 4px; border-radius:4px; margin-right:6px;">SPEND</span> ${r.activity}`;
+      } else if (isSaving) {
+          jStr = `<span style="color:var(--cyan)">+${jStr}</span>`;
+          pStr = `<span style="color:var(--cyan)">+${pStr}</span>`;
+          actDisplay = `<span style="color:var(--cyan); font-weight:bold; font-size:10px; border:1px solid var(--cyan); padding:2px 4px; border-radius:4px; margin-right:6px;">SAVING</span> ${r.activity}`;
+      } else {
+          jStr = `+${jStr}`;
+          pStr = `+${pStr}`;
+      }
+
+      return [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), actDisplay, jStr, pStr];
+  }, 
   (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; });
 }
 
