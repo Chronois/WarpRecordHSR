@@ -1069,6 +1069,8 @@ function renderStellarJade() {
   else {
       let recentHtml = recentVersions.map(v => renderCard(v, false)).join(''); let olderHtml = olderVersions.map(v => renderCard(v, true)).join('');
       html = recentHtml;
+      
+      // === Perubahan Teks Tombol (Awal & Toggle) ===
       if (olderVersions.length > 0) {
           html += `
           <div style="grid-column: 1 / -1; margin-top: 12px; margin-bottom: 12px;">
@@ -1087,8 +1089,14 @@ function renderStellarJade() {
   if (toggleBtn) {
       toggleBtn.addEventListener('click', function() {
           const container = document.getElementById('olderVersionsContainer');
-          if (container.style.display === 'none') { container.style.display = 'block'; this.innerHTML = '⬆ Hide Previous Versions'; } 
-          else { container.style.display = 'none'; this.innerHTML = '⬇ Show Previous ' + olderVersions.length + ' Versions'; }
+          // === Perubahan Teks Saat Tombol Diklik ===
+          if (container.style.display === 'none') { 
+              container.style.display = 'block'; 
+              this.innerHTML = 'Hide Previous Versions'; 
+          } else { 
+              container.style.display = 'none'; 
+              this.innerHTML = 'Show Previous Versions'; 
+          }
       });
   }
 
@@ -1111,7 +1119,11 @@ function renderStellarJade() {
   }, (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; });
 
   const totalSavingPulls = (currentJade / 160) + currentPasses;
-  document.getElementById('jadeStats').innerHTML = [    { label: 'Current <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">', value: fmt(currentJade, 0) },     { label: 'Current <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(currentPasses, 0) },     { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }  ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
+  document.getElementById('jadeStats').innerHTML = [
+    { label: 'Current <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">', value: fmt(currentJade, 0) }, 
+    { label: 'Current <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(currentPasses, 0) }, 
+    { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
+  ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
 }
 
 // ============ Form Listeners (Income & Spend) ============
