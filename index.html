@@ -693,7 +693,10 @@
           <label>Star Rail Pass</label>
           <input type="number" name="passes" min="0" step="1" value="0">
         </div>
-        <button type="submit" class="btn-add">+ Add Transaction</button>
+        <div style="display: flex; gap: 8px; align-items: flex-end;">
+          <button type="submit" name="actionType" value="add" class="btn-add" style="flex: 1;">+ Add</button>
+          <button type="submit" name="actionType" value="spend" class="btn-add" style="flex: 1; background: var(--loss); border-color: var(--loss); color: #fff;">- Spend</button>
+        </div>
       </form>
       <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-stellarjade" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
