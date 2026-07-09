@@ -620,17 +620,61 @@ function renderCalc() {
     </div>
   `).join('');
 }
+// ============ PAGE PRIORITY ============
 function renderPriority() {
-  if (DATA.priority) { DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority)); DATA.priority.forEach(r => { let avgPull = 85; let worstPull = 180; if (String(r.type || '').toLowerCase().includes('light cone') || String(r.type || '').toLowerCase().includes('lightcone')) { avgPull = 65; worstPull = 160; } r.averagePull = avgPull; r.worstPull = worstPull; }); }
-  renderDeleteTable('manageTable-priority', 'priority', ['Priority','Name','Type','Archetype','Average Pull','Worst Scenario Pull','Patch (min-max)'], r => [r.priority, r.name, r.type, r.archetype, fmt(r.averagePull,0), fmt(r.worstPull,0), `${fmt(r.averagePull/100,2)}–${fmt(r.worstPull/100,2)}`], (a, b) => a.r.priority - b.r.priority);
+  if (DATA.priority) { 
+    // 1. Urutkan berdasarkan angka priority saat ini
+    DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority)); 
+    
+    // 2. Paksa penomoran ulang secara statis (1, 2, 3...) agar tidak ada angka yang bolong
+    DATA.priority.forEach((r, i) => { 
+      r.priority = String(i + 1); 
+      let avgPull = 85; 
+      let worstPull = 180; 
+      if (String(r.type || '').toLowerCase().includes('light cone') || String(r.type || '').toLowerCase().includes('lightcone')) { 
+          avgPull = 65; worstPull = 160; 
+      } 
+      r.averagePull = avgPull; 
+      r.worstPull = worstPull; 
+    }); 
+  }
+  
+  renderDeleteTable('manageTable-priority', 'priority', ['Priority','Name','Type','Archetype','Average Pull','Worst Scenario Pull','Patch (min-max)'], 
+    r => [r.priority, r.name, r.type, r.archetype, fmt(r.averagePull,0), fmt(r.worstPull,0), `${fmt(r.averagePull/100,2)}–${fmt(r.worstPull/100,2)}`], 
+    (a, b) => Number(a.r.priority) - Number(b.r.priority)
+  );
 }
-document.getElementById('form-priority').addEventListener('submit', (e) => {
-  e.preventDefault(); const fd = new FormData(e.target); const targetPrio = Number(fd.get('priority')); if (!DATA.priority) DATA.priority = [];
-  DATA.priority.forEach(item => { let currentPrio = Number(item.priority); if (currentPrio >= targetPrio) { item.priority = (currentPrio + 1).toString(); } });
-  DATA.priority.push({ priority: targetPrio.toString(), name: fd.get('name').trim(), type: fd.get('type'), archetype: fd.get('archetype').trim() });
-  saveWorkingData(); renderAll(); e.target.reset();
-});
 
+document.getElementById('form-priority').addEventListener('submit', (e) => {
+  e.preventDefault(); 
+  const fd = new FormData(e.target); 
+  if (!DATA.priority) DATA.priority = [];
+  
+  let targetPrio = Number(fd.get('priority')); 
+  
+  // Sistem Keamanan: Mencegah user memasukkan angka yang melompati urutan (misal: data ada 17, mau input 50, otomatis dikunci jadi 18)
+  if (targetPrio > DATA.priority.length + 1) {
+      targetPrio = DATA.priority.length + 1;
+  }
+  
+  DATA.priority.forEach(item => { 
+      let currentPrio = Number(item.priority); 
+      if (currentPrio >= targetPrio) { 
+          item.priority = String(currentPrio + 1); 
+      } 
+  });
+  
+  DATA.priority.push({ 
+      priority: String(targetPrio), 
+      name: fd.get('name').trim(), 
+      type: fd.get('type'), 
+      archetype: fd.get('archetype').trim() 
+  });
+  
+  saveWorkingData(); 
+  renderAll(); 
+  e.target.reset();
+});
 // ============ CROPPER MODAL LOGIC ============
 let globalCropper = null;
 let currentCropTargetElement = null; 
