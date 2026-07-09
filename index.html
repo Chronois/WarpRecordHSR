@@ -2,116 +2,85 @@
 <html lang="en">
 <head>
   <meta name="referrer" content="no-referrer">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Warp Record HSR</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
-<link rel="stylesheet" href="style.css">
-<style>
-  .station-label-name {
-    font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);
-    margin-bottom: 8px; text-align: center; white-space: nowrap; width: 60px;
-    overflow: hidden; text-overflow: ellipsis; position: absolute; bottom: 100%; left: 50%;
-    transform: translateX(-50%); pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warp Record HSR</title>
   
-  .station-icon {
-    width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--border);
-    object-fit: cover; position: absolute; bottom: 100%; margin-bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(0) scale(1);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    background: var(--surface-2); z-index: 10; pointer-events: none;
-  }
-  
-  /* EFEK HOVER: Ikon Turun ke Tengah Buletan dan Membesar Maksimal */
-  .station:hover .station-icon {
-    transform: translateX(-50%) translateY(51px) scale(2.4); 
-    border-color: var(--gold-soft);
-    box-shadow: 0 0 25px rgba(232, 184, 75, 0.7); 
-    z-index: 20;
-  }
-  
-  .station:hover .station-label-name,
-  .station:hover .station-dot {
-    opacity: 0;
-  }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+  <link rel="stylesheet" href="style.css">
 
-  .track-scroll { padding-top: 80px !important; }
-  
-  .station-tooltip { 
-    bottom: calc(100% + 75px) !important; 
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  }
-  
-  .station:hover .station-tooltip {
-    transform: translateX(-50%) translateY(-10px) !important;
-    opacity: 1 !important;
-  }
-  
-  .station { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; }
-  .station-dot { margin-top: auto; transition: opacity 0.3s ease; }
-  
-  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
-  .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-  .team-image-row { display: flex; height: 90px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
-  .team-image-slot { flex: 1; border-right: 1px solid var(--border); display: flex; justify-content: center; align-items: center; overflow: hidden; background: #191d40; }
-  .team-image-slot:last-child { border-right: none; }
-  .team-image-slot img { width: 100%; height: 100%; object-fit: cover; }
-  .team-card-content { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-  .tc-arch { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--nebula); }
-  .tc-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); }
-  .tc-val { color: var(--text); font-weight: 600; text-align: right; }
-  .tc-footer { margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.05); display: flex; justify-content: space-between; align-items: center; }
-  .tc-pv { font-weight: 700; color: var(--gold-soft); font-size: 14px; }
+  <style>
+    /* Specific overrides and hover effects */
+    .station-label-name {
+      font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-bottom: 8px; text-align: center; white-space: nowrap; width: 60px;
+      overflow: hidden; text-overflow: ellipsis; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); pointer-events: none; transition: opacity 0.3s ease;
+    }
+    .station-icon {
+      width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; position: absolute; bottom: 100%; margin-bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(0) scale(1); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); background: var(--surface-2); z-index: 10; pointer-events: none;
+    }
+    .station:hover .station-icon { transform: translateX(-50%) translateY(51px) scale(2.4); border-color: var(--gold-soft); box-shadow: 0 0 25px rgba(232, 184, 75, 0.7); z-index: 20; }
+    .station:hover .station-label-name, .station:hover .station-dot { opacity: 0; }
+    .track-scroll { padding-top: 80px !important; }
+    .station-tooltip { bottom: calc(100% + 75px) !important; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    .station:hover .station-tooltip { transform: translateX(-50%) translateY(-10px) !important; opacity: 1 !important; }
+    .station { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; }
+    .station-dot { margin-top: auto; transition: opacity 0.3s ease; }
+    
+    /* Team Builder Grid */
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+    .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .team-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 24px rgba(0,0,0,0.5); border-color: var(--gold-soft); z-index: 5; }
+    .team-image-row { display: flex; height: 90px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+    .team-image-slot { flex: 1; border-right: 1px solid var(--border); display: flex; justify-content: center; align-items: center; overflow: hidden; background: #191d40; }
+    .team-image-slot:last-child { border-right: none; }
+    .team-image-slot img { width: 100%; height: 100%; object-fit: cover; }
+    .team-card-content { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .tc-arch { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--nebula); }
+    .tc-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); }
+    .tc-val { color: var(--text); font-weight: 600; text-align: right; }
+    .tc-footer { margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.05); display: flex; justify-content: space-between; align-items: center; }
+    .tc-pv { font-weight: 700; color: var(--gold-soft); font-size: 14px; }
+    .team-card.sustainless { border-color: rgba(226, 128, 125, 0.4); background: linear-gradient(180deg, var(--surface) 0%, rgba(226, 128, 125, 0.08) 100%); }
+    .team-card.sustainless:hover { border-color: var(--loss); box-shadow: 0 12px 24px rgba(226, 128, 125, 0.25); }
+    .team-card.sustainless .tc-arch { color: var(--loss); }
 
-  .slot-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
-  .slot-inputs { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-  .slot-top, .slot-bottom { display: flex; gap: 8px; align-items: center; }
-  .slot-name, .slot-eidolon, .slot-sign { padding: 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 13px; }
-  .slot-name { flex: 1; min-width: 120px; }
-  .slot-eidolon { width: 70px; }
-  .slot-sign { width: 80px; }
-  .btn-remove-slot { padding: 6px 12px; border-radius: 6px; background: rgba(226,128,125,0.1); border: 1px solid var(--loss); color: var(--loss); cursor:pointer; font-size: 11px; font-weight:bold; }
-  
-  .tag.CelestialInvitation { color: #d2a8ff; border-color: rgba(210,168,255,.4); }
-  .tag.GoldenCompanionSpirit { color: var(--gold); border-color: rgba(232,184,75,.4); }
-  .tag.MainCharacter { color: #d8d8d8; border-color: rgba(216,216,216,.4); }
-  
-  .roster-card.unowned .roster-img-wrap img { filter: grayscale(100%) brightness(0.6); opacity: 0.7; }
-  .roster-card.unowned .roster-name { color: var(--text-dim); }
-  .roster-card.unowned .roster-stats { opacity: 0.4; }
-  .unowned-tag {
-    position: absolute; top: 8px; left: 8px; background: rgba(226, 128, 125, 0.15); backdrop-filter: blur(4px);
-    border: 1px solid var(--loss); color: var(--loss); font-family: var(--font-mono); font-size: 10px;
-    padding: 4px 8px; border-radius: 4px; font-weight: bold; z-index: 2; letter-spacing: 0.05em;
-  }
-  
-  .freebie-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-  .freebie-icon { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; background: var(--surface-2); flex-shrink: 0; }
-  .freebie-title-wrap { display: flex; flex-direction: column; justify-content: center; }
+    /* Slots Input */
+    .slot-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
+    .slot-inputs { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .slot-top, .slot-bottom { display: flex; gap: 8px; align-items: center; }
+    .slot-name, .slot-eidolon, .slot-sign { padding: 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 13px; }
+    .slot-name { flex: 1; min-width: 120px; }
+    .slot-eidolon { width: 70px; }
+    .slot-sign { width: 80px; }
+    .btn-remove-slot { padding: 6px 12px; border-radius: 6px; background: rgba(226,128,125,0.1); border: 1px solid var(--loss); color: var(--loss); cursor:pointer; font-size: 11px; font-weight:bold; }
+    
+    /* Tags & Badges */
+    .tag.CelestialInvitation { color: #d2a8ff; border-color: rgba(210,168,255,.4); }
+    .tag.GoldenCompanionSpirit { color: var(--gold); border-color: rgba(232,184,75,.4); }
+    .tag.MainCharacter { color: #d8d8d8; border-color: rgba(216,216,216,.4); }
+    
+    .roster-card.unowned .roster-img-wrap img { filter: grayscale(100%) brightness(0.6); opacity: 0.7; }
+    .roster-card.unowned .roster-name { color: var(--text-dim); }
+    .roster-card.unowned .roster-stats { opacity: 0.4; }
+    .unowned-tag { position: absolute; top: 8px; left: 8px; background: rgba(226, 128, 125, 0.15); backdrop-filter: blur(4px); border: 1px solid var(--loss); color: var(--loss); font-family: var(--font-mono); font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: bold; z-index: 2; letter-spacing: 0.05em; }
+    
+    .freebie-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .freebie-icon { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; background: var(--surface-2); flex-shrink: 0; }
+    .freebie-title-wrap { display: flex; flex-direction: column; justify-content: center; }
+    .roster-img-wrap img { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .roster-card:hover .roster-img-wrap img { transform: scale(1.25); }
 
-  .roster-img-wrap img { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  .roster-card:hover .roster-img-wrap img { transform: scale(1.25); }
-
-  .team-card { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  .team-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 24px rgba(0,0,0,0.5); border-color: var(--gold-soft); z-index: 5; }
-  
-  .team-card.sustainless { border-color: rgba(226, 128, 125, 0.4); background: linear-gradient(180deg, var(--surface) 0%, rgba(226, 128, 125, 0.08) 100%); }
-  .team-card.sustainless:hover { border-color: var(--loss); box-shadow: 0 12px 24px rgba(226, 128, 125, 0.25); }
-  .team-card.sustainless .tc-arch { color: var(--loss); }
-
-  .phase-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px; }
-  .phase-row.total-row { background: rgba(232, 184, 75, 0.1); color: var(--gold-soft); font-weight: bold; font-size: 12px; border: 1px solid rgba(232, 184, 75, 0.2); }
-  .phase-label { font-weight: 600; width: 45px; }
-  .phase-stats { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); }
-  .pass-icon { width: 14px; height: 14px; object-fit: contain; vertical-align: middle; margin-top: -2px; }
-  
-</style>
+    /* Version / Stellar Jade Layout */
+    .phase-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px; }
+    .phase-row.total-row { background: rgba(232, 184, 75, 0.1); color: var(--gold-soft); font-weight: bold; font-size: 12px; border: 1px solid rgba(232, 184, 75, 0.2); }
+    .phase-label { font-weight: 600; width: 45px; }
+    .phase-stats { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); }
+    .pass-icon { width: 14px; height: 14px; object-fit: contain; vertical-align: middle; margin-top: -2px; }
+  </style>
 </head>
 <body>
 
@@ -138,10 +107,8 @@
   <h1 class="hero-title">Warp Record HSR</h1>
   <p class="hero-sub">A chronicle of every banner crossed aboard the Astral Express. Every ticket spent, every 50/50 won or lost, and every destination reached became part of the journey.</p>
   <div class="hero-meta">
-    <span id="metaGenerated">—</span>
-    <span class="dot">·</span>
-    <span id="metaLimitedWarps">—</span> limited warp
-    <span class="dot">·</span>
+    <span id="metaGenerated">—</span><span class="dot">·</span>
+    <span id="metaLimitedWarps">—</span> limited warp<span class="dot">·</span>
     <span id="metaStandardWarps">—</span> standard warp
   </div>
 </header>
@@ -150,16 +117,14 @@
   <main>
     <section class="section">
       <div class="section-head">
-        <span class="eyebrow">Overview</span>
-        <h2>Trailblaze Summary</h2>
+        <span class="eyebrow">Overview</span><h2>Trailblaze Summary</h2>
       </div>
       <div class="stat-grid" id="statGrid"></div>
     </section>
 
     <section class="section">
       <div class="section-head">
-        <span class="eyebrow">Featured Banner · Limited</span>
-        <h2>Limited Archive</h2>
+        <span class="eyebrow">Featured Banner · Limited</span><h2>Limited Archive</h2>
         <div class="tabs" id="limitedTabs">
           <button class="tab active" data-cat="Character">Character</button>
           <button class="tab" data-cat="Light Cone">Light Cone</button>
@@ -177,15 +142,9 @@
     </section>
 
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Log a Pull</span>
-        <h2>Add to Limited Pull</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Log a Pull</span><h2>Add to Limited Pull</h2></div>
       <form class="manage-form" id="form-limited" data-section="limited">
-        <div class="field">
-          <label>Date</label>
-          <input type="date" name="date" required>
-        </div>
+        <div class="field"><label>Date</label><input type="date" name="date" required></div>
         <div class="field">
           <label>Type</label>
           <select name="category" required>
@@ -193,28 +152,18 @@
             <option value="Light Cone">Light Cone</option>
           </select>
         </div>
-        <div class="field field-grow">
-          <label>Name</label>
-          <input type="text" name="name" required placeholder="e.g. Feixiao">
-        </div>
-        <div class="field field-narrow">
-          <label>Pity</label>
-          <input type="number" name="pity" min="1" max="90" required>
-        </div>
+        <div class="field field-grow"><label>Name</label><input type="text" name="name" required placeholder="e.g. Feixiao"></div>
+        <div class="field field-narrow"><label>Pity</label><input type="number" name="pity" min="1" max="90" required></div>
         <div class="field">
           <label>50/50 Result</label>
           <select name="result" required>
-            <option value="W">Win</option>
-            <option value="L">Loss</option>
-            <option value="G">Guaranteed</option>
+            <option value="W">Win</option><option value="L">Loss</option><option value="G">Guaranteed</option>
           </select>
         </div>
         <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
       <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-limited" placeholder="Filter records..."></div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="manageTable-limited"><thead></thead><tbody></tbody></table>
-      </div>
+      <div class="manage-table-wrap"><table class="manage-table" id="manageTable-limited"><thead></thead><tbody></tbody></table></div>
     </section>
   </main>
 </div>
@@ -222,47 +171,26 @@
 <div class="page" id="page-standardhistory" hidden>
   <main>
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Standard Banner</span>
-        <h2>Standard Archive</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Standard Banner</span><h2>Standard Archive</h2></div>
       <div class="banner-stats" id="standardStats"></div>
-      <div class="track-wrap">
-        <div class="track-scroll" id="standardTrack"></div>
-      </div>
+      <div class="track-wrap"><div class="track-scroll" id="standardTrack"></div></div>
     </section>
-
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Log a Pull</span>
-        <h2>Add to Standard Pull</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Log a Pull</span><h2>Add to Standard Pull</h2></div>
       <form class="manage-form" id="form-standard" data-section="standard">
-        <div class="field">
-          <label>Date</label>
-          <input type="date" name="date" required>
-        </div>
+        <div class="field"><label>Date</label><input type="date" name="date" required></div>
         <div class="field">
           <label>Type</label>
           <select name="category" required>
-            <option value="Character">Character</option>
-            <option value="Light Cone">Light Cone</option>
+            <option value="Character">Character</option><option value="Light Cone">Light Cone</option>
           </select>
         </div>
-        <div class="field field-grow">
-          <label>Name</label>
-          <input type="text" name="name" required placeholder="e.g. Gepard">
-        </div>
-        <div class="field field-narrow">
-          <label>Pity</label>
-          <input type="number" name="pity" min="1" max="80" required>
-        </div>
+        <div class="field field-grow"><label>Name</label><input type="text" name="name" required placeholder="e.g. Gepard"></div>
+        <div class="field field-narrow"><label>Pity</label><input type="number" name="pity" min="1" max="80" required></div>
         <button type="submit" class="btn-add">+ Add Pull</button>
       </form>
       <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-standard" placeholder="Filter records..."></div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="manageTable-standard"><thead></thead><tbody></tbody></table>
-      </div>
+      <div class="manage-table-wrap"><table class="manage-table" id="manageTable-standard"><thead></thead><tbody></tbody></table></div>
     </section>
   </main>
 </div>
@@ -270,44 +198,25 @@
 <div class="page" id="page-freebies" hidden>
   <main>
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Free Rewards</span>
-        <h2>Gift from Hoyo</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Free Rewards</span><h2>Gift from Hoyo</h2></div>
       <div class="freebie-row" id="freebieRow"></div>
     </section>
-
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Log a Reward</span>
-        <h2>Add to Freebies</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Log a Reward</span><h2>Add to Freebies</h2></div>
       <form class="manage-form" id="form-freebies" data-section="freebies">
-        <div class="field">
-          <label>Date</label>
-          <input type="date" name="date" required>
-        </div>
+        <div class="field"><label>Date</label><input type="date" name="date" required></div>
         <div class="field">
           <label>Type</label>
           <select name="category" required>
-            <option value="Character">Character</option>
-            <option value="Light Cone">Light Cone</option>
+            <option value="Character">Character</option><option value="Light Cone">Light Cone</option>
           </select>
         </div>
-        <div class="field field-grow">
-          <label>Name</label>
-          <input type="text" name="name" required placeholder="e.g. Dr. Ratio">
-        </div>
-        <div class="field field-grow">
-          <label>Event</label>
-          <input type="text" name="event" required placeholder="e.g. Golden Companion Spirit">
-        </div>
+        <div class="field field-grow"><label>Name</label><input type="text" name="name" required placeholder="e.g. Dr. Ratio"></div>
+        <div class="field field-grow"><label>Event</label><input type="text" name="event" required placeholder="e.g. Golden Companion Spirit"></div>
         <button type="submit" class="btn-add">+ Add Reward</button>
       </form>
       <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-freebies" placeholder="Filter records..."></div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="manageTable-freebies"><thead></thead><tbody></tbody></table>
-      </div>
+      <div class="manage-table-wrap"><table class="manage-table" id="manageTable-freebies"><thead></thead><tbody></tbody></table></div>
     </section>
   </main>
 </div>
@@ -315,17 +224,11 @@
 <div class="page" id="page-calc" hidden>
   <main>
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Derived Stats</span>
-        <h2>Express Archive</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Derived Stats</span><h2>Express Archive</h2></div>
       <div class="calc-grid" id="calcGrid"></div>
     </section>
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Streaks</span>
-        <h2>Best 50/50 Win Streak</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Streaks</span><h2>Best 50/50 Win Streak</h2></div>
       <div class="banner-stats" id="streakGrid"></div>
     </section>
   </main>
@@ -334,36 +237,21 @@
 <div class="page" id="page-priority" hidden>
   <main>
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Wishlist</span>
-        <h2>Next Up, in Order</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Wishlist</span><h2>Next Up, in Order</h2></div>
       <form class="manage-form" id="form-priority" data-section="priority">
-        <div class="field field-narrow">
-          <label>Priority</label>
-          <input type="number" name="priority" min="1" required>
-        </div>
-        <div class="field field-grow">
-          <label>Name</label>
-          <input type="text" name="name" required placeholder="e.g. Feixiao E1">
-        </div>
+        <div class="field field-narrow"><label>Priority</label><input type="number" name="priority" min="1" required></div>
+        <div class="field field-grow"><label>Name</label><input type="text" name="name" required placeholder="e.g. Feixiao E1"></div>
         <div class="field">
           <label>Type</label>
           <select name="type" required>
-            <option value="Character">Character</option>
-            <option value="Light Cone">Light Cone</option>
+            <option value="Character">Character</option><option value="Light Cone">Light Cone</option>
           </select>
         </div>
-        <div class="field field-grow">
-          <label>Archetype</label>
-          <input type="text" name="archetype" required placeholder="e.g. Break">
-        </div>
+        <div class="field field-grow"><label>Archetype</label><input type="text" name="archetype" required placeholder="e.g. Break"></div>
         <button type="submit" class="btn-add">+ Add to Wishlist</button>
       </form>
       <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-priority" placeholder="Filter records..."></div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="manageTable-priority"><thead></thead><tbody></tbody></table>
-      </div>
+      <div class="manage-table-wrap"><table class="manage-table" id="manageTable-priority"><thead></thead><tbody></tbody></table></div>
     </section>
   </main>
 </div>
@@ -371,111 +259,78 @@
 <div class="page" id="page-team" hidden>
   <main>
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Compositions</span>
-        <h2>Team Planner</h2>
-      </div>
-
+      <div class="section-head"><span class="eyebrow">Compositions</span><h2>Team Planner</h2></div>
       <form class="manage-form team-form" id="form-team" data-section="team">
         <div class="field" style="width: 100%; margin-bottom: 24px;">
-          <label>Archetype</label>
-          <input type="text" name="archetype" required placeholder="e.g. Break" style="width: 100%;">
+          <label>Archetype</label><input type="text" name="archetype" required placeholder="e.g. Break" style="width: 100%;">
         </div>
-
         <div class="team-masonry">
           <div class="team-masonry-col">
             <div class="team-slot-group">
               <div class="team-slot-label" style="color: var(--nebula);">Main DPS</div>
               <div class="team-slot" id="slot-mainDps">
                  <div class="slot-row">
-                   <div class="slot-img-upload" onclick="openCropModal(this)">
-                      <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                   </div>
+                   <div class="slot-img-upload" onclick="openCropModal(this)"><img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E"></div>
                    <div class="slot-inputs">
                       <div class="slot-top">
                         <select class="slot-name" data-role="mainDps"><option value="">— none —</option></select>
-                        <select class="slot-eidolon">
-                           <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
-                        </select>
+                        <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
                       </div>
                       <div class="slot-bottom">
-                        <select class="slot-sign">
-                           <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
-                        </select>
+                        <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
                       </div>
                    </div>
                  </div>
               </div>
             </div>
-
             <div class="team-slot-group">
               <div class="team-slot-label" style="color: var(--nebula);">Sustain</div>
               <div class="team-slot" id="slot-sustain">
                  <div class="slot-row">
-                   <div class="slot-img-upload" onclick="openCropModal(this)">
-                      <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                   </div>
+                   <div class="slot-img-upload" onclick="openCropModal(this)"><img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E"></div>
                    <div class="slot-inputs">
                       <div class="slot-top">
                         <select class="slot-name" data-role="sustain"><option value="">— none —</option></select>
-                        <select class="slot-eidolon">
-                           <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
-                        </select>
+                        <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
                       </div>
                       <div class="slot-bottom">
-                        <select class="slot-sign">
-                           <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
-                        </select>
+                        <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
                       </div>
                    </div>
                  </div>
               </div>
             </div>
           </div>
-
           <div class="team-masonry-col">
             <div class="team-slot-group">
               <div class="team-slot-label" style="color: var(--nebula);">Sub DPS <button type="button" class="btn-add-slot" data-role="subDps">+</button></div>
               <div class="team-slot" id="slot-subDps">
                  <div class="slot-row">
-                   <div class="slot-img-upload" onclick="openCropModal(this)">
-                      <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                   </div>
+                   <div class="slot-img-upload" onclick="openCropModal(this)"><img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E"></div>
                    <div class="slot-inputs">
                       <div class="slot-top">
                         <select class="slot-name" data-role="subDps"><option value="">— none —</option></select>
-                        <select class="slot-eidolon">
-                           <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
-                        </select>
+                        <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
                       </div>
                       <div class="slot-bottom">
-                        <select class="slot-sign">
-                           <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
-                        </select>
+                        <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
                       </div>
                    </div>
                  </div>
               </div>
             </div>
-
             <div class="team-slot-group">
               <div class="team-slot-label" style="color: var(--nebula);">Support <button type="button" class="btn-add-slot" data-role="support">+</button></div>
               <div class="team-slot" id="slot-support">
                  <div class="slot-row">
-                   <div class="slot-img-upload" onclick="openCropModal(this)">
-                      <img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
-                   </div>
+                   <div class="slot-img-upload" onclick="openCropModal(this)"><img class="slot-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E"></div>
                    <div class="slot-inputs">
                       <div class="slot-top">
                         <select class="slot-name" data-role="support"><option value="">— none —</option></select>
-                        <select class="slot-eidolon">
-                           <option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option>
-                        </select>
+                        <select class="slot-eidolon"><option value="E0">E0</option><option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E4">E4</option><option value="E5">E5</option><option value="E6">E6</option></select>
                       </div>
                       <div class="slot-bottom">
-                        <select class="slot-sign">
-                           <option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option>
-                        </select>
+                        <select class="slot-sign"><option value="S0">S0</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option></select>
                       </div>
                    </div>
                  </div>
@@ -483,29 +338,18 @@
             </div>
           </div>
         </div>
-
         <div class="team-form-bottom">
-          <div class="field field-grow">
-            <label>Cost (Auto)</label>
-            <input type="text" id="team-cost-preview" readonly placeholder="Will be computed..." style="opacity:0.6;cursor:default;width:100%;">
-          </div>
-          <div class="field field-narrow">
-            <label>Pull Value (Auto)</label>
-            <input type="number" id="team-pv-preview" readonly placeholder="—" style="opacity:0.6;cursor:default;width:100%;">
-          </div>
+          <div class="field field-grow"><label>Cost (Auto)</label><input type="text" id="team-cost-preview" readonly placeholder="Will be computed..." style="opacity:0.6;cursor:default;width:100%;"></div>
+          <div class="field field-narrow"><label>Pull Value (Auto)</label><input type="number" id="team-pv-preview" readonly placeholder="—" style="opacity:0.6;cursor:default;width:100%;"></div>
           <button type="submit" class="btn-add" style="margin-bottom: 2px;" id="btnSubmitTeam">+ Save Team</button>
         </div>
       </form>
-
       <div class="filter-wrap">
         <input type="text" class="table-filter" data-table="teamGrid" placeholder="Filter teams...">
         <select id="teamSortSelect" class="table-filter sort-select">
-          <option value="pvDesc">Highest Pull Value</option>
-          <option value="pvAsc">Lowest Pull Value</option>
-          <option value="costDesc">Highest Cost</option>
-          <option value="costAsc">Lowest Cost</option>
-          <option value="nameAsc">Alphabet (A-Z)</option>
-          <option value="nameDesc">Alphabet (Z-A)</option>
+          <option value="pvDesc">Highest Pull Value</option><option value="pvAsc">Lowest Pull Value</option>
+          <option value="costDesc">Highest Cost</option><option value="costAsc">Lowest Cost</option>
+          <option value="nameAsc">Alphabet (A-Z)</option><option value="nameDesc">Alphabet (Z-A)</option>
         </select>
       </div>
       <div class="team-grid" id="teamGrid"></div>
@@ -516,54 +360,40 @@
 <div class="page" id="page-character" hidden>
   <main>
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Set Character Type & Image</span>
-        <h2>Add / Update Character</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Set Character Type & Image</span><h2>Add / Update Character</h2></div>
       <form class="manage-form char-form-layout" id="form-character" data-section="roster">
         <div class="slot-img-upload" style="width: 70px; height: 70px; border-radius: 8px;" onclick="openCropModal(this)">
           <img class="slot-preview" id="charFormImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23191d40'/%3E%3Cpath d='M50 50 A 20 20 0 1 0 50 10 A 20 20 0 1 0 50 50 Z M 20 90 Q 20 60 50 60 Q 80 60 80 90' fill='%232b2f5c'/%3E%3C/svg%3E">
         </div>
         <div class="field field-grow">
-          <label>Name</label>
-          <input type="text" name="name" required placeholder="e.g. Feixiao" list="charNameList">
+          <label>Name</label><input type="text" name="name" required placeholder="e.g. Feixiao" list="charNameList">
           <datalist id="charNameList"></datalist>
         </div>
         <div class="field field-grow">
           <label>Type</label>
           <select name="source" required>
-            <option value="Limited">Limited</option>
-            <option value="Standard">Standard</option>
-            <option value="Celestial Invitation">Celestial Invitation</option>
-            <option value="Golden Companion Spirit">Golden Companion Spirit</option>
+            <option value="Limited">Limited</option><option value="Standard">Standard</option>
+            <option value="Celestial Invitation">Celestial Invitation</option><option value="Golden Companion Spirit">Golden Companion Spirit</option>
           </select>
         </div>
         <button type="submit" class="btn-add">+ Save Character</button>
       </form>
     </section>
-
     <section class="section" style="border-top: none; padding-top: 0;">
       <div class="section-head">
-        <span class="eyebrow">Passenger Cabin</span>
-        <h2>Astral Archive</h2>
+        <span class="eyebrow">Passenger Cabin</span><h2>Astral Archive</h2>
         <div class="tabs" id="rosterTabs">
-          <button class="tab active" data-filter="all">All</button>
-          <button class="tab" data-filter="Limited">Limited</button>
-          <button class="tab" data-filter="Standard">Standard</button>
-          <button class="tab" data-filter="other">Other</button>
+          <button class="tab active" data-filter="all">All</button><button class="tab" data-filter="Limited">Limited</button>
+          <button class="tab" data-filter="Standard">Standard</button><button class="tab" data-filter="other">Other</button>
         </div>
       </div>
       <div class="filter-wrap">
         <input type="text" class="table-filter" data-table="rosterGrid" placeholder="Filter characters...">
         <select id="rosterSortSelect" class="table-filter sort-select">
-          <option value="pullValueDesc">Highest Pull Value</option>
-          <option value="pullValueAsc">Lowest Pull Value</option>
-          <option value="costDesc">Highest Cost</option>
-          <option value="costAsc">Lowest Cost</option>
-          <option value="eidolonDesc">Highest Eidolon</option>
-          <option value="eidolonAsc">Lowest Eidolon</option>
-          <option value="nameAsc">Alphabet (A-Z)</option>
-          <option value="nameDesc">Alphabet (Z-A)</option>
+          <option value="pullValueDesc">Highest Pull Value</option><option value="pullValueAsc">Lowest Pull Value</option>
+          <option value="costDesc">Highest Cost</option><option value="costAsc">Lowest Cost</option>
+          <option value="eidolonDesc">Highest Eidolon</option><option value="eidolonAsc">Lowest Eidolon</option>
+          <option value="nameAsc">Alphabet (A-Z)</option><option value="nameDesc">Alphabet (Z-A)</option>
         </select>
       </div>
       <div class="roster-grid" id="rosterGrid"></div>
@@ -574,86 +404,50 @@
 <div class="page" id="page-stellarjade" hidden>
   <main>
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Income Ledger</span>
-        <h2>Stellar Jade &amp; Passes</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Income Ledger</span><h2>Stellar Jade &amp; Passes</h2></div>
       <div class="banner-stats" id="jadeStats"></div>
     </section>
-
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">By Version</span>
-        <h2>Version Income Records</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">By Version</span><h2>Version Income Records</h2></div>
       <div class="version-grid" id="versionGrid"></div>
     </section>
-
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Log Data</span>
-        <h2>Add a Transaction</h2>
-      </div>
-
+      <div class="section-head"><span class="eyebrow">Log Data</span><h2>Add a Transaction</h2></div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
-        
         <form class="manage-form" id="form-income" data-section="stellarJade" style="margin: 0;">
           <h3 style="margin-top:0; font-size:16px; color:var(--cyan); margin-bottom:16px;">Log Income</h3>
-          <div class="field">
-            <label>Date</label>
-            <input type="date" name="date" required>
-          </div>
+          <div class="field"><label>Date</label><input type="date" name="date" required></div>
           <div class="field field-grow">
             <label>Activity / Event</label>
             <input type="text" name="activity" required placeholder="e.g. Daily + Express" list="activityOptions">
             <datalist id="activityOptions">
-              <option value="Daily + Express"></option>
-              <option value="Weekly CW/DU Reset"></option>
-              <option value="Character Trial"></option>
-              <option value="Event"></option>
-              <option value="Memory of Chaos"></option>
-              <option value="Pure Fiction"></option>
-              <option value="Apocalyptic Shadow"></option>
-              <option value="Maintenance"></option>
-              <option value="Missions"></option>
-              <option value="Saving"></option>
+              <option value="Daily + Express"></option><option value="Weekly CW/DU Reset"></option><option value="Character Trial"></option>
+              <option value="Event"></option><option value="Memory of Chaos"></option><option value="Pure Fiction"></option>
+              <option value="Apocalyptic Shadow"></option><option value="Maintenance"></option><option value="Missions"></option><option value="Saving"></option>
             </datalist>
           </div>
           <div style="display: flex; gap: 12px; margin-top:12px;">
               <div class="field field-grow">
-                <label>Stellar Jade</label>
+                <label><img src="./assets/Items/Stellar%20Jade.png" class="pass-icon" style="width:14px;height:14px;vertical-align:middle;margin-top:-2px;"> Stellar Jade</label>
                 <input type="number" name="jade" min="0" step="1" value="0">
               </div>
               <div class="field field-grow">
-                <label>Star Rail Pass</label>
+                <label><img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:14px;height:14px;vertical-align:middle;margin-top:-2px;"> Star Rail Pass</label>
                 <input type="number" name="passes" min="0" step="1" value="0">
               </div>
           </div>
           <button type="submit" class="btn-add" style="width: 100%; margin-top: 12px;">Add Income</button>
         </form>
-
         <form class="manage-form" id="form-spend" data-section="stellarJade" style="margin: 0; border-color: rgba(226, 128, 125, 0.3); background: rgba(226, 128, 125, 0.02);">
           <h3 style="margin-top:0; font-size:16px; color:var(--loss); margin-bottom:16px;">Log Spend</h3>
-          <div class="field">
-            <label>Date</label>
-            <input type="date" name="date" required>
-          </div>
-          <div class="field field-grow">
-            <label>Banner / Reason</label>
-            <input type="text" name="reason" required placeholder="e.g. Feixiao Banner">
-          </div>
-          <div class="field field-grow" style="margin-top:12px;">
-            <label>Pulls Used (Tickets)</label>
-            <input type="number" name="pulls" min="1" step="1" required placeholder="e.g. 10">
-          </div>
+          <div class="field"><label>Date</label><input type="date" name="date" required></div>
+          <div class="field field-grow"><label>Banner / Reason</label><input type="text" name="reason" required placeholder="e.g. Feixiao Banner"></div>
+          <div class="field field-grow" style="margin-top:12px;"><label>Pulls Used (Tickets)</label><input type="number" name="pulls" min="1" step="1" required placeholder="e.g. 10"></div>
           <button type="submit" class="btn-add" style="width: 100%; margin-top: auto; background: var(--loss); border-color: var(--loss); color: #fff;">Spend Pulls</button>
         </form>
-
       </div>
       <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-stellarjade" placeholder="Filter records..."></div>
-      <div class="manage-table-wrap">
-        <table class="manage-table" id="manageTable-stellarjade"><thead></thead><tbody></tbody></table>
-      </div>
+      <div class="manage-table-wrap"><table class="manage-table" id="manageTable-stellarjade"><thead></thead><tbody></tbody></table></div>
     </section>
   </main>
 </div>
@@ -661,12 +455,8 @@
 <div class="page" id="page-data" hidden>
   <main>
     <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Data Management</span>
-        <h2>Save & Load</h2>
-      </div>
+      <div class="section-head"><span class="eyebrow">Data Management</span><h2>Save & Load</h2></div>
       <p class="track-hint" style="text-align:left; margin-bottom: 24px;">Manage your Trailblaze records here. Download your current data as a backup file, or upload a previously saved backup.</p>
-
       <div class="data-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
         <button type="button" class="btn-add" id="btnDownloadJson">Save Data File</button>
         <label class="btn-ghost" for="uploadJsonFile" style="margin:0; cursor: pointer;">Upload Data File</label>
@@ -683,49 +473,37 @@
 
 <div id="cropModalOverlay" class="crop-modal-overlay" hidden>
   <div class="crop-modal-box">
-    <div class="crop-modal-header">
-      <h3>Edit portrait</h3>
-    </div>
-    
+    <div class="crop-modal-header"><h3>Edit portrait</h3></div>
     <div class="crop-modal-stepper">
       <div id="modalStep1" class="step-indicator active"><div class="step-circle">1</div> Provide image</div>
       <div id="modalStep2" class="step-indicator"><div class="step-circle">2</div> Crop image</div>
     </div>
-
     <div id="modalBody1" class="crop-modal-body">
       <div class="modal-tabs">
         <button class="modal-tab active" data-tab="upload">Upload image</button>
         <button class="modal-tab" data-tab="url">Enter image URL</button>
         <button class="modal-tab" data-tab="default">Use default image</button>
       </div>
-
       <div id="tab-upload" class="modal-tab-content active">
         <input type="file" id="modalFileInput" accept=".jpg,.jpeg,.png,.gif,.webp" hidden>
         <div class="upload-zone" onclick="document.getElementById('modalFileInput').click()">
           <span style="font-size: 24px; margin-bottom: 8px; display:block;">📁</span>
-          Click or drag image file to this area to upload<br>
-          <span style="opacity:0.6">Accepts .jpg .jpeg .png .gif .webp</span>
+          Click or drag image file to this area to upload<br><span style="opacity:0.6">Accepts .jpg .jpeg .png .gif .webp</span>
         </div>
       </div>
-
       <div id="tab-url" class="modal-tab-content" hidden>
         <input type="text" id="modalUrlInput" placeholder="Enter image URL..." style="width:100%; padding:10px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:8px; margin-bottom:12px; outline:none;">
         <p style="font-size:11px; color:var(--text-dim); text-align:center;">Note: Some URLs might be blocked by browser security (CORS).</p>
       </div>
-
       <div id="tab-default" class="modal-tab-content" hidden>
         <div style="display:flex; justify-content:center; align-items:center; height:120px; background:var(--surface-2); border-radius:8px;">
           <img id="modalDefaultPreview" src="" style="max-height:100px; max-width:100%; object-fit:contain;">
         </div>
       </div>
     </div>
-
     <div id="modalBody2" class="crop-modal-body" hidden style="padding: 0; background: var(--bg-deep);">
-      <div style="width: 100%; height: 350px;">
-        <img id="modalTargetImg" src="" style="display:block; max-width: 100%;">
-      </div>
+      <div style="width: 100%; height: 350px;"><img id="modalTargetImg" src="" style="display:block; max-width: 100%;"></div>
     </div>
-
     <div class="crop-modal-footer">
       <button class="btn-ghost" onclick="closeCropModal()">Cancel</button>
       <button class="btn-ghost" id="btnModalPrev" hidden>Previous</button>
