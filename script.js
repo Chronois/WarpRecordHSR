@@ -222,7 +222,12 @@ const MASTER_CHARACTERS = {
   "trailblazer • remembrance": { name: "Trailblazer • Remembrance", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Remembrance%20Splash%20Art.gif"  },
   "trailblazer • elation": { name: "Trailblazer • Elation", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Elation%20Splash%20Art.gif"  }
 };
-
+// OPTIMASI: Mengubah jalur lokal menjadi CDN jsDelivr berkecepatan tinggi
+Object.values(MASTER_CHARACTERS).forEach(char => {
+    if (char.img && char.img.startsWith('./assets')) {
+        char.img = char.img.replace('./assets', 'https://cdn.jsdelivr.net/gh/Chronois/WarpRecordHSR@main/assets');
+    }
+};
 function computeRosterFromHistory() {
   const charHistory   = (DATA.limited || []).filter(r => r.category === 'Character');
   const lcHistory     = (DATA.limited || []).filter(r => r.category === 'Light Cone');
@@ -456,7 +461,7 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
 
     return `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px">
       <div class="station-label-name">${r.name}</div>
-      <img src="${imgSrc}" class="station-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
+      <img loading="lazy" src="${imgSrc}" class="station-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
       <div class="station-tooltip">
         <div class="tt-name">${r.name}</div>
         <div class="tt-meta">${formatDate(r.date)} · pity ${r.pity}${hasResult ? ' · ' + (r.result === 'W' ? '50/50 Win' : r.result === 'L' ? '50/50 Loss' : 'Guaranteed') : ''}</div>
@@ -522,7 +527,7 @@ function renderFreebies() {
 
     return `<div class="freebie-card">
       <div class="freebie-header">
-        <img src="${imgSrc}" class="freebie-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
+        <img loading="lazy" src="${imgSrc}" class="freebie-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
         <div class="freebie-title-wrap">
           <div class="freebie-name">${f.name}</div>
           <div class="freebie-event">${f.event}</div>
@@ -791,7 +796,7 @@ document.getElementById('form-team').addEventListener('change', (e) => {
 
 const slotTemplate = (role, isRemovable) => `
   <div class="slot-row">
-     <div class="slot-img-upload" onclick="openCropModal(this)"><img class="slot-preview" src="${DEFAULT_AVATAR}"></div>
+     <div class="slot-img-upload" onclick="openCropModal(this)"><img loading="lazy" class="slot-preview" src="${DEFAULT_AVATAR}"></div>
      <div class="slot-inputs">
         <div class="slot-top">
            <select class="slot-name" data-role="${role}"><option value="">— none —</option></select>
@@ -864,7 +869,7 @@ function renderTeam() {
   });
   grid.innerHTML = indexed.map((r) => {
     const subDps = Array.isArray(r.subDps) ? r.subDps.join(', ') : (r.subDps || '—'); const support = Array.isArray(r.support) ? r.support.join(', ') : (r.support || '—'); const pctVal = pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2);
-    let imgHtml = ''; if (r.members && r.members.length > 0) { imgHtml = r.members.map(m => `<div class="team-image-slot" title="${m.name}"><img src="${m.img}" onerror="this.src='${DEFAULT_AVATAR}'"></div>`).join(''); } else { imgHtml = `<div class="team-image-slot"><img src="${DEFAULT_AVATAR}"></div>`; }
+    let imgHtml = ''; if (r.members && r.members.length > 0) { imgHtml = r.members.map(m => `<div class="team-image-slot" title="${m.name}"><img loading="lazy" src="${m.img}" onerror="this.src='${DEFAULT_AVATAR}'"></div>`).join(''); } else { imgHtml = `<div class="team-image-slot"><img loading="lazy" src="${DEFAULT_AVATAR}"></div>`; }
     
     // Deteksi jika tim tidak membawa Sustain
     const isSustainless = !r.sustain || r.sustain === '—';
@@ -998,7 +1003,7 @@ function renderRoster() {
     const tagClass = r.source.replace(/\s+/g, '');
     
     return `<div class="roster-card searchable-item ${unownedCls}" data-idx="${r._idx}">
-        <div class="roster-img-wrap"><img src="${imgSrc}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">${notOwnedBadge}<div class="tag ${tagClass} roster-type-tag">${r.source}</div><button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button></div>
+        <div class="roster-img-wrap"><img loading="lazy" src="${imgSrc}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">${notOwnedBadge}<div class="tag ${tagClass} roster-type-tag">${r.source}</div><button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button></div>
         <div class="roster-info"><div class="roster-name" title="${r.name}">${r.name}</div><div class="roster-stats"><span>Eidolon: <span ${eidoCls}>${r.eidolon}</span></span><span>Sign: <span ${signCls}>${r.signature}</span></span></div><div class="roster-stats" style="margin-top: 4px;"><span>PV: <span style="color:var(--text)">${fmt(r.pullValueEidolon, 0)}</span></span><span>PV: <span style="color:var(--text)">${fmt(r.pullValueSignature, 0)}</span></span></div><div class="roster-stats" style="margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;"><span>Total Pull Value: <span style="color:var(--gold-soft)">${fmt(r.totalPullValue, 0)}</span></span></div></div>
     </div>`;
   }).join('');
@@ -1022,7 +1027,7 @@ function renderStellarJade() {
   
   document.getElementById('jadeStats').innerHTML = [
     { label: 'Total Stellar Jade', value: fmt(totalJade, 0) }, 
-    { label: 'Total <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(totalPasses, 0) }, 
+    { label: 'Total <img loading="lazy" src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(totalPasses, 0) }, 
     { label: 'Pulls Available', value: fmt(totalPulls, 1) }, 
     { label: 'Logged Entries', value: fmt(rows.length, 0) }
   ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
@@ -1076,7 +1081,7 @@ function renderStellarJade() {
                 <div style="font-size:11px; font-weight:bold; color:var(--text-dim); margin-bottom:6px;">Phase 1</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px;">
                     <div>${fmt(d.jade1,0)} SJ</div>
-                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.pass1,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
+                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.pass1,0)} <img loading="lazy" src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
                     <div>${fmt(pull1,1)} Pulls</div>
                 </div>
             </div>
@@ -1085,7 +1090,7 @@ function renderStellarJade() {
                 <div style="font-size:11px; font-weight:bold; color:var(--text-dim); margin-bottom:6px;">Phase 2</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px;">
                     <div>${fmt(d.jade2,0)} SJ</div>
-                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.pass2,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
+                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.pass2,0)} <img loading="lazy" src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
                     <div>${fmt(pull2,1)} Pulls</div>
                 </div>
             </div>
@@ -1094,7 +1099,7 @@ function renderStellarJade() {
                 <div style="font-size:11px; font-weight:bold; color:var(--gold-soft); margin-bottom:6px;">Total</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px; font-weight:bold; color:var(--gold-soft);">
                     <div>${fmt(tJade,0)} SJ</div>
-                    <div style="display:flex; align-items:center; gap:4px;">${fmt(tPass,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
+                    <div style="display:flex; align-items:center; gap:4px;">${fmt(tPass,0)} <img loading="lazy" src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
                     <div>${fmt(tPull,1)} Pulls</div>
                 </div>
             </div>
