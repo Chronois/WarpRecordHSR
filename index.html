@@ -135,6 +135,45 @@
   .roster-card:hover .roster-img-wrap img {
     transform: scale(1.2);
   }
+
+  /* --- Animasi Hover & Sustainless Page Team --- */
+  .team-card {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .team-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+    border-color: var(--gold-soft);
+    z-index: 5;
+  }
+  
+  /* Gaya Khusus Tim Sustainless */
+  .team-card.sustainless {
+    border-color: rgba(226, 128, 125, 0.4);
+    background: linear-gradient(180deg, var(--surface) 0%, rgba(226, 128, 125, 0.08) 100%);
+  }
+  .team-card.sustainless:hover {
+    border-color: var(--loss);
+    box-shadow: 0 12px 24px rgba(226, 128, 125, 0.25);
+  }
+  .team-card.sustainless .tc-arch {
+    color: var(--loss);
+  }
+
+  /* --- Tata Letak Baru Page Stellar Jade --- */
+  .phase-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.03);
+    padding: 6px 10px; border-radius: 6px;
+  }
+  .phase-row.total-row {
+    background: rgba(232, 184, 75, 0.1); color: var(--gold-soft);
+    font-weight: bold; font-size: 12px; border: 1px solid rgba(232, 184, 75, 0.2);
+  }
+  .phase-label { font-weight: 600; width: 45px; }
+  .phase-stats { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); }
+  .pass-icon { width: 14px; height: 14px; object-fit: contain; vertical-align: middle; margin-top: -2px; }
+  
 </style>
 </head>
 <body>
