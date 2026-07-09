@@ -867,3 +867,49 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cur
 
 .cropper-view-box { outline: 1px solid var(--cyan); }
 .cropper-line, .cropper-point { background-color: var(--cyan); }
+
+/* =========================================
+   ENHANCED HOVER EFFECTS FOR FREEBIES & STATS
+   ========================================= */
+
+/* Efek Hover animasi untuk kartu di Page Freebies */
+.freebie-card {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.freebie-card:hover {
+  background: var(--surface-2) !important;
+  transform: translateY(-4px) scale(1.02) !important;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4) !important;
+  border-color: var(--nebula) !important;
+}
+
+/* Animasi tambahan agar avatar karakter ikut membesar saat kartu di-hover */
+.freebie-card .freebie-icon {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.freebie-card:hover .freebie-icon {
+  transform: scale(1.15) rotate(5deg) !important;
+  border-color: var(--cyan) !important;
+}
+
+/* Efek Hover untuk kartu besar di Page Stats (Express Archive) */
+.calc-col {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.calc-col:hover {
+  transform: translateY(-4px) !important;
+  border-color: var(--gold-soft) !important;
+  box-shadow: 0 12px 30px rgba(232, 184, 75, 0.15) !important;
+  background: linear-gradient(180deg, var(--surface) 0%, rgba(232, 184, 75, 0.04) 100%) !important;
+}
+
+/* Efek Hover untuk kotak-kotak kecil Best Win Streak / Average Pity (.bstat) */
+.bstat {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.bstat:hover {
+  border-color: var(--cyan) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 20px rgba(95, 201, 217, 0.15) !important;
+  background: linear-gradient(180deg, var(--surface) 0%, rgba(95, 201, 217, 0.05) 100%) !important;
+}
