@@ -222,12 +222,21 @@ const MASTER_CHARACTERS = {
   "trailblazer • elation": { name: "Trailblazer • Elation", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Elation%20Splash%20Art.gif"  }
 };
 
-// OPTIMASI: Mengubah jalur lokal menjadi CDN jsDelivr berkecepatan tinggi
+// OPTIMASI TINGKAT DEWA: Menggunakan CDN Auto-Compress & Resize (wsrv.nl)
 Object.values(MASTER_CHARACTERS).forEach(char => {
     if (char.img && char.img.startsWith('./assets')) {
-        char.img = char.img.replace('./assets', 'https://cdn.jsdelivr.net/gh/Chronois/WarpRecordHSR@main/assets');
+        // 1. Ubah format path lokal menjadi URL raw GitHub
+        let rawGithubPath = char.img.replace('./assets', 'raw.githubusercontent.com/Chronois/WarpRecordHSR/main/assets');
+        
+        // 2. Bungkus dengan CDN wsrv.nl untuk otomatis kompres ke WEBP, kualitas 80%, & lebar maksimal 500px
+        // Pengecualian untuk file .gif (Trailblazer) agar animasinya tidak rusak
+        if (char.img.toLowerCase().endsWith('.gif')) {
+            char.img = `https://wsrv.nl/?url=${rawGithubPath}&n=-1`; // n=-1 membiarkan GIF tetap bergerak
+        } else {
+            char.img = `https://wsrv.nl/?url=${rawGithubPath}&w=500&output=webp&q=80`;
+        }
     }
-}); // <--- Tanda tutup kurung diperbaiki di sini
+});
 
 function computeRosterFromHistory() {
   const charHistory   = (DATA.limited || []).filter(r => r.category === 'Character');
