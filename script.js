@@ -309,6 +309,8 @@ function bestWinStreak(rows) {
   [...rows].sort((a, b) => String(a.date || '').localeCompare(String(b.date || ''))).forEach(r => { if (r.result === 'W') { cur++; best = Math.max(best, cur); } else if (r.result === 'L') { cur = 0; } });
   return best;
 }
+
+// ============ Table Functions ============
 function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   const table = document.getElementById(tableId); if (!table) return;
   const thead = table.querySelector('thead'); const tbody = table.querySelector('tbody'); const rows = DATA[section] || [];
@@ -327,7 +329,6 @@ function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   </td></tr>`).join('');
 }
 
-// FITUR DUPLIKASI DATA TABEL
 window.dupEntry = function(section, idx) {
   const item = DATA[section][idx];
   DATA[section].push(JSON.parse(JSON.stringify(item)));
@@ -338,22 +339,17 @@ window.dupEntry = function(section, idx) {
     sortByDate(DATA[section]);
     recomputeDaysSince(DATA[section]);
   }
-  saveWorkingData();
-  renderAll();
+  saveWorkingData(); renderAll();
 };
 
-// FITUR EDIT DATA TABEL
 window.editEntry = function(section, idx) {
   const item = DATA[section][idx];
   let formId = 'form-' + section;
   
-  // Deteksi khusus jika yang diedit adalah Stellar Jade (menggunakan sistem 2 form)
   if (section === 'stellarJade') {
      const act = String(item.activity || '');
      const isSpend = item.jade < 0 || item.passes < 0 || act.toUpperCase().includes('[SPEND]');
-     
      formId = isSpend ? 'form-spend' : 'form-income';
-     
      if (isSpend) {
          item.pulls = Math.abs(item.passes || 0) + (Math.abs(item.jade || 0) / 160);
          item.reason = act.replace('[SPEND]', '').trim();
@@ -380,8 +376,7 @@ window.editEntry = function(section, idx) {
     recomputeDaysSince(DATA[section]);
   }
   
-  saveWorkingData();
-  renderAll();
+  saveWorkingData(); renderAll();
 
   const btn = form.querySelector('button[type="submit"]');
   if (btn) {
@@ -392,11 +387,10 @@ window.editEntry = function(section, idx) {
           form.removeEventListener('submit', onSub);
       });
   }
-
   form.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
-// ============ Overview (Combined Char & LC) ============
+// ============ Overview ============
 function buildOverview() {
   const limRows = DATA.limited || [];
   const stdRows = DATA.standard || [];
@@ -404,12 +398,7 @@ function buildOverview() {
   const stats = computeBannerStats(limRows, null); 
   const total5star = limRows.length + stdRows.length + freebies.length;
 
-  const cards = [
-    { label: `Total Warps Spent`, value: fmt(stats.totalWarps, 0), sub: 'character + light cone (limited)' },
-    { label: `Total 5★ Obtained`, value: fmt(total5star, 0), sub: `${limRows.length} lim · ${stdRows.length} std · ${freebies.length} free` },
-    { label: '50/50 Win Rate', value: stats.winRate !== null ? pct(stats.winRate) : '—', sub: `${stats.wins}W / ${stats.losses}L` },
-    { label: `Average Pity`, value: fmt(stats.avgPity, 1), sub: `combined avg pity` }
-  ];
+  const cards = [    { label: `Total Warps Spent`, value: fmt(stats.totalWarps, 0), sub: 'character + light cone (limited)' },    { label: `Total 5★ Obtained`, value: fmt(total5star, 0), sub: `${limRows.length} lim · ${stdRows.length} std · ${freebies.length} free` },    { label: '50/50 Win Rate', value: stats.winRate !== null ? pct(stats.winRate) : '—', sub: `${stats.wins}W / ${stats.losses}L` },    { label: `Average Pity`, value: fmt(stats.avgPity, 1), sub: `combined avg pity` }  ];
 
   document.getElementById('statGrid').innerHTML = cards.map(c => `<div class="stat-card"><div class="stat-label">${c.label}</div><div class="stat-value ${c.value.length > 6 ? 'small' : ''}">${c.value}</div><div class="stat-sub">${c.sub}</div></div>`).join('');
   const elMetaLim = document.getElementById('metaLimitedWarps'); if(elMetaLim) elMetaLim.textContent = fmt((DATA.limited||[]).filter(r => r.category === 'Character').reduce((s, r) => s + r.pity, 0) + (DATA.limited||[]).filter(r => r.category === 'Light Cone').reduce((s, r) => s + r.pity, 0), 0);
@@ -422,13 +411,10 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
   if (!rows || !rows.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`; return; }
   
-  // Membalikkan urutan array untuk visualisasi (Terbaru di kiri -> Terlama di kanan)
+  // Balik urutan agar tarikan terbaru ada di sebelah kiri
   const displayRows = [...rows].reverse();
-  
-  // Menghitung jarak (gaps) yang benar untuk urutan yang sudah dibalik
-  // Jarak antar stasiun dihitung berdasarkan nilai daysSince dari tarikan yang lebih baru (sebelah kirinya)
   const gaps = displayRows.map((r, i) => {
-    if (i === 0) return 24; // Margin tetap untuk item pertama (paling baru)
+    if (i === 0) return 24; 
     const newerPull = displayRows[i - 1]; 
     return Math.max(Math.sqrt(newerPull.daysSince || 0.5) * 22, 46);
   });
@@ -444,15 +430,47 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
         imgSrc = MASTER_CHARACTERS[lowerName].img;
     }
 
-    return `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px">
+    // === LOGIKA DINAMIKA WARNA PITY & AURA ===
+    let pityColor = 'var(--gold-soft)';
+    let fontWeight = 'normal';
+    let baseAura = '0 0 10px rgba(232, 184, 75, 0.3)'; // Kuning (Average Pity)
+    let hoverAura = '0 0 25px rgba(232, 184, 75, 0.8)';
+
+    if (r.pity <= 35) { 
+        // Early Pity (Sangat Beruntung) -> Hijau
+        pityColor = 'var(--win)'; 
+        fontWeight = 'bold';
+        baseAura = '0 0 10px rgba(111, 207, 151, 0.3)';
+        hoverAura = '0 0 25px rgba(111, 207, 151, 0.8)';
+    } else if (r.pity >= 74) { 
+        // Hard Pity -> Merah yang makin menyala seiring tingginya pity
+        pityColor = 'var(--loss)'; 
+        fontWeight = 'bold';
+        
+        // Kalkulasi intensitas pekatnya merah (0.0 sampai 1.0)
+        const redIntensity = Math.min(1, (r.pity - 73) / (maxPity - 73)); 
+        const baseSpread = 10 + (redIntensity * 15);  
+        const hoverSpread = 25 + (redIntensity * 25); 
+        const alphaBase = 0.4 + (redIntensity * 0.4); 
+        const alphaHover = 0.7 + (redIntensity * 0.3); 
+
+        baseAura = `0 0 ${baseSpread}px rgba(226, 128, 125, ${alphaBase})`;
+        hoverAura = `0 0 ${hoverSpread}px rgba(226, 128, 125, ${alphaHover})`;
+    }
+
+    // Ukuran titik (dot) yang semakin membesar seiring naiknya pity
+    const dotSize = 10 + (r.pity / maxPity) * 16;
+
+    // Menyuntikkan variabel aura ke CSS lewat style attribute
+    return `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px; --aura-base: ${baseAura}; --aura-hover: ${hoverAura};">
       <div class="station-label-name">${r.name}</div>
       <img src="${imgSrc}" class="station-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
       <div class="station-tooltip">
         <div class="tt-name">${r.name}</div>
         <div class="tt-meta">${formatDate(r.date)} · pity ${r.pity}${hasResult ? ' · ' + (r.result === 'W' ? '50/50 Win' : r.result === 'L' ? '50/50 Loss' : 'Guaranteed') : ''}</div>
       </div>
-      <div class="station-dot ${hasResult ? r.result : 'G'}"></div>
-      <div class="station-pity">${r.pity}</div>
+      <div class="station-dot ${hasResult ? r.result : 'G'}" style="width: ${dotSize}px; height: ${dotSize}px;"></div>
+      <div class="station-pity" style="color: ${pityColor}; font-weight: ${fontWeight};">${r.pity}</div>
     </div>`;
   }).join('');
   
@@ -465,6 +483,7 @@ function renderBannerStats(containerId, stats) {
   document.getElementById(containerId).innerHTML = items.map(i => `<div class="bstat"><div class="stat-label">${i.label}</div><div class="stat-value">${i.value}</div></div>`).join('');
 }
 
+// ============ Limited & Standard & Freebies ============
 let currentLimitedCat = 'Character';
 function renderLimited() {
   const rows = (DATA.limited||[]).filter(r => r.category === currentLimitedCat); const maxPity = currentLimitedCat === 'Character' ? 90 : 80;
@@ -479,6 +498,11 @@ function renderManageLimited() {
   r => [formatDate(r.date), r.category, r.name, r.pity, r.result === 'W' ? 'Win' : r.result === 'L' ? 'Loss' : 'Guaranteed', r.daysSince], 
   (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; }); 
 }
+document.getElementById('form-limited')?.addEventListener('submit', (e) => {
+  e.preventDefault(); const fd = new FormData(e.target); if (!DATA.limited) DATA.limited = [];
+  DATA.limited.push({ date: fd.get('date'), category: fd.get('category'), name: fd.get('name').trim(), pity: Number(fd.get('pity')), result: fd.get('result'), daysSince: 0 });
+  sortByDate(DATA.limited); recomputeDaysSince(DATA.limited); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs();
+});
 
 function renderStandard() { const rows = DATA.standard || []; renderBannerStats('standardStats', computeBannerStats(rows, 80)); renderTrack('standardTrack', rows, 80, false); }
 function renderManageStandard() { 
@@ -499,7 +523,6 @@ function renderFreebies() {
     return; 
   }
   
-  // Membalik urutan agar Freebies terbaru muncul pertama
   const displayFreebies = [...DATA.freebies].reverse();
   
   container.innerHTML = displayFreebies.map(f => {
@@ -543,109 +566,77 @@ function renderCalc() {
   const limChar = (DATA.limited||[]).filter(r => r.category === 'Character'); 
   const limLC   = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
   
-  const datasets = [
-    { label: 'Character Banner', rows: limChar, maxPity: 90 }, 
-    { label: 'Light Cone Banner', rows: limLC, maxPity: 80 }, 
-    { label: 'Combined (Total)', rows: DATA.limited||[], maxPity: 90 }
+  const datasets = [    { label: 'Character Banner', rows: limChar, maxPity: 90 },     { label: 'Light Cone Banner', rows: limLC, maxPity: 80 },     { label: 'Combined (Total)', rows: DATA.limited||[], maxPity: 90 }
   ];
 
   const maxPulls = Math.max(...datasets.map(d => computeBannerStats(d.rows, d.maxPity).totalWarps)) || 1;
 
   document.getElementById('calcGrid').innerHTML = datasets.map(b => {
     const s = computeBannerStats(b.rows, b.maxPity);
-    
-    // 1. Data untuk Pie Chart
     const totalWLG = (s.wins + s.losses + s.guaranteed) || 1; 
     const wPct = (s.wins / totalWLG) * 100;
     const lPct = (s.losses / totalWLG) * 100;
     
-    // CSS Conic-Gradient untuk Pie Chart Win Rate
     const winRateVal = s.winRate !== null ? s.winRate : 0;
     const wrWinDeg = winRateVal * 360;
-    const wrPie = s.winRate !== null 
-        ? `conic-gradient(#4ade80 0deg ${wrWinDeg}deg, var(--loss) ${wrWinDeg}deg 360deg)` 
-        : 'conic-gradient(rgba(255,255,255,0.1) 0deg 360deg)';
+    const wrPie = s.winRate !== null ? `conic-gradient(#4ade80 0deg ${wrWinDeg}deg, var(--loss) ${wrWinDeg}deg 360deg)` : 'conic-gradient(rgba(255,255,255,0.1) 0deg 360deg)';
 
-    // CSS Conic-Gradient untuk Pie Chart Distribution
     const distWinDeg = (wPct / 100) * 360;
     const distLossDeg = distWinDeg + ((lPct / 100) * 360);
-    const distPie = (s.wins > 0 || s.losses > 0 || s.guaranteed > 0)
-        ? `conic-gradient(#4ade80 0deg ${distWinDeg}deg, var(--loss) ${distWinDeg}deg ${distLossDeg}deg, var(--gold-soft) ${distLossDeg}deg 360deg)`
-        : 'conic-gradient(rgba(255,255,255,0.1) 0deg 360deg)';
+    const distPie = (s.wins > 0 || s.losses > 0 || s.guaranteed > 0) ? `conic-gradient(#4ade80 0deg ${distWinDeg}deg, var(--loss) ${distWinDeg}deg ${distLossDeg}deg, var(--gold-soft) ${distLossDeg}deg 360deg)` : 'conic-gradient(rgba(255,255,255,0.1) 0deg 360deg)';
 
-    // 2. Data untuk Bullet Chart (Average Pity)
     const pityPct = Math.min((s.avgPity / b.maxPity) * 100, 100);
-    let markerColor = '#4ade80'; 
-    if (pityPct > 85) markerColor = 'var(--loss)'; 
-    else if (pityPct > 70) markerColor = 'var(--gold-soft)';
+    let markerColor = '#4ade80'; if (pityPct > 85) markerColor = 'var(--loss)'; else if (pityPct > 70) markerColor = 'var(--gold-soft)';
     
     const pullBarPct = (s.totalWarps / maxPulls) * 100;
 
-    // 3. Kalkulasi Data Histogram (Frekuensi Pity per 10 Tarikan)
-    const bins = b.maxPity === 90 ? 9 : 8; // 9 tiang untuk Char, 8 tiang untuk LC
+    const bins = b.maxPity === 90 ? 9 : 8; 
     const histData = Array(bins).fill(0);
-    
     b.rows.forEach(r => {
-        // Hanya hitung pity untuk yang dapat bintang 5 (W, L, G)
         if(r.pity > 0 && (r.result === 'W' || r.result === 'L' || r.result === 'G')) {
             let binIdx = Math.ceil(r.pity / 10) - 1;
-            if(binIdx >= bins) binIdx = bins - 1; // Keamanan
+            if(binIdx >= bins) binIdx = bins - 1; 
             if(binIdx < 0) binIdx = 0;
             histData[binIdx]++;
         }
     });
     
-    const maxFreq = Math.max(...histData, 1); // Hindari pembagian 0
+    const maxFreq = Math.max(...histData, 1); 
 
-    // Render HTML Histogram
     let histHtml = `<div style="display:flex; align-items:flex-end; gap:6px; height:80px; margin-top:12px;">`;
     histData.forEach((freq, i) => {
         const hPct = (freq / maxFreq) * 100;
         const rangeStr = i === bins - 1 ? `${i*10 + 1}+` : `${i*10 + 1}-${(i+1)*10}`;
-        histHtml += `
-            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px; height:100%; position:relative;" title="${freq} Pulls in this range">
+        histHtml += `<div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px; height:100%; position:relative;" title="${freq} Pulls in this range">
                 <span style="font-size:10px; color:var(--text-dim); opacity:${freq>0?1:0}">${freq}</span>
                 <div style="width:100%; max-width:20px; height:${Math.max(hPct, 2)}%; background:var(--cyan); border-radius:3px 3px 0 0; opacity:0.85; transition: height 0.5s ease;"></div>
                 <span style="font-size:9px; color:var(--text-dim); font-family:var(--font-mono); margin-top:2px;">${rangeStr}</span>
-            </div>
-        `;
+            </div>`;
     });
     histHtml += `</div>`;
 
-
-    // Return Susunan HTML Kartu
-    return `
-      <div class="calc-col" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:16px;">
-        
+    return `<div class="calc-col" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:16px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;">
             <h3 style="margin:0; color:var(--nebula); font-size:16px; font-family:var(--font-display);">${b.label}</h3>
-            <div style="text-align:right;">
-                <span style="color:var(--text); font-weight:bold; font-size:14px;">${fmt(s.total, 0)}</span> <span style="color:var(--text-dim); font-size:12px;">5★</span>
-            </div>
+            <div style="text-align:right;"><span style="color:var(--text); font-weight:bold; font-size:14px;">${fmt(s.total, 0)}</span> <span style="color:var(--text-dim); font-size:12px;">5★</span></div>
         </div>
-
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
-            <span style="color:var(--text-dim);">Total Pulls</span>
-            <span style="font-weight:700; color:var(--cyan);">${fmt(s.totalWarps, 0)}</span>
+            <span style="color:var(--text-dim);">Total Pulls</span><span style="font-weight:700; color:var(--cyan);">${fmt(s.totalWarps, 0)}</span>
           </div>
           <div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden;">
             <div style="width:${pullBarPct}%; background:var(--cyan); height:100%; border-radius:4px; transition:width 1s ease;"></div>
           </div>
         </div>
-
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
-            <span style="color:var(--text-dim);">Average Pity</span>
-            <span style="font-weight:700; color:${markerColor}">${fmt(s.avgPity, 1)} / ${b.maxPity}</span>
+            <span style="color:var(--text-dim);">Average Pity</span><span style="font-weight:700; color:${markerColor}">${fmt(s.avgPity, 1)} / ${b.maxPity}</span>
           </div>
           <div style="width:100%; height:16px; background:linear-gradient(to right, rgba(74,222,128,0.15) 0%, rgba(74,222,128,0.15) 70%, rgba(234,179,8,0.15) 70%, rgba(234,179,8,0.15) 85%, rgba(226,128,125,0.15) 85%, rgba(226,128,125,0.15) 100%); border-radius:4px; position:relative; display:flex; align-items:center;">
              <div style="width:${pityPct}%; background:${markerColor}; height:6px; border-radius:0 3px 3px 0; z-index:2; transition:width 1s ease;"></div>
           </div>
         </div>
-
         <div style="display:flex; justify-content:space-around; align-items:center; padding-top:12px;">
-            
             <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
                 <span style="font-size:11px; color:var(--text-dim);">50/50 Win Rate</span>
                 <div style="width:84px; height:84px; border-radius:50%; background:${wrPie}; display:flex; justify-content:center; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
@@ -654,7 +645,6 @@ function renderCalc() {
                     </div>
                 </div>
             </div>
-
             <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
                 <span style="font-size:11px; color:var(--text-dim);">Distribution</span>
                 <div style="width:84px; height:84px; border-radius:50%; background:${distPie}; display:flex; justify-content:center; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
@@ -663,55 +653,34 @@ function renderCalc() {
                     </div>
                 </div>
             </div>
-
         </div>
-
         <div style="display:flex; gap:14px; justify-content:center; font-size:10px; color:var(--text-dim); margin-top: 4px;">
             <span style="display:flex; align-items:center; gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#4ade80;"></span> Win</span>
             <span style="display:flex; align-items:center; gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--loss);"></span> Loss</span>
             <span style="display:flex; align-items:center; gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold-soft);"></span> Guar.</span>
         </div>
-
         <div style="margin-top:8px; padding-top:16px; border-top:1px dashed rgba(255,255,255,0.08);">
             <div style="font-size:11px; color:var(--text-dim); text-align:center; font-weight:bold;">Pity Frequency (5★ Drops)</div>
             ${histHtml}
         </div>
-
-      </div>
-    `;
+      </div>`;
   }).join('');
   
-  // Update Area Max Win Streak
-  document.getElementById('streakGrid').innerHTML = [
-      { label: 'Character', value: bestWinStreak(limChar) }, 
-      { label: 'Light Cone', value: bestWinStreak(limLC) }, 
-      { label: 'Combined', value: bestWinStreak(DATA.limited||[]) }
-  ].map(s => `
-    <div class="bstat" style="text-align:center; padding: 20px;">
-        <div class="stat-label" style="margin-bottom:8px; letter-spacing:1px;">MAX ${s.label.toUpperCase()} WIN STREAK</div>
-        <div class="stat-value" style="color:var(--cyan); font-size:32px; font-family:var(--font-display);">${fmt(s.value, 0)}</div>
-    </div>
-  `).join('');
+  document.getElementById('streakGrid').innerHTML = [      { label: 'Character', value: bestWinStreak(limChar) },       { label: 'Light Cone', value: bestWinStreak(limLC) },       { label: 'Combined', value: bestWinStreak(DATA.limited||[]) }
+  ].map(s => `<div class="bstat" style="text-align:center; padding: 20px;"><div class="stat-label" style="margin-bottom:8px; letter-spacing:1px;">MAX ${s.label.toUpperCase()} WIN STREAK</div><div class="stat-value" style="color:var(--cyan); font-size:32px; font-family:var(--font-display);">${fmt(s.value, 0)}</div></div>`).join('');
 }
+
 // ============ PAGE PRIORITY ============
 function renderPriority() {
   if (DATA.priority) { 
-    // 1. Urutkan berdasarkan angka priority saat ini
     DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority)); 
-    
-    // 2. Paksa penomoran ulang secara statis (1, 2, 3...) agar tidak ada angka yang bolong
     DATA.priority.forEach((r, i) => { 
       r.priority = String(i + 1); 
-      let avgPull = 85; 
-      let worstPull = 180; 
-      if (String(r.type || '').toLowerCase().includes('light cone') || String(r.type || '').toLowerCase().includes('lightcone')) { 
-          avgPull = 65; worstPull = 160; 
-      } 
-      r.averagePull = avgPull; 
-      r.worstPull = worstPull; 
+      let avgPull = 85, worstPull = 180; 
+      if (String(r.type || '').toLowerCase().includes('light cone') || String(r.type || '').toLowerCase().includes('lightcone')) { avgPull = 65; worstPull = 160; } 
+      r.averagePull = avgPull; r.worstPull = worstPull; 
     }); 
   }
-  
   renderDeleteTable('manageTable-priority', 'priority', ['Priority','Name','Type','Archetype','Average Pull','Worst Scenario Pull','Patch (min-max)'], 
     r => [r.priority, r.name, r.type, r.archetype, fmt(r.averagePull,0), fmt(r.worstPull,0), `${fmt(r.averagePull/100,2)}–${fmt(r.worstPull/100,2)}`], 
     (a, b) => Number(a.r.priority) - Number(b.r.priority)
@@ -719,64 +688,30 @@ function renderPriority() {
 }
 
 document.getElementById('form-priority').addEventListener('submit', (e) => {
-  e.preventDefault(); 
-  const fd = new FormData(e.target); 
-  if (!DATA.priority) DATA.priority = [];
-  
+  e.preventDefault(); const fd = new FormData(e.target); if (!DATA.priority) DATA.priority = [];
   let targetPrio = Number(fd.get('priority')); 
-  
-  // Sistem Keamanan: Mencegah user memasukkan angka yang melompati urutan (misal: data ada 17, mau input 50, otomatis dikunci jadi 18)
-  if (targetPrio > DATA.priority.length + 1) {
-      targetPrio = DATA.priority.length + 1;
-  }
-  
-  DATA.priority.forEach(item => { 
-      let currentPrio = Number(item.priority); 
-      if (currentPrio >= targetPrio) { 
-          item.priority = String(currentPrio + 1); 
-      } 
-  });
-  
-  DATA.priority.push({ 
-      priority: String(targetPrio), 
-      name: fd.get('name').trim(), 
-      type: fd.get('type'), 
-      archetype: fd.get('archetype').trim() 
-  });
-  
-  saveWorkingData(); 
-  renderAll(); 
-  e.target.reset();
+  if (targetPrio > DATA.priority.length + 1) targetPrio = DATA.priority.length + 1;
+  DATA.priority.forEach(item => { let currentPrio = Number(item.priority); if (currentPrio >= targetPrio) item.priority = String(currentPrio + 1); });
+  DATA.priority.push({ priority: String(targetPrio), name: fd.get('name').trim(), type: fd.get('type'), archetype: fd.get('archetype').trim() });
+  saveWorkingData(); renderAll(); e.target.reset();
 });
-// ============ CROPPER MODAL LOGIC ============
-let globalCropper = null;
-let currentCropTargetElement = null; 
 
+// ============ CROPPER MODAL LOGIC ============
+let globalCropper = null, currentCropTargetElement = null; 
 function openCropModal(triggerElement) {
   currentCropTargetElement = triggerElement.querySelector('.slot-preview') || triggerElement;
   document.getElementById('cropModalOverlay').hidden = false;
-  switchModalTab('upload');
-  switchModalStep(1);
-  document.getElementById('modalFileInput').value = '';
-  document.getElementById('modalUrlInput').value = '';
+  switchModalTab('upload'); switchModalStep(1);
+  document.getElementById('modalFileInput').value = ''; document.getElementById('modalUrlInput').value = '';
   const currentSrc = currentCropTargetElement.src;
   document.getElementById('modalDefaultPreview').src = currentSrc.includes('viewBox') ? DEFAULT_AVATAR : currentSrc;
 }
-
-function closeCropModal() {
-  document.getElementById('cropModalOverlay').hidden = true;
-  if(globalCropper) { globalCropper.destroy(); globalCropper = null; }
-}
-
+function closeCropModal() { document.getElementById('cropModalOverlay').hidden = true; if(globalCropper) { globalCropper.destroy(); globalCropper = null; } }
 document.querySelectorAll('.modal-tab').forEach(tab => { tab.addEventListener('click', (e) => { switchModalTab(e.target.dataset.tab); }); });
-
 function switchModalTab(tabId) {
-  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.modal-tab-content').forEach(c => c.hidden = true);
-  document.querySelector(`.modal-tab[data-tab="${tabId}"]`).classList.add('active');
-  document.getElementById(`tab-${tabId}`).hidden = false;
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.modal-tab-content').forEach(c => c.hidden = true);
+  document.querySelector(`.modal-tab[data-tab="${tabId}"]`).classList.add('active'); document.getElementById(`tab-${tabId}`).hidden = false;
 }
-
 function switchModalStep(step) {
   if(step === 1) {
     document.getElementById('modalStep1').classList.add('active'); document.getElementById('modalStep2').classList.remove('active');
@@ -792,44 +727,31 @@ function switchModalStep(step) {
 
 document.getElementById('btnModalPrev').addEventListener('click', () => switchModalStep(1));
 document.getElementById('btnModalNext').addEventListener('click', () => {
-  const activeTab = document.querySelector('.modal-tab.active').dataset.tab;
-  let sourceImg = '';
+  const activeTab = document.querySelector('.modal-tab.active').dataset.tab; let sourceImg = '';
   if (activeTab === 'upload') {
-    const file = document.getElementById('modalFileInput').files[0];
-    if (!file) return alert('Please upload a file first!');
-    sourceImg = URL.createObjectURL(file);
-    initCropper(sourceImg, false);
+    const file = document.getElementById('modalFileInput').files[0]; if (!file) return alert('Please upload a file first!');
+    sourceImg = URL.createObjectURL(file); initCropper(sourceImg, false);
   } else if (activeTab === 'url') {
-    const url = document.getElementById('modalUrlInput').value.trim();
-    if (!url) return alert('Please enter a URL!');
-    sourceImg = url;
-    initCropper(sourceImg, true);
+    const url = document.getElementById('modalUrlInput').value.trim(); if (!url) return alert('Please enter a URL!');
+    sourceImg = url; initCropper(sourceImg, true);
   } else if (activeTab === 'default') {
-    sourceImg = document.getElementById('modalDefaultPreview').src;
-    initCropper(sourceImg, false);
+    sourceImg = document.getElementById('modalDefaultPreview').src; initCropper(sourceImg, false);
   }
 });
 
 function initCropper(src, isUrl) {
   const imgElement = document.getElementById('modalTargetImg');
   if (isUrl) { imgElement.crossOrigin = "Anonymous"; } else { imgElement.removeAttribute('crossOrigin'); }
-  imgElement.src = src;
-  switchModalStep(2);
-  imgElement.onload = () => {
-    if(globalCropper) globalCropper.destroy();
-    globalCropper = new Cropper(imgElement, { aspectRatio: 1, viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false, checkCrossOrigin: false });
-  };
+  imgElement.src = src; switchModalStep(2);
+  imgElement.onload = () => { if(globalCropper) globalCropper.destroy(); globalCropper = new Cropper(imgElement, { aspectRatio: 1, viewMode: 1, dragMode: 'move', autoCropArea: 1, background: false, checkCrossOrigin: false }); };
   imgElement.onerror = () => { alert("Could not load image. If it's a URL, it might be blocked by CORS."); switchModalStep(1); };
 }
 
 document.getElementById('btnModalSubmit').addEventListener('click', () => {
   if (!globalCropper) return;
   try {
-    const canvas = globalCropper.getCroppedCanvas({ width: 256, height: 256 });
-    if (!canvas) throw new Error("Canvas is empty");
-    const finalBase64 = canvas.toDataURL('image/jpeg', 0.85); 
-    currentCropTargetElement.src = finalBase64;
-    closeCropModal();
+    const canvas = globalCropper.getCroppedCanvas({ width: 256, height: 256 }); if (!canvas) throw new Error("Canvas is empty");
+    currentCropTargetElement.src = canvas.toDataURL('image/jpeg', 0.85); closeCropModal();
   } catch(err) { console.error(err); alert("Failed to crop image."); }
 });
 
@@ -843,24 +765,18 @@ document.getElementById('modalFileInput').addEventListener('change', (e) => {
 // ============ Team Planner ============
 function getAllCharNames() {
   const names = new Set();
-  (DATA.limited||[]).forEach(r => { if (r.name) names.add(r.name); });
-  (DATA.standard||[]).forEach(r => { if (r.name) names.add(r.name); });
-  (DATA.freebies||[]).forEach(r => { if (r.name) names.add(r.name); });
+  (DATA.limited||[]).forEach(r => { if (r.name) names.add(r.name); }); (DATA.standard||[]).forEach(r => { if (r.name) names.add(r.name); }); (DATA.freebies||[]).forEach(r => { if (r.name) names.add(r.name); });
   return [...names].sort();
 }
 function populateSlotDropdowns() {
-  const names = getAllCharNames();
-  const optionsHtml = `<option value="">— none —</option>` + names.map(n => `<option value="${n}">${n}</option>`).join('');
+  const names = getAllCharNames(); const optionsHtml = `<option value="">— none —</option>` + names.map(n => `<option value="${n}">${n}</option>`).join('');
   document.querySelectorAll('.slot-name').forEach(sel => { const cur = sel.value; sel.innerHTML = optionsHtml; if (cur) sel.value = cur; });
 }
 document.getElementById('form-team').addEventListener('change', (e) => {
   if (e.target.classList.contains('slot-name')) {
-      const name = e.target.value;
-      const imgEl = e.target.closest('.slot-row').querySelector('.slot-preview');
-      const rosterChar = (DATA.roster||[]).find(r => r.name === name);
+      const name = e.target.value; const imgEl = e.target.closest('.slot-row').querySelector('.slot-preview'); const rosterChar = (DATA.roster||[]).find(r => r.name === name);
       if (rosterChar && rosterChar.img) { imgEl.src = rosterChar.img; } else { imgEl.src = DEFAULT_AVATAR; }
-  }
-  updateTeamPreview();
+  } updateTeamPreview();
 });
 
 const slotTemplate = (role, isRemovable) => `
@@ -885,9 +801,7 @@ document.querySelectorAll('.btn-add-slot').forEach(btn => {
     slotDiv.appendChild(wrapper.firstElementChild); populateSlotDropdowns(); updateTeamPreview();
   });
 });
-document.getElementById('form-team').addEventListener('click', (e) => {
-  if (e.target.classList.contains('btn-remove-slot')) { e.target.closest('.slot-row').remove(); updateTeamPreview(); }
-});
+document.getElementById('form-team').addEventListener('click', (e) => { if (e.target.classList.contains('btn-remove-slot')) { e.target.closest('.slot-row').remove(); updateTeamPreview(); } });
 
 function getSlotMembers(role) {
   return [...document.querySelectorAll(`#slot-${role} .slot-row`)].map(row => {
@@ -940,9 +854,7 @@ function renderTeam() {
   grid.innerHTML = indexed.map((r) => {
     const subDps = Array.isArray(r.subDps) ? r.subDps.join(', ') : (r.subDps || '—'); const support = Array.isArray(r.support) ? r.support.join(', ') : (r.support || '—'); const pctVal = pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2);
     let imgHtml = ''; if (r.members && r.members.length > 0) { imgHtml = r.members.map(m => `<div class="team-image-slot" title="${m.name}"><img src="${m.img}" onerror="this.src='${DEFAULT_AVATAR}'"></div>`).join(''); } else { imgHtml = `<div class="team-image-slot"><img src="${DEFAULT_AVATAR}"></div>`; }
-    
-    const isSustainless = !r.sustain || r.sustain === '—';
-    const sustainlessClass = isSustainless ? 'sustainless' : '';
+    const isSustainless = !r.sustain || r.sustain === '—'; const sustainlessClass = isSustainless ? 'sustainless' : '';
 
     return `<div class="team-card searchable-item ${sustainlessClass}" data-idx="${r._idx}">
         <div class="team-image-row">${imgHtml}</div>
@@ -971,8 +883,7 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
   document.querySelectorAll('.slot-preview').forEach(img => img.src = DEFAULT_AVATAR);
   ['subDps','support'].forEach(role => { const slotDiv = document.getElementById('slot-' + role); const rows = slotDiv.querySelectorAll('.slot-row'); rows.forEach((row, i) => { if (i > 0) row.remove(); }); slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = ''); });
   ['mainDps','sustain'].forEach(role => { const slotDiv = document.getElementById('slot-' + role); slotDiv.querySelectorAll('.slot-name').forEach(sel => sel.value = ''); });
-  document.getElementById('team-cost-preview').value = ''; document.getElementById('team-pv-preview').value = ''; populateSlotDropdowns();
-  document.getElementById('btnSubmitTeam').textContent = "+ Save Team";
+  document.getElementById('team-cost-preview').value = ''; document.getElementById('team-pv-preview').value = ''; populateSlotDropdowns(); document.getElementById('btnSubmitTeam').textContent = "+ Save Team";
 });
 
 window.dupTeam = function(idx) { const team = DATA.team[idx]; DATA.team.push(JSON.parse(JSON.stringify(team))); saveWorkingData(); renderAll(); }
@@ -1000,53 +911,25 @@ document.getElementById('rosterSortSelect')?.addEventListener('change', (e) => {
 
 function getRosterRows() {
   let rows = (DATA.roster||[]).map((r, idx) => ({ ...r, _idx: idx }));
-  
   if (rosterFilter === 'Limited') rows = rows.filter(r => r.source === 'Limited'); 
   else if (rosterFilter === 'Standard') rows = rows.filter(r => r.source === 'Standard'); 
   else if (rosterFilter === 'other') rows = rows.filter(r => r.source !== 'Limited' && r.source !== 'Standard');
   
   rows.sort((a, b) => {
-    if (a.isOwned !== b.isOwned) {
-        return a.isOwned ? -1 : 1;
-    }
-
+    if (a.isOwned !== b.isOwned) return a.isOwned ? -1 : 1;
     if (rosterSortValue === 'nameAsc') return String(a.name||'').localeCompare(String(b.name||'')); 
     if (rosterSortValue === 'nameDesc') return String(b.name||'').localeCompare(String(a.name||''));
-    
     let ea = parseInt(String(a.eidolon||'').replace('E','').replace('No','0')) || 0; 
     let sa = parseInt(String(a.signature||'').replace('S','')) || 0; 
     let eb = parseInt(String(b.eidolon||'').replace('E','').replace('No','0')) || 0; 
     let sb = parseInt(String(b.signature||'').replace('S','')) || 0;
-
     if (a.source === 'Main Character') ea = 0;
     if (b.source === 'Main Character') eb = 0;
-    
-    if (rosterSortValue === 'eidolonDesc') { 
-        if (eb !== ea) return eb - ea; 
-        return (b.totalPullValue||0) - (a.totalPullValue||0); 
-    }
-    if (rosterSortValue === 'eidolonAsc') { 
-        if (ea !== eb) return ea - eb; 
-        return (a.totalPullValue||0) - (b.totalPullValue||0); 
-    }
-    
-    if (rosterSortValue === 'costDesc') { 
-        const costA = ea + sa; 
-        const costB = eb + sb; 
-        if (costB !== costA) return costB - costA; 
-        return (b.totalPullValue||0) - (a.totalPullValue||0); 
-    }
-    if (rosterSortValue === 'costAsc') { 
-        const costA = ea + sa; 
-        const costB = eb + sb; 
-        if (costA !== costB) return costA - costB; 
-        return (a.totalPullValue||0) - (b.totalPullValue||0); 
-    }
-    
-    if (rosterSortValue === 'pullValueAsc') {
-        return (a.totalPullValue||0) - (b.totalPullValue||0);
-    }
-    
+    if (rosterSortValue === 'eidolonDesc') { if (eb !== ea) return eb - ea; return (b.totalPullValue||0) - (a.totalPullValue||0); }
+    if (rosterSortValue === 'eidolonAsc') { if (ea !== eb) return ea - eb; return (a.totalPullValue||0) - (b.totalPullValue||0); }
+    if (rosterSortValue === 'costDesc') { const costA = ea + sa; const costB = eb + sb; if (costB !== costA) return costB - costA; return (b.totalPullValue||0) - (a.totalPullValue||0); }
+    if (rosterSortValue === 'costAsc') { const costA = ea + sa; const costB = eb + sb; if (costA !== costB) return costA - costB; return (a.totalPullValue||0) - (b.totalPullValue||0); }
+    if (rosterSortValue === 'pullValueAsc') return (a.totalPullValue||0) - (b.totalPullValue||0);
     return (b.totalPullValue||0) - (a.totalPullValue||0);
   }); 
   return rows;
@@ -1058,8 +941,7 @@ function renderRoster() {
   grid.innerHTML = rows.map(r => {
     const eidoCls = r.eidolon === 'No' ? '' : 'style="color:var(--gold-soft);font-weight:700"'; 
     const signCls = r.signature === 'S0' ? '' : 'style="color:var(--cyan);font-weight:700"'; 
-    const imgSrc = r.img || DEFAULT_AVATAR;
-    const unownedCls = r.isOwned ? '' : 'unowned';
+    const imgSrc = r.img || DEFAULT_AVATAR; const unownedCls = r.isOwned ? '' : 'unowned';
     const notOwnedBadge = r.isOwned ? '' : `<div class="unowned-tag">NOT OWNED</div>`;
     const tagClass = String(r.source||'').replace(/\s+/g, '');
     
@@ -1071,7 +953,7 @@ function renderRoster() {
   const dl = document.getElementById('charNameList'); if (dl) dl.innerHTML = getAllCharNames().map(n => `<option value="${n}">`).join('');
 }
 document.getElementById('rosterTabs').addEventListener('click', (e) => { const btn = e.target.closest('.tab'); if (!btn) return; document.querySelectorAll('#rosterTabs .tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); rosterFilter = btn.dataset.filter; renderRoster(); });
-document.getElementById('form-character').addEventListener('submit', (e) => {
+document.getElementById('form-character')?.addEventListener('submit', (e) => {
   e.preventDefault(); const fd = new FormData(e.target); const name = fd.get('name').trim(); const src = fd.get('source');
   const imgSrc = document.getElementById('charFormImg').src; const isDefault = String(imgSrc||'').includes('viewBox'); 
   const existing = (DATA.roster||[]).find(r => normName(r.name) === normName(name));
@@ -1089,84 +971,45 @@ const F2P_ESTIMATES = {
 
 function renderStellarJade() {
   const rows = DATA.stellarJade || []; 
-  
-  let currentJade = 0;
-  let currentPasses = 0;
-
-  const verMap = {};
+  let currentJade = 0; let currentPasses = 0; const verMap = {};
   VERSION_SCHEDULE.forEach(v => {
       if (!verMap[v.fullLabel]) verMap[v.fullLabel] = { v1:null, v2:null, jade1:0, pass1:0, jade2:0, pass2:0 };
-      if (v.label.includes('1/2')) verMap[v.fullLabel].v1 = v;
-      else verMap[v.fullLabel].v2 = v;
+      if (v.label.includes('1/2')) verMap[v.fullLabel].v1 = v; else verMap[v.fullLabel].v2 = v;
   });
 
   rows.forEach(r => {
-      let j = parseFloat(r.jade) || 0;
-      let p = parseFloat(r.passes) || 0;
-      let act = String(r.activity || '');
-      
-      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]');
-      let isSaving = act.toLowerCase().includes('saving');
+      let j = parseFloat(r.jade) || 0; let p = parseFloat(r.passes) || 0; let act = String(r.activity || '');
+      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); let isSaving = act.toLowerCase().includes('saving');
 
-      if (isSpend) {
-          j = -Math.abs(j);
-          p = -Math.abs(p);
-      } else {
-          j = Math.abs(j);
-          p = Math.abs(p);
-      }
-
-      currentJade += j;
-      currentPasses += p;
+      if (isSpend) { j = -Math.abs(j); p = -Math.abs(p); } else { j = Math.abs(j); p = Math.abs(p); }
+      currentJade += j; currentPasses += p;
 
       if (!isSaving && !isSpend) {
           const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
           if (matchedV) {
               const fullV = matchedV.fullLabel;
-              if (matchedV.label.includes('1/2')) {
-                  verMap[fullV].jade1 += j;
-                  verMap[fullV].pass1 += p;
-              } else {
-                  verMap[fullV].jade2 += j;
-                  verMap[fullV].pass2 += p;
-              }
+              if (matchedV.label.includes('1/2')) { verMap[fullV].jade1 += j; verMap[fullV].pass1 += p; } 
+              else { verMap[fullV].jade2 += j; verMap[fullV].pass2 += p; }
           }
       }
   });
   
   const today = new Date().toISOString().split('T')[0]; 
   let relevantVersions = Object.keys(verMap).filter(fullV => {
-      const d = verMap[fullV];
-      return (d.jade1>0 || d.pass1>0 || d.jade2>0 || d.pass2>0) || (d.v1 && d.v1.start <= today);
+      const d = verMap[fullV]; return (d.jade1>0 || d.pass1>0 || d.jade2>0 || d.pass2>0) || (d.v1 && d.v1.start <= today);
   });
-
-  // Urutkan versi dari yang terbaru ke terlama (Descending)
   relevantVersions.sort((a, b) => parseFloat(b) - parseFloat(a));
 
-  // Pemisahan 5 versi terbaru dan versi lama
-  const recentVersions = relevantVersions.slice(0, 5);
-  const olderVersions = relevantVersions.slice(5);
+  const recentVersions = relevantVersions.slice(0, 5); const olderVersions = relevantVersions.slice(5);
 
   const renderCard = (fullV, isOlder) => {
-      const d = verMap[fullV];
-      const pull1 = (d.jade1 / 160) + d.pass1;
-      const pull2 = (d.jade2 / 160) + d.pass2;
-      const tJade = d.jade1 + d.jade2;
-      const tPass = d.pass1 + d.pass2;
-      const tPull = pull1 + pull2;
+      const d = verMap[fullV]; const pull1 = (d.jade1 / 160) + d.pass1; const pull2 = (d.jade2 / 160) + d.pass2;
+      const tJade = d.jade1 + d.jade2; const tPass = d.pass1 + d.pass2; const tPull = pull1 + pull2;
       const isActive = d.v1 && d.v2 && today >= d.v1.start && today < d.v2.end;
       
-      // Kalkulasi jumlah hari dalam versi tersebut
-      let daysCount = 0;
-      if (d.v1 && d.v2) {
-          daysCount = daysBetween(d.v2.end, d.v1.start);
-      }
-      
-      const durationHtml = daysCount > 0 
-          ? `<div style="text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--text-dim); margin-top:6px; background:rgba(255,255,255,0.03); padding:4px; border-radius:4px; letter-spacing:0.05em;">${daysCount} Days</div>` 
-          : '';
+      let daysCount = 0; if (d.v1 && d.v2) { daysCount = daysBetween(d.v2.end, d.v1.start); }
+      const durationHtml = daysCount > 0 ? `<div style="text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--text-dim); margin-top:6px; background:rgba(255,255,255,0.03); padding:4px; border-radius:4px; letter-spacing:0.05em;">${daysCount} Days</div>` : '';
 
-      // Tampilan untuk versi lama yang tidak memiliki data (Menggunakan F2P Estimate)
       if (isOlder && tPull === 0 && F2P_ESTIMATES[fullV]) {
           return `
           <div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
@@ -1184,7 +1027,6 @@ function renderStellarJade() {
           </div>`;
       }
       
-      // Tampilan Card Normal
       return `
       <div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
         <div>
@@ -1197,25 +1039,23 @@ function renderStellarJade() {
             <div style="background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px;">
                 <div style="font-size:11px; font-weight:bold; color:var(--text-dim); margin-bottom:6px;">Phase 1</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px;">
-                    <div>${fmt(d.jade1,0)} SJ</div>
+                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.jade1,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
                     <div style="display:flex; align-items:center; gap:4px;">${fmt(d.pass1,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
                     <div>${fmt(pull1,1)} Pulls</div>
                 </div>
             </div>
-            
             <div style="background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px;">
                 <div style="font-size:11px; font-weight:bold; color:var(--text-dim); margin-bottom:6px;">Phase 2</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px;">
-                    <div>${fmt(d.jade2,0)} SJ</div>
+                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.jade2,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
                     <div style="display:flex; align-items:center; gap:4px;">${fmt(d.pass2,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
                     <div>${fmt(pull2,1)} Pulls</div>
                 </div>
             </div>
-            
             <div style="background:rgba(232, 184, 75, 0.1); border:1px solid rgba(232, 184, 75, 0.2); padding:8px 12px; border-radius:8px;">
                 <div style="font-size:11px; font-weight:bold; color:var(--gold-soft); margin-bottom:6px;">Total</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px; font-weight:bold; color:var(--gold-soft);">
-                    <div>${fmt(tJade,0)} SJ</div>
+                    <div style="display:flex; align-items:center; gap:4px;">${fmt(tJade,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
                     <div style="display:flex; align-items:center; gap:4px;">${fmt(tPass,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
                     <div>${fmt(tPull,1)} Pulls</div>
                 </div>
@@ -1225,156 +1065,97 @@ function renderStellarJade() {
   };
 
   let html = '';
-  if (relevantVersions.length === 0) {
-      html = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px; grid-column:1/-1;">No data yet.</p>`;
-  } else {
-      let recentHtml = recentVersions.map(v => renderCard(v, false)).join('');
-      let olderHtml = olderVersions.map(v => renderCard(v, true)).join('');
+  if (relevantVersions.length === 0) { html = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px; grid-column:1/-1;">No data yet.</p>`; } 
+  else {
+      let recentHtml = recentVersions.map(v => renderCard(v, false)).join(''); let olderHtml = olderVersions.map(v => renderCard(v, true)).join('');
+      html = recentHtml;
       
-      html = recentHtml; // Render 5 versi terbaru di urutan awal
-
-      // Jika ada versi lama, letakkan tombol Expand di bawahnya, diikuti kontainer versi lama
+      // === Perubahan Teks Tombol (Awal & Toggle) ===
       if (olderVersions.length > 0) {
           html += `
           <div style="grid-column: 1 / -1; margin-top: 12px; margin-bottom: 12px;">
               <button id="btnToggleOlderVersions" class="btn-ghost" style="width:100%; padding: 14px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.03); border-radius: 10px;">
-                  ⬇ Show Previous ${olderVersions.length} Versions
+                  Show Previous Versions
               </button>
           </div>
           <div id="olderVersionsContainer" style="display:none; grid-column: 1 / -1;">
              <div class="version-grid" style="opacity:0.85;">${olderHtml}</div>
-          </div>
-          `;
+          </div>`;
       }
   }
-  
   document.getElementById('versionGrid').innerHTML = html;
 
-  // Event listener untuk tombol Toggle
   const toggleBtn = document.getElementById('btnToggleOlderVersions');
   if (toggleBtn) {
       toggleBtn.addEventListener('click', function() {
           const container = document.getElementById('olderVersionsContainer');
-          if (container.style.display === 'none') {
-              container.style.display = 'block';
-              this.innerHTML = '⬆ Hide Previous Versions';
-          } else {
-              container.style.display = 'none';
-              this.innerHTML = '⬇ Show Previous ' + olderVersions.length + ' Versions';
+          // === Perubahan Teks Saat Tombol Diklik ===
+          if (container.style.display === 'none') { 
+              container.style.display = 'block'; 
+              this.innerHTML = 'Hide Previous Versions'; 
+          } else { 
+              container.style.display = 'none'; 
+              this.innerHTML = 'Show Previous Versions'; 
           }
       });
   }
 
-  // --- Bagian tabel delete ---
-  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','Stellar Jade','Star Rail Pass'], 
+  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">','<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Star Rail Pass" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">'], 
   r => {
-      let j = parseFloat(r.jade) || 0;
-      let p = parseFloat(r.passes) || 0;
-      let act = String(r.activity || '');
-      
-      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]');
-      let isSaving = act.toLowerCase().includes('saving');
-
-      let jStr = fmt(isSpend ? -Math.abs(j) : Math.abs(j), 0);
-      let pStr = fmt(isSpend ? -Math.abs(p) : Math.abs(p), 0);
+      let j = parseFloat(r.jade) || 0; let p = parseFloat(r.passes) || 0; let act = String(r.activity || '');
+      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); let isSaving = act.toLowerCase().includes('saving');
+      let jStr = fmt(isSpend ? -Math.abs(j) : Math.abs(j), 0); let pStr = fmt(isSpend ? -Math.abs(p) : Math.abs(p), 0);
       let actDisplay = act.replace(/\[SPEND\]/gi, '').trim();
       
       if (isSpend) {
-          jStr = `<span style="color:var(--loss)">${jStr}</span>`;
-          pStr = `<span style="color:var(--loss)">${pStr}</span>`;
+          jStr = `<span style="color:var(--loss)">${jStr}</span>`; pStr = `<span style="color:var(--loss)">${pStr}</span>`;
           actDisplay = `<span style="color:var(--loss); font-weight:bold; font-size:10px; border:1px solid var(--loss); padding:2px 4px; border-radius:4px; margin-right:6px;">SPEND</span> ${actDisplay}`;
       } else if (isSaving) {
-          jStr = `<span style="color:var(--cyan)">+${jStr}</span>`;
-          pStr = `<span style="color:var(--cyan)">+${pStr}</span>`;
+          jStr = `<span style="color:var(--cyan)">+${jStr}</span>`; pStr = `<span style="color:var(--cyan)">+${pStr}</span>`;
           actDisplay = `<span style="color:var(--cyan); font-weight:bold; font-size:10px; border:1px solid var(--cyan); padding:2px 4px; border-radius:4px; margin-right:6px;">SAVING</span> ${actDisplay}`;
-      } else {
-          jStr = `+${jStr}`;
-          pStr = `+${pStr}`;
-      }
+      } else { jStr = `+${jStr}`; pStr = `+${pStr}`; }
 
       return [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), actDisplay, jStr, pStr];
-  }, 
-  (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; });
+  }, (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; });
 
   const totalSavingPulls = (currentJade / 160) + currentPasses;
   document.getElementById('jadeStats').innerHTML = [
-    { label: 'Current Stellar Jade', value: fmt(currentJade, 0) }, 
+    { label: 'Current <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">', value: fmt(currentJade, 0) }, 
     { label: 'Current <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(currentPasses, 0) }, 
     { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
   ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
 }
-// ============ LOGIC LISTENER UNTUK 2 FORM BARU ============
 
-// 1. FORM ADD INCOME
+// ============ Form Listeners (Income & Spend) ============
 const formIncome = document.getElementById('form-income');
 if (formIncome) {
     formIncome.addEventListener('submit', (e) => { 
-        e.preventDefault(); // Mencegah page refresh
-        const fd = new FormData(e.target); 
-        if(!DATA.stellarJade) DATA.stellarJade = []; 
-        
-        DATA.stellarJade.push({ 
-            date: fd.get('date'), 
-            activity: String(fd.get('activity') || '').trim(), 
-            jade: Math.abs(Number(fd.get('jade')) || 0), 
-            passes: Math.abs(Number(fd.get('passes')) || 0) 
-        }); 
-        
-        sortByDate(DATA.stellarJade); 
-        saveWorkingData(); 
-        renderAll(); 
-        e.target.reset(); 
-        initDateInputs(); 
+        e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; 
+        DATA.stellarJade.push({ date: fd.get('date'), activity: String(fd.get('activity') || '').trim(), jade: Math.abs(Number(fd.get('jade')) || 0), passes: Math.abs(Number(fd.get('passes')) || 0) }); 
+        sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs(); 
     });
 }
 
-// 2. FORM LOG SPEND (Potong Pass dulu, lalu Jade)
 const formSpend = document.getElementById('form-spend');
 if (formSpend) {
     formSpend.addEventListener('submit', (e) => { 
-        e.preventDefault(); // Mencegah page refresh
-        const fd = new FormData(e.target); 
-        if(!DATA.stellarJade) DATA.stellarJade = []; 
-        
-        let pullsToSpend = Math.abs(Number(fd.get('pulls')) || 0);
-        let reason = String(fd.get('reason') || '').trim();
-        
+        e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; 
+        let pullsToSpend = Math.abs(Number(fd.get('pulls')) || 0); let reason = String(fd.get('reason') || '').trim();
         let availablePasses = DATA.stellarJade.reduce((s, r) => {
-            let p = Number(r.passes) || 0;
-            let j = Number(r.jade) || 0;
-            let act = String(r.activity || '');
-            let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]');
-            return s + (isSpend ? -Math.abs(p) : Math.abs(p));
+            let p = Number(r.passes) || 0; let j = Number(r.jade) || 0; let act = String(r.activity || '');
+            let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); return s + (isSpend ? -Math.abs(p) : Math.abs(p));
         }, 0);
-        
-        availablePasses = Math.max(0, availablePasses);
-        
-        let pDeduct = 0;
-        let jDeduct = 0;
+        availablePasses = Math.max(0, availablePasses); let pDeduct = 0; let jDeduct = 0;
 
-        if (pullsToSpend <= availablePasses) {
-            pDeduct = pullsToSpend;
-        } else {
-            pDeduct = availablePasses;
-            let remainingPulls = pullsToSpend - availablePasses;
-            jDeduct = remainingPulls * 160;
-        }
+        if (pullsToSpend <= availablePasses) { pDeduct = pullsToSpend; } 
+        else { pDeduct = availablePasses; let remainingPulls = pullsToSpend - availablePasses; jDeduct = remainingPulls * 160; }
 
-        DATA.stellarJade.push({ 
-            date: fd.get('date'), 
-            activity: `[SPEND] ${reason}`, 
-            jade: -jDeduct, 
-            passes: -pDeduct 
-        }); 
-        
-        sortByDate(DATA.stellarJade); 
-        saveWorkingData(); 
-        renderAll(); 
-        e.target.reset(); 
-        initDateInputs(); 
+        DATA.stellarJade.push({ date: fd.get('date'), activity: `[SPEND] ${reason}`, jade: -jDeduct, passes: -pDeduct }); 
+        sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs(); 
     });
 }
 
+// ============ Global Helpers ============
 document.querySelectorAll('.table-filter').forEach(input => { input.addEventListener('input', (e) => { const term = e.target.value.toLowerCase(); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return; if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } } else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } }); });
 document.addEventListener('click', (e) => { if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { const th = e.target; const table = th.closest('table'); const tbody = table.querySelector('tbody'); const idx = Array.from(th.parentNode.children).indexOf(th); const isAsc = th.classList.contains('asc'); table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); th.classList.add(isAsc ? 'desc' : 'asc'); const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); rows.sort((a, b) => { const aText = a.children[idx].textContent.trim(); const bText = b.children[idx].textContent.trim(); const aNum = parseFloat(aText.replace(/,/g, '')); const bNum = parseFloat(bText.replace(/,/g, '')); if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum; return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); }); tbody.append(...rows); } });
 document.getElementById('btnDownloadJson')?.addEventListener('click', () => { const content = JSON.stringify(DATA, null, 2); const blob = new Blob([content], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
