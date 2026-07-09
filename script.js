@@ -411,11 +411,12 @@ function buildOverview() {
   const elMetaGen = document.getElementById('metaGenerated'); if(elMetaGen) elMetaGen.textContent = 'Last pull: ' + (DATA.limited && DATA.limited.length ? formatDate(DATA.limited[DATA.limited.length - 1].date) : '—');
 }
 
-// ============ Track Render ============
+// ============ Standard UI (No Pity Road) ============
 function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
-  if (!rows || !rows.length) { container.innerHTML = `<p class="empty-text">No data yet.</p>`; return; }
+  if (!rows || !rows.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`; return; }
   
+  // Balik urutan agar tarikan terbaru ada di sebelah kiri
   const displayRows = [...rows].reverse();
   const gaps = displayRows.map((r, i) => {
     if (i === 0) return 24; 
@@ -437,24 +438,24 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
     // === LOGIKA DINAMIKA WARNA PITY & AURA ===
     let pityColor = 'var(--gold-soft)';
     let fontWeight = 'normal';
-    let baseAura = '0 0 10px rgba(232, 184, 75, 0.3)'; // Kuning Average (Standar)
+    let baseAura = '0 0 10px rgba(232, 184, 75, 0.3)'; // Kuning (Average Pity)
     let hoverAura = '0 0 25px rgba(232, 184, 75, 0.8)';
 
     if (r.pity <= 35) { 
-        // Early Pity (Beruntung) -> Hijau
+        // Early Pity (Sangat Beruntung) -> Hijau
         pityColor = 'var(--win)'; 
         fontWeight = 'bold';
         baseAura = '0 0 10px rgba(111, 207, 151, 0.3)';
         hoverAura = '0 0 25px rgba(111, 207, 151, 0.8)';
     } else if (r.pity >= 74) { 
-        // Hard Pity -> Merah yang makin menyala
+        // Hard Pity -> Merah yang makin menyala seiring tingginya pity
         pityColor = 'var(--loss)'; 
         fontWeight = 'bold';
         
-        // Intensitas naik dari 0.0 ke 1.0 semakin mendekati maxPity (90)
+        // Kalkulasi intensitas pekatnya merah (0.0 sampai 1.0)
         const redIntensity = Math.min(1, (r.pity - 73) / (maxPity - 73)); 
-        const baseSpread = 10 + (redIntensity * 15);  // Menyebar hingga 25px
-        const hoverSpread = 25 + (redIntensity * 25); // Menyebar hingga 50px di hover
+        const baseSpread = 10 + (redIntensity * 15);  
+        const hoverSpread = 25 + (redIntensity * 25); 
         const alphaBase = 0.4 + (redIntensity * 0.4); 
         const alphaHover = 0.7 + (redIntensity * 0.3); 
 
@@ -465,7 +466,7 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
     // Ukuran titik (dot) yang semakin membesar seiring naiknya pity
     const dotSize = 10 + (r.pity / maxPity) * 16;
 
-    // Masukkan aura ke dalam inline-style variables (--aura-base, --aura-hover)
+    // Menyuntikkan variabel aura ke CSS lewat style attribute
     return `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px; --aura-base: ${baseAura}; --aura-hover: ${hoverAura};">
       <div class="station-label-name">${r.name}</div>
       <img src="${imgSrc}" class="station-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
