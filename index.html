@@ -2,116 +2,15 @@
 <html lang="en">
 <head>
   <meta name="referrer" content="no-referrer">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Warp Record HSR</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
-<link rel="stylesheet" href="style.css">
-<style>
-  .station-label-name {
-    font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);
-    margin-bottom: 8px; text-align: center; white-space: nowrap; width: 60px;
-    overflow: hidden; text-overflow: ellipsis; position: absolute; bottom: 100%; left: 50%;
-    transform: translateX(-50%); pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warp Record HSR</title>
   
-  .station-icon {
-    width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--border);
-    object-fit: cover; position: absolute; bottom: 100%; margin-bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(0) scale(1);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    background: var(--surface-2); z-index: 10; pointer-events: none;
-  }
-  
-  /* EFEK HOVER: Ikon Turun ke Tengah Buletan dan Membesar Maksimal */
-  .station:hover .station-icon {
-    transform: translateX(-50%) translateY(51px) scale(2.4); 
-    border-color: var(--gold-soft);
-    box-shadow: 0 0 25px rgba(232, 184, 75, 0.7); 
-    z-index: 20;
-  }
-  
-  .station:hover .station-label-name,
-  .station:hover .station-dot {
-    opacity: 0;
-  }
-
-  .track-scroll { padding-top: 80px !important; }
-  
-  .station-tooltip { 
-    bottom: calc(100% + 75px) !important; 
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  }
-  
-  .station:hover .station-tooltip {
-    transform: translateX(-50%) translateY(-10px) !important;
-    opacity: 1 !important;
-  }
-  
-  .station { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; }
-  .station-dot { margin-top: auto; transition: opacity 0.3s ease; }
-  
-  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
-  .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-  .team-image-row { display: flex; height: 90px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
-  .team-image-slot { flex: 1; border-right: 1px solid var(--border); display: flex; justify-content: center; align-items: center; overflow: hidden; background: #191d40; }
-  .team-image-slot:last-child { border-right: none; }
-  .team-image-slot img { width: 100%; height: 100%; object-fit: cover; }
-  .team-card-content { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-  .tc-arch { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--nebula); }
-  .tc-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); }
-  .tc-val { color: var(--text); font-weight: 600; text-align: right; }
-  .tc-footer { margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.05); display: flex; justify-content: space-between; align-items: center; }
-  .tc-pv { font-weight: 700; color: var(--gold-soft); font-size: 14px; }
-
-  .slot-row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
-  .slot-inputs { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-  .slot-top, .slot-bottom { display: flex; gap: 8px; align-items: center; }
-  .slot-name, .slot-eidolon, .slot-sign { padding: 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 13px; }
-  .slot-name { flex: 1; min-width: 120px; }
-  .slot-eidolon { width: 70px; }
-  .slot-sign { width: 80px; }
-  .btn-remove-slot { padding: 6px 12px; border-radius: 6px; background: rgba(226,128,125,0.1); border: 1px solid var(--loss); color: var(--loss); cursor:pointer; font-size: 11px; font-weight:bold; }
-  
-  .tag.CelestialInvitation { color: #d2a8ff; border-color: rgba(210,168,255,.4); }
-  .tag.GoldenCompanionSpirit { color: var(--gold); border-color: rgba(232,184,75,.4); }
-  .tag.MainCharacter { color: #d8d8d8; border-color: rgba(216,216,216,.4); }
-  
-  .roster-card.unowned .roster-img-wrap img { filter: grayscale(100%) brightness(0.6); opacity: 0.7; }
-  .roster-card.unowned .roster-name { color: var(--text-dim); }
-  .roster-card.unowned .roster-stats { opacity: 0.4; }
-  .unowned-tag {
-    position: absolute; top: 8px; left: 8px; background: rgba(226, 128, 125, 0.15); backdrop-filter: blur(4px);
-    border: 1px solid var(--loss); color: var(--loss); font-family: var(--font-mono); font-size: 10px;
-    padding: 4px 8px; border-radius: 4px; font-weight: bold; z-index: 2; letter-spacing: 0.05em;
-  }
-  
-  .freebie-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-  .freebie-icon { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; background: var(--surface-2); flex-shrink: 0; }
-  .freebie-title-wrap { display: flex; flex-direction: column; justify-content: center; }
-
-  .roster-img-wrap img { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  .roster-card:hover .roster-img-wrap img { transform: scale(1.25); }
-
-  .team-card { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-  .team-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 24px rgba(0,0,0,0.5); border-color: var(--gold-soft); z-index: 5; }
-  
-  .team-card.sustainless { border-color: rgba(226, 128, 125, 0.4); background: linear-gradient(180deg, var(--surface) 0%, rgba(226, 128, 125, 0.08) 100%); }
-  .team-card.sustainless:hover { border-color: var(--loss); box-shadow: 0 12px 24px rgba(226, 128, 125, 0.25); }
-  .team-card.sustainless .tc-arch { color: var(--loss); }
-
-  .phase-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px; }
-  .phase-row.total-row { background: rgba(232, 184, 75, 0.1); color: var(--gold-soft); font-weight: bold; font-size: 12px; border: 1px solid rgba(232, 184, 75, 0.2); }
-  .phase-label { font-weight: 600; width: 45px; }
-  .phase-stats { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); }
-  .pass-icon { width: 14px; height: 14px; object-fit: contain; vertical-align: middle; margin-top: -2px; }
-  
-</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
