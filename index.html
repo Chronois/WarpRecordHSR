@@ -29,10 +29,8 @@
   
   /* EFEK HOVER: Ikon Turun ke Tengah Buletan dan Membesar Maksimal */
   .station:hover .station-icon {
-    /* Scale dinaikkan menjadi 2.4 agar jauh lebih besar */
     transform: translateX(-50%) translateY(51px) scale(2.4); 
     border-color: var(--gold-soft);
-    /* Cahaya shadow sedikit dipertebal menyesuaikan ukuran baru */
     box-shadow: 0 0 25px rgba(232, 184, 75, 0.7); 
     z-index: 20;
   }
@@ -84,92 +82,31 @@
   .tag.GoldenCompanionSpirit { color: var(--gold); border-color: rgba(232,184,75,.4); }
   .tag.MainCharacter { color: #d8d8d8; border-color: rgba(216,216,216,.4); }
   
-  .roster-card.unowned .roster-img-wrap img {
-    filter: grayscale(100%) brightness(0.6);
-    opacity: 0.7;
-  }
-  .roster-card.unowned .roster-name {
-    color: var(--text-dim);
-  }
-  .roster-card.unowned .roster-stats {
-    opacity: 0.4;
-  }
+  .roster-card.unowned .roster-img-wrap img { filter: grayscale(100%) brightness(0.6); opacity: 0.7; }
+  .roster-card.unowned .roster-name { color: var(--text-dim); }
+  .roster-card.unowned .roster-stats { opacity: 0.4; }
   .unowned-tag {
-    position: absolute; top: 8px; left: 8px;
-    background: rgba(226, 128, 125, 0.15); backdrop-filter: blur(4px);
-    border: 1px solid var(--loss); color: var(--loss);
-    font-family: var(--font-mono); font-size: 10px;
-    padding: 4px 8px; border-radius: 4px; font-weight: bold;
-    z-index: 2; letter-spacing: 0.05em;
-  }
-  /* --- Style Baru untuk Ikon di Freebies --- */
-  .freebie-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 12px;
-  }
-  .freebie-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    object-fit: cover;
-    background: var(--surface-2);
-    flex-shrink: 0;
-  }
-  .freebie-title-wrap {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  /* --- Animasi Hover Page Character (Hanya Zoom) --- */
-  
-  /* Transisi dasar agar pergerakan membesarnya mulus */
-  .roster-img-wrap img {
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  /* Efek Zoom 1.5x saat kartu disorot kursor (berlaku untuk semua karakter) */
-  .roster-card:hover .roster-img-wrap img {
-    transform: scale(1.5);
-  }
-
-  /* --- Animasi Hover & Sustainless Page Team --- */
-  .team-card {
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .team-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.5);
-    border-color: var(--gold-soft);
-    z-index: 5;
+    position: absolute; top: 8px; left: 8px; background: rgba(226, 128, 125, 0.15); backdrop-filter: blur(4px);
+    border: 1px solid var(--loss); color: var(--loss); font-family: var(--font-mono); font-size: 10px;
+    padding: 4px 8px; border-radius: 4px; font-weight: bold; z-index: 2; letter-spacing: 0.05em;
   }
   
-  /* Gaya Khusus Tim Sustainless */
-  .team-card.sustainless {
-    border-color: rgba(226, 128, 125, 0.4);
-    background: linear-gradient(180deg, var(--surface) 0%, rgba(226, 128, 125, 0.08) 100%);
-  }
-  .team-card.sustainless:hover {
-    border-color: var(--loss);
-    box-shadow: 0 12px 24px rgba(226, 128, 125, 0.25);
-  }
-  .team-card.sustainless .tc-arch {
-    color: var(--loss);
-  }
+  .freebie-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .freebie-icon { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; background: var(--surface-2); flex-shrink: 0; }
+  .freebie-title-wrap { display: flex; flex-direction: column; justify-content: center; }
 
-  /* --- Tata Letak Baru Page Stellar Jade --- */
-  .phase-row {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.03);
-    padding: 6px 10px; border-radius: 6px;
-  }
-  .phase-row.total-row {
-    background: rgba(232, 184, 75, 0.1); color: var(--gold-soft);
-    font-weight: bold; font-size: 12px; border: 1px solid rgba(232, 184, 75, 0.2);
-  }
+  .roster-img-wrap img { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .roster-card:hover .roster-img-wrap img { transform: scale(1.25); }
+
+  .team-card { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .team-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 12px 24px rgba(0,0,0,0.5); border-color: var(--gold-soft); z-index: 5; }
+  
+  .team-card.sustainless { border-color: rgba(226, 128, 125, 0.4); background: linear-gradient(180deg, var(--surface) 0%, rgba(226, 128, 125, 0.08) 100%); }
+  .team-card.sustainless:hover { border-color: var(--loss); box-shadow: 0 12px 24px rgba(226, 128, 125, 0.25); }
+  .team-card.sustainless .tc-arch { color: var(--loss); }
+
+  .phase-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px; }
+  .phase-row.total-row { background: rgba(232, 184, 75, 0.1); color: var(--gold-soft); font-weight: bold; font-size: 12px; border: 1px solid rgba(232, 184, 75, 0.2); }
   .phase-label { font-weight: 600; width: 45px; }
   .phase-stats { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); }
   .pass-icon { width: 14px; height: 14px; object-fit: contain; vertical-align: middle; margin-top: -2px; }
@@ -654,47 +591,65 @@
 
     <section class="section">
       <div class="section-head">
-        <span class="eyebrow">Log Income</span>
+        <span class="eyebrow">Log Data</span>
         <h2>Add a Transaction</h2>
       </div>
-      <form class="manage-form" id="form-stellarjade" data-section="stellarJade">
-        <div class="field">
-          <label>Date</label>
-          <input type="date" name="date" required>
-        </div>
-        <div class="field field-grow">
-          <label>Activity / Event</label>
-          <input type="text" name="activity" required placeholder="e.g. Daily + Express" list="activityOptions">
-          <datalist id="activityOptions">
-            <option value="Daily + Express">
-            <option value="Weekly CW/DU Reset">
-            <option value="Character Dialog">
-            <option value="Character Trial">
-            <option value="Event">
-            <option value="Memory of Chaos">
-            <option value="Pure Fiction">
-            <option value="Apocalyptic Shadow">
-            <option value="Nameless Glory">
-            <option value="Birthday Gift">
-            <option value="Gift of Odysses">
-            <option value="Hoyolab Login">
-            <option value="Maintenance">
-            <option value="Maps">
-            <option value="Missions">
-            <option value="Shop Reset">
-            <option value="Special Program Redeem Code">
-          </datalist>
-        </div>
-        <div class="field field-narrow">
-          <label>Stellar Jade</label>
-          <input type="number" name="jade" min="0" step="1" value="0">
-        </div>
-        <div class="field field-narrow">
-          <label>Star Rail Pass</label>
-          <input type="number" name="passes" min="0" step="1" value="0">
-        </div>
-        <button type="submit" class="btn-add">+ Add Transaction</button>
-      </form>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
+        
+        <form class="manage-form" id="form-income" data-section="stellarJade" style="margin: 0;">
+          <h3 style="margin-top:0; font-size:16px; color:var(--cyan); margin-bottom:16px;">Log Income</h3>
+          <div class="field">
+            <label>Date</label>
+            <input type="date" name="date" required>
+          </div>
+          <div class="field field-grow">
+            <label>Activity / Event</label>
+            <input type="text" name="activity" required placeholder="e.g. Daily + Express" list="activityOptions">
+            <datalist id="activityOptions">
+              <option value="Daily + Express"></option>
+              <option value="Weekly CW/DU Reset"></option>
+              <option value="Character Trial"></option>
+              <option value="Event"></option>
+              <option value="Memory of Chaos"></option>
+              <option value="Pure Fiction"></option>
+              <option value="Apocalyptic Shadow"></option>
+              <option value="Maintenance"></option>
+              <option value="Missions"></option>
+              <option value="Saving"></option>
+            </datalist>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top:12px;">
+              <div class="field field-grow">
+                <label>Stellar Jade</label>
+                <input type="number" name="jade" min="0" step="1" value="0">
+              </div>
+              <div class="field field-grow">
+                <label>Star Rail Pass</label>
+                <input type="number" name="passes" min="0" step="1" value="0">
+              </div>
+          </div>
+          <button type="submit" class="btn-add" style="width: 100%; margin-top: 12px;">Add Income</button>
+        </form>
+
+        <form class="manage-form" id="form-spend" data-section="stellarJade" style="margin: 0; border-color: rgba(226, 128, 125, 0.3); background: rgba(226, 128, 125, 0.02);">
+          <h3 style="margin-top:0; font-size:16px; color:var(--loss); margin-bottom:16px;">Log Spend</h3>
+          <div class="field">
+            <label>Date</label>
+            <input type="date" name="date" required>
+          </div>
+          <div class="field field-grow">
+            <label>Banner / Reason</label>
+            <input type="text" name="reason" required placeholder="e.g. Feixiao Banner">
+          </div>
+          <div class="field field-grow" style="margin-top:12px;">
+            <label>Pulls Used (Tickets)</label>
+            <input type="number" name="pulls" min="1" step="1" required placeholder="e.g. 10">
+          </div>
+          <button type="submit" class="btn-add" style="width: 100%; margin-top: auto; background: var(--loss); border-color: var(--loss); color: #fff;">Spend Pulls</button>
+        </form>
+
+      </div>
       <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-stellarjade" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-stellarjade"><thead></thead><tbody></tbody></table>
@@ -713,10 +668,10 @@
       <p class="track-hint" style="text-align:left; margin-bottom: 24px;">Manage your Trailblaze records here. Download your current data as a backup file, or upload a previously saved backup.</p>
 
       <div class="data-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <button type="button" class="btn-add" id="btnDownloadJson">⬇ Download .json</button>
-        <label class="btn-ghost" for="uploadJsonFile" style="margin:0; cursor: pointer;">⬆ Upload .json</label>
+        <button type="button" class="btn-add" id="btnDownloadJson">Save Data File</button>
+        <label class="btn-ghost" for="uploadJsonFile" style="margin:0; cursor: pointer;">Upload Data File</label>
         <input type="file" id="uploadJsonFile" accept=".json,application/json" hidden>
-        <button type="button" class="btn-ghost danger" id="btnResetData" style="margin-left:auto;">🗑 Clear All Data</button>
+        <button type="button" class="btn-ghost danger" id="btnResetData" style="margin-left:auto;">🗑 Clear Data</button>
       </div>
     </section>
   </main>
