@@ -525,6 +525,7 @@ document.getElementById('form-freebies').addEventListener('submit', (e) => {
   sortByDate(DATA.freebies); recomputeDaysSince(DATA.freebies); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs();
 });
 
+// ============ PAGE STATS / CALC ============
 function renderCalc() {
   const limChar = (DATA.limited||[]).filter(r => r.category === 'Character'); 
   const limLC   = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
@@ -539,26 +540,77 @@ function renderCalc() {
 
   document.getElementById('calcGrid').innerHTML = datasets.map(b => {
     const s = computeBannerStats(b.rows, b.maxPity);
+    
+    // 1. Data untuk Pie Chart
     const totalWLG = (s.wins + s.losses + s.guaranteed) || 1; 
     const wPct = (s.wins / totalWLG) * 100;
     const lPct = (s.losses / totalWLG) * 100;
-    const gPct = (s.guaranteed / totalWLG) * 100;
-    const winRateVal = s.winRate !== null ? s.winRate * 100 : 0;
-    const lossRateVal = s.winRate !== null ? (1 - s.winRate) * 100 : 0;
+    
+    // CSS Conic-Gradient untuk Pie Chart Win Rate
+    const winRateVal = s.winRate !== null ? s.winRate : 0;
+    const wrWinDeg = winRateVal * 360;
+    const wrPie = s.winRate !== null 
+        ? `conic-gradient(#4ade80 0deg ${wrWinDeg}deg, var(--loss) ${wrWinDeg}deg 360deg)` 
+        : 'conic-gradient(rgba(255,255,255,0.1) 0deg 360deg)';
+
+    // CSS Conic-Gradient untuk Pie Chart Distribution
+    const distWinDeg = (wPct / 100) * 360;
+    const distLossDeg = distWinDeg + ((lPct / 100) * 360);
+    const distPie = (s.wins > 0 || s.losses > 0 || s.guaranteed > 0)
+        ? `conic-gradient(#4ade80 0deg ${distWinDeg}deg, var(--loss) ${distWinDeg}deg ${distLossDeg}deg, var(--gold-soft) ${distLossDeg}deg 360deg)`
+        : 'conic-gradient(rgba(255,255,255,0.1) 0deg 360deg)';
+
+    // 2. Data untuk Bullet Chart (Average Pity)
     const pityPct = Math.min((s.avgPity / b.maxPity) * 100, 100);
     let markerColor = '#4ade80'; 
     if (pityPct > 85) markerColor = 'var(--loss)'; 
     else if (pityPct > 70) markerColor = 'var(--gold-soft)';
+    
     const pullBarPct = (s.totalWarps / maxPulls) * 100;
 
+    // 3. Kalkulasi Data Histogram (Frekuensi Pity per 10 Tarikan)
+    const bins = b.maxPity === 90 ? 9 : 8; // 9 tiang untuk Char, 8 tiang untuk LC
+    const histData = Array(bins).fill(0);
+    
+    b.rows.forEach(r => {
+        // Hanya hitung pity untuk yang dapat bintang 5 (W, L, G)
+        if(r.pity > 0 && (r.result === 'W' || r.result === 'L' || r.result === 'G')) {
+            let binIdx = Math.ceil(r.pity / 10) - 1;
+            if(binIdx >= bins) binIdx = bins - 1; // Keamanan
+            if(binIdx < 0) binIdx = 0;
+            histData[binIdx]++;
+        }
+    });
+    
+    const maxFreq = Math.max(...histData, 1); // Hindari pembagian 0
+
+    // Render HTML Histogram
+    let histHtml = `<div style="display:flex; align-items:flex-end; gap:6px; height:80px; margin-top:12px;">`;
+    histData.forEach((freq, i) => {
+        const hPct = (freq / maxFreq) * 100;
+        const rangeStr = i === bins - 1 ? `${i*10 + 1}+` : `${i*10 + 1}-${(i+1)*10}`;
+        histHtml += `
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px; height:100%; position:relative;" title="${freq} Pulls in this range">
+                <span style="font-size:10px; color:var(--text-dim); opacity:${freq>0?1:0}">${freq}</span>
+                <div style="width:100%; max-width:20px; height:${Math.max(hPct, 2)}%; background:var(--cyan); border-radius:3px 3px 0 0; opacity:0.85; transition: height 0.5s ease;"></div>
+                <span style="font-size:9px; color:var(--text-dim); font-family:var(--font-mono); margin-top:2px;">${rangeStr}</span>
+            </div>
+        `;
+    });
+    histHtml += `</div>`;
+
+
+    // Return Susunan HTML Kartu
     return `
-      <div class="calc-col" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:18px;">
+      <div class="calc-col" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:16px;">
+        
         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;">
             <h3 style="margin:0; color:var(--nebula); font-size:16px; font-family:var(--font-display);">${b.label}</h3>
             <div style="text-align:right;">
                 <span style="color:var(--text); font-weight:bold; font-size:14px;">${fmt(s.total, 0)}</span> <span style="color:var(--text-dim); font-size:12px;">5★</span>
             </div>
         </div>
+
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
             <span style="color:var(--text-dim);">Total Pulls</span>
@@ -568,6 +620,7 @@ function renderCalc() {
             <div style="width:${pullBarPct}%; background:var(--cyan); height:100%; border-radius:4px; transition:width 1s ease;"></div>
           </div>
         </div>
+
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
             <span style="color:var(--text-dim);">Average Pity</span>
@@ -577,38 +630,45 @@ function renderCalc() {
              <div style="width:${pityPct}%; background:${markerColor}; height:6px; border-radius:0 3px 3px 0; z-index:2; transition:width 1s ease;"></div>
           </div>
         </div>
-        ${s.winRate !== null ? `
-        <div>
-          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
-            <span style="color:var(--text-dim);">50/50 Win Rate</span>
-            <span style="font-weight:700; color:${s.winRate >= 0.5 ? '#4ade80' : 'var(--loss)'}">${pct(s.winRate)}</span>
-          </div>
-          <div style="width:100%; height:8px; border-radius:4px; overflow:hidden; display:flex; background:rgba(0,0,0,0.3);">
-            <div style="width:${winRateVal}%; background:#4ade80; height:100%; transition:width 1s ease;" title="Won: ${s.wins}"></div>
-            <div style="width:${lossRateVal}%; background:var(--loss); height:100%; transition:width 1s ease;" title="Lost: ${s.losses}"></div>
-          </div>
+
+        <div style="display:flex; justify-content:space-around; align-items:center; padding-top:12px;">
+            
+            <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                <span style="font-size:11px; color:var(--text-dim);">50/50 Win Rate</span>
+                <div style="width:84px; height:84px; border-radius:50%; background:${wrPie}; display:flex; justify-content:center; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+                    <div style="width:64px; height:64px; border-radius:50%; background:var(--surface); display:flex; justify-content:center; align-items:center; flex-direction:column; line-height:1;">
+                        <span style="font-size:14px; font-weight:bold; color:${s.winRate >= 0.5 ? '#4ade80' : 'var(--loss)'};">${s.winRate !== null ? pct(s.winRate, 0) : '-'}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                <span style="font-size:11px; color:var(--text-dim);">Distribution</span>
+                <div style="width:84px; height:84px; border-radius:50%; background:${distPie}; display:flex; justify-content:center; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+                    <div style="width:64px; height:64px; border-radius:50%; background:var(--surface); display:flex; justify-content:center; align-items:center; flex-direction:column; line-height:1.2;">
+                         <span style="font-size:10px; font-family:var(--font-mono); color:var(--text-dim); text-align:center;">${s.wins}W<br>${s.losses}L<br>${s.guaranteed}G</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
-        ` : ''}
-        <div>
-          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
-            <span style="color:var(--text-dim);">Pull Distribution</span>
-            <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono);">${s.wins}W / ${s.losses}L / ${s.guaranteed}G</span>
-          </div>
-          <div style="width:100%; height:8px; border-radius:4px; overflow:hidden; display:flex; background:rgba(0,0,0,0.3);">
-            <div style="width:${wPct}%; background:#4ade80; transition:width 1s ease;" title="Win"></div>
-            <div style="width:${lPct}%; background:var(--loss); transition:width 1s ease;" title="Loss"></div>
-            <div style="width:${gPct}%; background:var(--gold-soft); transition:width 1s ease;" title="Guaranteed"></div>
-          </div>
-          <div style="display:flex; gap:12px; margin-top:8px; font-size:10px; color:var(--text-dim); justify-content:center;">
-              <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#4ade80;"></span> Win</span>
-              <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--loss);"></span> Loss</span>
-              <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold-soft);"></span> Guar.</span>
-          </div>
+
+        <div style="display:flex; gap:14px; justify-content:center; font-size:10px; color:var(--text-dim); margin-top: 4px;">
+            <span style="display:flex; align-items:center; gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:#4ade80;"></span> Win</span>
+            <span style="display:flex; align-items:center; gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--loss);"></span> Loss</span>
+            <span style="display:flex; align-items:center; gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold-soft);"></span> Guar.</span>
         </div>
+
+        <div style="margin-top:8px; padding-top:16px; border-top:1px dashed rgba(255,255,255,0.08);">
+            <div style="font-size:11px; color:var(--text-dim); text-align:center; font-weight:bold;">Pity Frequency (5★ Drops)</div>
+            ${histHtml}
+        </div>
+
       </div>
     `;
   }).join('');
   
+  // Update Area Max Win Streak
   document.getElementById('streakGrid').innerHTML = [
       { label: 'Character', value: bestWinStreak(limChar) }, 
       { label: 'Light Cone', value: bestWinStreak(limLC) }, 
