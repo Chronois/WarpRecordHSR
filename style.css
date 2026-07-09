@@ -50,13 +50,13 @@ body{
 
 
 /* MAIN NAV */
-.main-nav{
+.main-nav {
   position: sticky;
   top: 0;
   z-index: 20;
   display: flex;
   align-items: center;
-  width: 100%; /* Memastikan bar membentang layar penuh */
+  width: 100%;
   overflow-x: auto;
   background: rgba(10,12,24,.92);
   backdrop-filter: blur(14px);
@@ -64,12 +64,12 @@ body{
   border-bottom: 1px solid var(--border);
   scrollbar-width: none;
 }
-.main-nav::-webkit-scrollbar{ display:none; }
+.main-nav::-webkit-scrollbar { display:none; }
 
-.nav-item{
-  flex: 1 0 auto; /* Rahasianya di sini: Membagi rata ruang kosong ke semua tombol */
+.nav-item {
+  flex: 1 0 auto;
   display: flex;
-  justify-content: center; /* Memastikan teks tombol ada di tengah */
+  justify-content: center;
   align-items: center;
   gap: 6px;
   background: transparent;
@@ -84,6 +84,30 @@ body{
   transition: all .15s ease;
   white-space: nowrap;
 }
+
+/* Efek Hover Futuristik untuk tombol yang belum diklik */
+.nav-item:hover { 
+  color: var(--cyan); 
+  background: linear-gradient(to top, rgba(95, 201, 217, 0.1) 0%, transparent 70%);
+  border-bottom-color: rgba(95, 201, 217, 0.5); 
+}
+
+/* Tampilan tombol yang SEDANG AKTIF (terpilih) */
+.nav-item.active {
+  color: var(--gold-soft);
+  background: var(--surface);
+  border-bottom-color: var(--gold);
+  border-radius: 6px 6px 0 0;
+}
+
+/* Memastikan tombol yang sedang aktif tidak berubah jadi biru saat di-hover */
+.nav-item.active:hover {
+  color: var(--gold-soft);
+  background: var(--surface);
+  border-bottom-color: var(--gold);
+}
+
+.nav-caret { display: none; }
 /* UTILITY BAR */
 .util-bar{
   position: sticky;
