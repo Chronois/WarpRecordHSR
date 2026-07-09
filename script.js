@@ -434,31 +434,41 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
         imgSrc = MASTER_CHARACTERS[lowerName].img;
     }
 
-    // === DINAMIKA GRAFIK BERDASARKAN TINGGI PITY ===
+    // === LOGIKA DINAMIKA WARNA PITY & AURA ===
     let pityColor = 'var(--gold-soft)';
     let fontWeight = 'normal';
-    let glowEff = 'none';
+    let baseAura = '0 0 10px rgba(232, 184, 75, 0.3)'; // Kuning Average (Standar)
+    let hoverAura = '0 0 25px rgba(232, 184, 75, 0.8)';
 
-    // 1. Logika Warna Teks dan Efek Glow (Cahaya) Avatar
     if (r.pity <= 35) { 
-        // Early Pity (Sangat Beruntung)
+        // Early Pity (Beruntung) -> Hijau
         pityColor = 'var(--win)'; 
         fontWeight = 'bold';
-        glowEff = '0 0 15px rgba(111,207,151,0.5)';
-    } else if (r.pity >= 75) { 
-        // Hard Pity (Sial) - Glow merah akan semakin kuat jika pity semakin mendekati 90
+        baseAura = '0 0 10px rgba(111, 207, 151, 0.3)';
+        hoverAura = '0 0 25px rgba(111, 207, 151, 0.8)';
+    } else if (r.pity >= 74) { 
+        // Hard Pity -> Merah yang makin menyala
         pityColor = 'var(--loss)'; 
         fontWeight = 'bold';
-        const glowIntensity = 10 + ((r.pity - 75) * 1.5); 
-        glowEff = `0 0 ${glowIntensity}px rgba(226,128,125,0.85)`;
+        
+        // Intensitas naik dari 0.0 ke 1.0 semakin mendekati maxPity (90)
+        const redIntensity = Math.min(1, (r.pity - 73) / (maxPity - 73)); 
+        const baseSpread = 10 + (redIntensity * 15);  // Menyebar hingga 25px
+        const hoverSpread = 25 + (redIntensity * 25); // Menyebar hingga 50px di hover
+        const alphaBase = 0.4 + (redIntensity * 0.4); 
+        const alphaHover = 0.7 + (redIntensity * 0.3); 
+
+        baseAura = `0 0 ${baseSpread}px rgba(226, 128, 125, ${alphaBase})`;
+        hoverAura = `0 0 ${hoverSpread}px rgba(226, 128, 125, ${alphaHover})`;
     }
 
-    // 2. Logika Ukuran Titik (Membesar secara linear. Min: ~10px, Max: 26px)
+    // Ukuran titik (dot) yang semakin membesar seiring naiknya pity
     const dotSize = 10 + (r.pity / maxPity) * 16;
 
-    return `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px">
+    // Masukkan aura ke dalam inline-style variables (--aura-base, --aura-hover)
+    return `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px; --aura-base: ${baseAura}; --aura-hover: ${hoverAura};">
       <div class="station-label-name">${r.name}</div>
-      <img src="${imgSrc}" class="station-icon" style="box-shadow: ${glowEff};" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
+      <img src="${imgSrc}" class="station-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
       <div class="station-tooltip">
         <div class="tt-name">${r.name}</div>
         <div class="tt-meta">${formatDate(r.date)} · pity ${r.pity}${hasResult ? ' · ' + (r.result === 'W' ? '50/50 Win' : r.result === 'L' ? '50/50 Loss' : 'Guaranteed') : ''}</div>
