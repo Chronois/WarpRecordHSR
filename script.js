@@ -1011,13 +1011,17 @@ function renderStellarJade() {
   const rows = DATA.stellarJade || []; 
   const totalJade = rows.reduce((s, r) => s + (r.jade || 0), 0); 
   const totalPasses= rows.reduce((s, r) => s + (r.passes|| 0), 0); 
-  const totalPulls = totalJade / 160 + totalPasses;
+  const totalSavingPulls = totalJade / 160 + totalPasses;
   
+  // Kalkulasi Total Spend berdasarkan riwayat tarikan di Limited Banner
+  const totalSpendPulls = (DATA.limited || []).reduce((s, r) => s + r.pity, 0);
+  
+  // Mengubah Top Stats: Menghapus Logged Entries, Menambahkan Spend & Saving
   document.getElementById('jadeStats').innerHTML = [
     { label: 'Total Stellar Jade', value: fmt(totalJade, 0) }, 
     { label: 'Total <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(totalPasses, 0) }, 
-    { label: 'Pulls Available', value: fmt(totalPulls, 1) }, 
-    { label: 'Logged Entries', value: fmt(rows.length, 0) }
+    { label: 'Total Spend', value: fmt(totalSpendPulls, 0) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }, 
+    { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
   ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
   
   const verMap = {};
