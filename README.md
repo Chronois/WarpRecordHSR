@@ -6,7 +6,7 @@ character roster, pull-priority wishlist, team compositions, and Stellar Jade in
 one page.
 
 ## Main menu
-
+ 
 The tab bar at the top mirrors the sheets in your original spreadsheet, so each tab is its own
 page with real data and its own "add entry" form:
 
