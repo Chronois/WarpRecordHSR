@@ -373,12 +373,25 @@ window.dupEntry = function(section, idx) {
 window.editEntry = function(section, idx) {
   const item = DATA[section][idx];
   
-  // Deteksi nama Form secara otomatis berdasarkan tabel
-  let formId = 'form-' + (section === 'stellarJade' ? 'stellarjade' : section);
+  let formId = 'form-' + section;
+  
+  // Deteksi khusus jika yang diedit adalah Stellar Jade (menggunakan sistem 2 form)
+  if (section === 'stellarJade') {
+     const act = item.activity || '';
+     const isSpend = item.jade < 0 || item.passes < 0 || act.includes('[SPEND]');
+     
+     formId = isSpend ? 'form-spend' : 'form-income';
+     
+     // Jika masuk ke form Spend, konversi kembali minus jade/pass menjadi "Pulls"
+     if (isSpend) {
+         item.pulls = Math.abs(item.passes || 0) + (Math.abs(item.jade || 0) / 160);
+         item.reason = act.replace('[SPEND]', '').trim();
+     }
+  }
+
   const form = document.getElementById(formId);
   if (!form) return;
 
-  // Isi kotak input Form dengan data dari baris yang ingin diedit
   Object.keys(item).forEach(key => {
     const input = form.elements[key];
     if (input) input.value = item[key];
@@ -402,18 +415,14 @@ window.editEntry = function(section, idx) {
   if (btn) {
       const originalText = btn.textContent;
       btn.textContent = "✓ Update Entry";
-      
-      // Kembalikan teks tombol jadi normal setelah selesai update
       form.addEventListener('submit', function onSub() {
           setTimeout(() => { btn.textContent = originalText; }, 100);
           form.removeEventListener('submit', onSub);
       });
   }
 
-  // Geser layar langsung ke area form
   form.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
-
 // ============ Overview (Combined Char & LC) ============
 function buildOverview() {
   const limRows = DATA.limited || [];
