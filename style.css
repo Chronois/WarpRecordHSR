@@ -913,3 +913,50 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cur
   box-shadow: 0 8px 20px rgba(95, 201, 217, 0.15) !important;
   background: linear-gradient(180deg, var(--surface) 0%, rgba(95, 201, 217, 0.05) 100%) !important;
 }
+
+/* =========================================
+   TEXT ALIGNMENT - CENTERED
+   ========================================= */
+
+/* 1. Center text pada semua Tabel (Manage Data) */
+.manage-table thead th,
+.manage-table tbody td,
+.manage-table .empty-row td {
+  text-align: center !important;
+}
+
+/* 2. Center nama Character di Page Character */
+.roster-name {
+  text-align: center !important;
+}
+
+/* 3. Center isi dari "Trailblaze Summary", "Limited Archive", "Standard Archive", & "Stellar Jade & Passes" */
+.stat-card,
+.bstat {
+  text-align: center !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 4. Center isi dari "Version Income Records" (Stellar Jade Page) */
+.version-label, 
+.version-dates {
+  text-align: center !important;
+}
+
+/* Rata tengah untuk tulisan "Phase 1", "Phase 2", "Total" */
+.version-card div[style*="margin-bottom:6px"] {
+  text-align: center !important;
+}
+
+/* Rata tengah untuk Grid data (Angka + Ikon) di dalam kartu versi */
+.version-card div[style*="display:grid"] {
+  justify-items: center !important;
+}
+
+/* Memastikan susunan Ikon dan Angka tetap di tengah */
+.version-card div[style*="display:grid"] > div {
+  justify-content: center !important;
+}
