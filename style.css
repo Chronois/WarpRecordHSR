@@ -981,3 +981,27 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cur
 .station:hover .station-icon {
   box-shadow: var(--aura-hover, 0 0 25px rgba(232, 184, 75, 0.8)) !important;
 }
+
+/* =========================================
+   FIX TOOLTIP TERPOTONG & DYNAMIC AURA
+   ========================================= */
+
+/* 1. Mencegah bagian atas terpotong dengan menambah ruang scroll */
+.track-scroll {
+  padding-top: 120px !important; 
+}
+
+/* 2. Menurunkan posisi Tooltip agar tidak menabrak atap container */
+.station-tooltip {
+  bottom: calc(100% + 20px) !important; 
+  z-index: 100 !important;
+}
+
+/* 3. Menerapkan variabel warna Aura dinamis dari JavaScript ke Avatar */
+.station-icon {
+  box-shadow: var(--aura-base, 0 0 10px rgba(232, 184, 75, 0.3)) !important;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.station:hover .station-icon {
+  box-shadow: var(--aura-hover, 0 0 30px rgba(232, 184, 75, 0.8)) !important;
+}
