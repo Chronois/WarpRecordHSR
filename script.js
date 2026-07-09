@@ -215,19 +215,20 @@ const MASTER_CHARACTERS = {
   "yunli": { name: "Yunli", source: "Limited", img: "./assets/characters/splash%20art/Yunli%20Splash%20Art.png" },
 
   // --- Trailblazer ---
-  // (Pastikan ekstensi di GitHub-mu benar-benar .gif ya! Jika ternyata kamu uploadnya .png, silakan ubah .gif di bawah menjadi .png)
   "trailblazer • destruction": { name: "Trailblazer • Destruction", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Destruction.gif" },
   "trailblazer • preservation": { name: "Trailblazer • Preservation", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Preservation%20Splash%20Art.gif" },
   "trailblazer • harmony": { name: "Trailblazer • Harmony", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20The%20Harmony.gif" },
   "trailblazer • remembrance": { name: "Trailblazer • Remembrance", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Remembrance%20Splash%20Art.gif"  },
   "trailblazer • elation": { name: "Trailblazer • Elation", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Elation%20Splash%20Art.gif"  }
 };
+
 // OPTIMASI: Mengubah jalur lokal menjadi CDN jsDelivr berkecepatan tinggi
 Object.values(MASTER_CHARACTERS).forEach(char => {
     if (char.img && char.img.startsWith('./assets')) {
         char.img = char.img.replace('./assets', 'https://cdn.jsdelivr.net/gh/Chronois/WarpRecordHSR@main/assets');
     }
-};
+}); // <--- Tanda tutup kurung diperbaiki di sini
+
 function computeRosterFromHistory() {
   const charHistory   = (DATA.limited || []).filter(r => r.category === 'Character');
   const lcHistory     = (DATA.limited || []).filter(r => r.category === 'Light Cone');
@@ -596,7 +597,6 @@ function renderCalc() {
             </div>
         </div>
 
-        <!-- 1. JUMLAH PULL (Bar Chart) -->
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
             <span style="color:var(--text-dim);">Total Pulls</span>
@@ -607,20 +607,16 @@ function renderCalc() {
           </div>
         </div>
 
-        <!-- 2. AVERAGE PITY (Bullet Chart) -->
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
             <span style="color:var(--text-dim);">Average Pity</span>
             <span style="font-weight:700; color:${markerColor}">${fmt(s.avgPity, 1)} / ${b.maxPity}</span>
           </div>
-          <!-- Background dibagi 3 zona: Aman (Hijau), Soft Pity (Kuning), Hard Pity (Merah) -->
           <div style="width:100%; height:16px; background:linear-gradient(to right, rgba(74,222,128,0.15) 0%, rgba(74,222,128,0.15) 70%, rgba(234,179,8,0.15) 70%, rgba(234,179,8,0.15) 85%, rgba(226,128,125,0.15) 85%, rgba(226,128,125,0.15) 100%); border-radius:4px; position:relative; display:flex; align-items:center;">
-             <!-- Batang penanda nilai riil rata-rata -->
              <div style="width:${pityPct}%; background:${markerColor}; height:6px; border-radius:0 3px 3px 0; z-index:2; transition:width 1s ease;"></div>
           </div>
         </div>
 
-        <!-- 3. 50/50 WIN RATE (100% Stacked Bar Chart) -->
         ${s.winRate !== null ? `
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
@@ -634,7 +630,6 @@ function renderCalc() {
         </div>
         ` : ''}
 
-        <!-- 4. PULL DISTRIBUTION (Stacked Bar Chart) -->
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
             <span style="color:var(--text-dim);">Pull Distribution</span>
