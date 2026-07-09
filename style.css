@@ -960,3 +960,24 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cur
 .version-card div[style*="display:grid"] > div {
   justify-content: center !important;
 }
+
+/* =========================================
+   DYNAMIC AURA & TOOLTIP FIX
+   ========================================= */
+
+/* 1. Mencegah bagian atas Tooltip terpotong (Garis di atas) */
+.track-scroll {
+  padding-top: 110px !important; /* Menambah ruang kosong di atas */
+}
+.station-tooltip {
+  bottom: calc(100% + 55px) !important; /* Menurunkan posisi tooltip sedikit */
+}
+
+/* 2. Penerapan Dynamic Aura dari JavaScript */
+.station-icon {
+  box-shadow: var(--aura-base, 0 0 10px rgba(232, 184, 75, 0.3)) !important;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.station:hover .station-icon {
+  box-shadow: var(--aura-hover, 0 0 25px rgba(232, 184, 75, 0.8)) !important;
+}
