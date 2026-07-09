@@ -4,13 +4,15 @@ A comprehensive, web-based personal tracker for Honkai: Star Rail. This tool all
 
 ## 🌟 Features
 
-* **Warp History Tracker:** Log your Limited (Character/Light Cone) and Standard warps. Track your pity, 50/50 win rates, and longest win streaks.
-* **Express Archive (Stats):** View detailed analytics of your warp history with visualizations, including pull distribution, average pity, and win/loss/guaranteed ratios.
-* **Stellar Jade Ledger:** Keep track of your Stellar Jade and Star Rail Special Pass income and spending, categorized seamlessly by game versions.
-* **Team Planner:** Build and visualize team compositions, complete with Eidolon and Superimposition levels, and calculate the total "Pull Value" of your teams.
-* **Roster & Freebies Management:** Manage your owned characters and free 5-star rewards from HoYoverse.
-* **Priority / Wishlist:** Plan your future pulls by setting up a priority list for upcoming characters and light cones, including estimated pull costs.
-* **Data Portability:** Fully runs locally on your browser. You can easily export your data as a `.json` file for backup and import it back anytime.
+| Feature | Description |
+| :--- | :--- |
+| **Warp History Tracker** | Log your Limited (Character/Light Cone) and Standard warps. Track your pity, 50/50 win rates, and longest win streaks. |
+| **Express Archive (Stats)** | View detailed analytics of your warp history with visualizations, including pull distribution, average pity, and win/loss/guaranteed ratios. |
+| **Stellar Jade Ledger** | Keep track of your Stellar Jade and Star Rail Special Pass income and spending, categorized seamlessly by game versions. |
+| **Team Planner** | Build and visualize team compositions, complete with Eidolon and Superimposition levels, and calculate the total "Pull Value" of your teams. |
+| **Roster & Freebies Management** | Manage your owned characters and free 5-star rewards from HoYoverse. |
+| **Priority / Wishlist** | Plan your future pulls by setting up a priority list for upcoming characters and light cones, including estimated pull costs. |
+| **Data Portability** | Fully runs locally on your browser. You can easily export your data as a `.json` file for backup and import it back anytime. |
 
 ## ⚠️ Disclaimer
 
