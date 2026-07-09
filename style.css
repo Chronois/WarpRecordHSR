@@ -358,6 +358,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cur
 .roster-card.unowned .roster-name { color: var(--text-dim); }
 .roster-card.unowned .roster-stats { opacity: 0.4; }
 .unowned-tag { position: absolute; top: 8px; left: 8px; background: rgba(226, 128, 125, 0.15); backdrop-filter: blur(4px); border: 1px solid var(--loss); color: var(--loss); font-family: var(--font-mono); font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: bold; z-index: 2; letter-spacing: 0.05em; }
+.pass-icon { width: 14px !important; height: 14px !important; object-fit: contain !important; vertical-align: middle !important; margin-top: -2px !important; }
 
 /* CROPPER MODAL STYLES */
 .crop-modal-overlay { position: fixed; inset: 0; background: rgba(5,6,13,0.85); z-index: 999; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
