@@ -152,74 +152,74 @@ const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/200
 
 const MASTER_CHARACTERS = {
   // --- Standard ---
-  "bailu": { name: "Bailu", source: "Standard", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1211.png" },
-  "bronya": { name: "Bronya", source: "Standard", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1101.png" },
-  "clara": { name: "Clara", source: "Standard", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1107.png" },
-  "gepard": { name: "Gepard", source: "Standard", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1104.png" },
-  "himeko": { name: "Himeko", source: "Standard", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1003.png" },
-  "welt": { name: "Welt", source: "Standard", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1004.png" },
-  "yanqing": { name: "Yanqing", source: "Standard", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1209.png" },
+  "bailu": { name: "Bailu", source: "Standard", img: "./assets/characters/splash%20Art/Bailu%20Splash%20Art.png" },
+  "bronya": { name: "Bronya", source: "Standard", img: "./assets/characters/splash%20Art/Bronya%20Splash%20Art.png" },
+  "clara": { name: "Clara", source: "Standard", img: "./assets/characters/splash%20Art/Clara%20Splash%20Art.png" },
+  "gepard": { name: "Gepard", source: "Standard", img: "./assets/characters/splash%20Art/Gepard%20Splash%20Art.png" },
+  "himeko": { name: "Himeko", source: "Standard", img: "./assets/characters/splash%20Art/Himeko%20Splash%20Art.png" },
+  "welt": { name: "Welt", source: "Standard", img: "./assets/characters/splash%20Art/Welt%20Splash%20Art.png" },
+  "yanqing": { name: "Yanqing", source: "Standard", img: "./assets/characters/splash%20Art/Yanqing%20Splash%20Art.png" },
 
   // --- Limited & Others ---
-  "acheron": { name: "Acheron", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1308.png" },
-  "aglaea": { name: "Aglaea", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1402.png" },
-  "anaxa": { name: "Anaxa", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1405.png" },
-  "archer": { name: "Archer", source: "Other", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1015.png" },
-  "argenti": { name: "Argenti", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1302.png" },
-  "ashveil": { name: "Ashveil", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1504.png" },
-  "aventurine": { name: "Aventurine", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1304.png" },
-  "black swan": { name: "Black Swan", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1307.png" },
-  "blade": { name: "Blade", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1205.png" },
-  "mortenax blade": { name: "Mortenax Blade", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1507.png" },
-  "boothill": { name: "Boothill", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1315.png" },
-  "castorice": { name: "Castorice", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1407.png" },
-  "cerydra": { name: "Cerydra", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1412.png" },
-  "cipher": { name: "Cipher", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1406.png" },
-  "cyrene": { name: "Cyrene", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1415.png" },
-  "dan heng • imbibitor lunae": { name: "Dan Heng • Imbibitor Lunae", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1213.png" },
-  "dan heng • permansor terrae": { name: "Dan Heng • Permansor Terrae", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1414.png" },
-  "dr. ratio": { name: "Dr. Ratio", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1305.png" },
-  "evanescia": { name: "Evanescia", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1505.png" },
-  "evernight": { name: "Evernight", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1413.png" },
-  "feixiao": { name: "Feixiao", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1220.png" },
-  "firefly": { name: "Firefly", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1310.png" },
-  "fu xuan": { name: "Fu Xuan", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1208.png" },
-  "fugue": { name: "Fugue", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1225.png" },
-  "huohuo": { name: "Huohuo", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1217.png" },
-  "hyacine": { name: "Hyacine", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1409.png" },
-  "hysilens": { name: "Hysilens", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1410.png" },
-  "jade": { name: "Jade", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1314.png" },
-  "jiaoqiu": { name: "Jiaoqiu", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1218.png" },
-  "jing yuan": { name: "Jing Yuan", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1204.png" },
-  "jingliu": { name: "Jingliu", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1212.png" },
-  "kafka": { name: "Kafka", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1005.png" },
-  "lingsha": { name: "Lingsha", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1222.png" },
-  "luocha": { name: "Luocha", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1203.png" },
-  "mydei": { name: "Mydei", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1404.png" },
-  "phainon": { name: "Phainon", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1408.png" },
-  "rappa": { name: "Rappa", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1317.png" },
-  "robin": { name: "Robin", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1309.png" },
-  "ruan mei": { name: "Ruan Mei", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1303.png" },
-  "saber": { name: "Saber", source: "Other", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1014.png" },
-  "seele": { name: "Seele", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1102.png" },
-  "silver wolf": { name: "Silver Wolf", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1006.png" },
-  "silver wolf • lv. 999": { name: "Silver Wolf • Lv. 999", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1506.png" },
-  "sparkle": { name: "Sparkle", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1306.png" },
-  "sparxie": { name: "Sparxie", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1501.png" },
-  "sunday": { name: "Sunday", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1313.png" },
-  "the dahlia": { name: "The Dahlia", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1321.png" },
-  "the herta": { name: "The Herta", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1401.png" },
-  "topaz & numby": { name: "Topaz & Numby", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1112.png" },
-  "tribbie": { name: "Tribbie", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1403.png" },
-  "yao guang": { name: "Yao Guang", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1502.png" },
-  "yunli": { name: "Yunli", source: "Limited", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/1221.png" },
+  "acheron": { name: "Acheron", source: "Limited", img: "./assets/characters/splash%20Art/Acheron%20Splash%20Art.png" },
+  "aglaea": { name: "Aglaea", source: "Limited", img: "./assets/characters/splash%20Art/Aglaea%20Splash%20Art.png" },
+  "anaxa": { name: "Anaxa", source: "Limited", img: "./assets/characters/splash%20Art/Anaxa%20Splash%20Art.png" },
+  "archer": { name: "Archer", source: "Other", img: "./assets/characters/splash%20Art/Archer%20Splash%20Art.png" },
+  "argenti": { name: "Argenti", source: "Limited", img: "./assets/characters/splash%20Art/Argenti%20Splash%20Art.png" },
+  "ashveil": { name: "Ashveil", source: "Limited", img: "./assets/characters/splash%20Art/Ashveil%20Splash%20Art.png" },
+  "aventurine": { name: "Aventurine", source: "Limited", img: "./assets/characters/splash%20Art/Aventurine%20Splash%20Art.png" },
+  "black swan": { name: "Black Swan", source: "Limited", img: "./assets/characters/splash%20Art/Black%20Swan%20Splash%20Art.png" },
+  "blade": { name: "Blade", source: "Limited", img: "./assets/characters/splash%20Art/Blade%20Splash%20Art.png" },
+  "mortenax blade": { name: "Mortenax Blade", source: "Limited", img: "./assets/characters/splash%20Art/Mortenax%20Blade%20Splash%20Art.png" },
+  "boothill": { name: "Boothill", source: "Limited", img: "./assets/characters/splash%20Art/Boothill%20Splash%20Art.png" },
+  "castorice": { name: "Castorice", source: "Limited", img: "./assets/characters/splash%20Art/Castorice%20Splash%20Art.png" },
+  "cerydra": { name: "Cerydra", source: "Limited", img: "./assets/characters/splash%20Art/Cerydra%20Splash%20Art.png" },
+  "cipher": { name: "Cipher", source: "Limited", img: "./assets/characters/splash%20Art/Cipher%20Splash%20Art.png" },
+  "cyrene": { name: "Cyrene", source: "Limited", img: "./assets/characters/splash%20Art/Cyrene%20Splash%20Art.png" },
+  "dan heng • imbibitor lunae": { name: "Dan Heng • Imbibitor Lunae", source: "Limited", img: "./assets/characters/splash%20Art/Dan%20Heng%20-%20Imbibitor%20Lunae%20Splash%20Art.png" },
+  "dan heng • permansor terrae": { name: "Dan Heng • Permansor Terrae", source: "Limited", img: "./assets/characters/splash%20Art/Dan%20Heng%20-%20Permansor%20Terrae%20Splash%20Art.png" },
+  "dr. ratio": { name: "Dr. Ratio", source: "Limited", img: "./assets/characters/splash%20Art/Dr.%20Ratio%20Splash%20Art.png" },
+  "evanescia": { name: "Evanescia", source: "Limited", img: "./assets/characters/splash%20Art/Evanesia%20Splash%20Art.png" },
+  "evernight": { name: "Evernight", source: "Limited", img: "./assets/characters/splash%20Art/Evernight%20Splash%20Art.png" },
+  "feixiao": { name: "Feixiao", source: "Limited", img: "./assets/characters/splash%20Art/Feixiao%20Splash%20Art.png" },
+  "firefly": { name: "Firefly", source: "Limited", img: "./assets/characters/splash%20Art/Firefly%20Splash%20Art.png" },
+  "fu xuan": { name: "Fu Xuan", source: "Limited", img: "./assets/characters/splash%20Art/Fu%20Xuan%20Splash%20Art.png" },
+  "fugue": { name: "Fugue", source: "Limited", img: "./assets/characters/splash%20Art/Fugue%20Splash%20Art.png" },
+  "huohuo": { name: "Huohuo", source: "Limited", img: "./assets/characters/splash%20Art/Huohuo%20Splash%20Art.png" },
+  "hyacine": { name: "Hyacine", source: "Limited", img: "./assets/characters/splash%20Art/Hyacine%20Splash%20Art.png" },
+  "hysilens": { name: "Hysilens", source: "Limited", img: "./assets/characters/splash%20Art/Hysilens%20Splash%20Art.png" },
+  "jade": { name: "Jade", source: "Limited", img: "./assets/characters/splash%20Art/Jade%20Splash%20Art.png" },
+  "jiaoqiu": { name: "Jiaoqiu", source: "Limited", img: "./assets/characters/splash%20Art/Jiaoqiu%20Splash%20Art.png" },
+  "jing yuan": { name: "Jing Yuan", source: "Limited", img: "./assets/characters/splash%20Art/Jing%20Yuan%20Splash%20Art.png" },
+  "jingliu": { name: "Jingliu", source: "Limited", img: "./assets/characters/splash%20Art/Jingliu%20Splash%20Art.png" },
+  "kafka": { name: "Kafka", source: "Limited", img: "./assets/characters/splash%20Art/Kafka%20Splash%20Art.png" },
+  "lingsha": { name: "Lingsha", source: "Limited", img: "./assets/characters/splash%20Art/Lingsha%20Splash%20Art.png" },
+  "luocha": { name: "Luocha", source: "Limited", img: "./assets/characters/splash%20Art/Luocha%20Splash%20Art.png" },
+  "mydei": { name: "Mydei", source: "Limited", img: "./assets/characters/splash%20Art/Mydei%20Splash%20Art.png" },
+  "phainon": { name: "Phainon", source: "Limited", img: "./assets/characters/splash%20Art/Phainon%20Splash%20Art.png" },
+  "rappa": { name: "Rappa", source: "Limited", img: "./assets/characters/splash%20Art/Rappa%20Splash%20Art.png" },
+  "robin": { name: "Robin", source: "Limited", img: "./assets/characters/splash%20Art/Robin%20Splash%20Art_full.png" },
+  "ruan mei": { name: "Ruan Mei", source: "Limited", img: "./assets/characters/splash%20Art/Ruan%20Mei%20Splash%20Art.png" },
+  "saber": { name: "Saber", source: "Other", img: "./assets/characters/splash%20Art/Saber%20Splash%20Art.png" },
+  "seele": { name: "Seele", source: "Limited", img: "./assets/characters/splash%20Art/Seele%20Splash%20Art.png" },
+  "silver wolf": { name: "Silver Wolf", source: "Limited", img: "./assets/characters/splash%20Art/Silver%20Wolf%20Splash%20Art.png" },
+  "silver wolf • lv. 999": { name: "Silver Wolf • Lv. 999", source: "Limited", img: "./assets/characters/splash%20Art/Silver%20Wolf%20•%20Lv.%20999%20Splash%20Art.png" },
+  "sparkle": { name: "Sparkle", source: "Limited", img: "./assets/characters/splash%20Art/Sparkle%20Splash%20Art.png" },
+  "sparxie": { name: "Sparxie", source: "Limited", img: "./assets/characters/splash%20Art/Sparxie%20Splash%20Art.png" },
+  "sunday": { name: "Sunday", source: "Limited", img: "./assets/characters/splash%20Art/Sunday%20Splash%20Art.png" },
+  "the dahlia": { name: "The Dahlia", source: "Limited", img: "./assets/characters/splash%20Art/The%20Dahlia%20Splash%20Art.png" },
+  "the herta": { name: "The Herta", source: "Limited", img: "./assets/characters/splash%20Art/The%20Herta%20Splash%20Art.png" },
+  "topaz & numby": { name: "Topaz & Numby", source: "Limited", img: "./assets/characters/splash%20Art/Topaz%20%26%20Numby%20Splash%20Art.png" },
+  "tribbie": { name: "Tribbie", source: "Limited", img: "./assets/characters/splash%20Art/Tribbie%20Splash%20Art.png" },
+  "yao guang": { name: "Yao Guang", source: "Limited", img: "./assets/characters/splash%20Art/Yao%20Guang%20Splash%20Art.png" },
+  "yunli": { name: "Yunli", source: "Limited", img: "./assets/characters/splash%20Art/Yunli%20Splash%20Art.png" },
 
-  // --- Trailblazer ---
-  "trailblazer • destruction": { name: "Trailblazer • Destruction", source: "Other", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/8002.png" },
-  "trailblazer • preservation": { name: "Trailblazer • Preservation", source: "Other", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/8004.png" },
-  "trailblazer • harmony": { name: "Trailblazer • Harmony", source: "Other", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/8006.png" },
-  "trailblazer • remembrance": { name: "Trailblazer • Remembrance", source: "Other", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/8008.png"  },
-  "trailblazer • elation": { name: "Trailblazer • Elation", source: "Other", img: "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/8010.png"  }
+  // --- Trailblazer (Memakai format .gif) ---
+  "trailblazer • destruction": { name: "Trailblazer • Destruction", source: "Other", img: "./assets/characters/splash%20Art/Trailblazer%20-%20the%20Destruction%20Splash%20Art.gif" },
+  "trailblazer • preservation": { name: "Trailblazer • Preservation", source: "Other", img: "./assets/characters/splash%20Art/Trailblazer%20-%20the%20Preservation%20Splash%20Art.gif" },
+  "trailblazer • harmony": { name: "Trailblazer • Harmony", source: "Other", img: "./assets/characters/splash%20Art/Trailblazer%20-%20The%20Harmony%20Splash%20Art.gif" },
+  "trailblazer • remembrance": { name: "Trailblazer • Remembrance", source: "Other", img: "./assets/characters/splash%20Art/Trailblazer%20-%20the%20Remembrance%20Splash%20Art.gif"  },
+  "trailblazer • elation": { name: "Trailblazer • Elation", source: "Other", img: "./assets/characters/splash%20Art/Trailblazer%20-%20the%20Elation%20Splash%20Art.gif"  }
 };
 
 function computeRosterFromHistory() {
@@ -1019,10 +1019,10 @@ function renderStellarJade() {
   const totalPasses= rows.reduce((s, r) => s + (r.passes|| 0), 0); 
   const totalPulls = totalJade / 160 + totalPasses;
   
-  // Menggunakan HSR%20Pulls.png agar spasi pada nama file tidak error
+  // Menggunakan folder "Items" (I besar) dan nama file dengan %20
   document.getElementById('jadeStats').innerHTML = [
     { label: 'Total Stellar Jade', value: fmt(totalJade, 0) }, 
-    { label: 'Total <img src="HSR%20Pulls.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(totalPasses, 0) }, 
+    { label: 'Total <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(totalPasses, 0) }, 
     { label: 'Pulls Available', value: fmt(totalPulls, 1) }, 
     { label: 'Logged Entries', value: fmt(rows.length, 0) }
   ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
@@ -1063,7 +1063,6 @@ function renderStellarJade() {
       const tPull = pull1 + pull2;
       const isActive = d.v1 && d.v2 && today >= d.v1.start && today < d.v2.end;
       
-      // Menggunakan struktur flexbox baru agar teks tidak melompat ke baris baru
       return `<div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:8px;">
         <div class="version-label" style="font-size:16px;">Version ${fullV}</div>
         <div class="version-dates" style="margin-bottom:4px;">${formatDate(d.v1 ? d.v1.start : '')} – ${formatDate(d.v2 ? d.v2.end : '')}</div>
@@ -1073,7 +1072,7 @@ function renderStellarJade() {
                 <span class="phase-label">Phase 1</span>
                 <div style="display:flex; align-items:center; gap:6px; white-space:nowrap; font-family:var(--font-mono);">
                     <span>${fmt(d.jade1,0)} SJ</span> <span style="opacity:0.3">|</span> 
-                    <span style="display:flex; align-items:center; gap:4px;">${fmt(d.pass1,0)} <img src="HSR%20Pulls.png" class="pass-icon"></span> <span style="opacity:0.3">|</span> 
+                    <span style="display:flex; align-items:center; gap:4px;">${fmt(d.pass1,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></span> <span style="opacity:0.3">|</span> 
                     <span>${fmt(pull1,1)} Pulls</span>
                 </div>
             </div>
@@ -1081,7 +1080,7 @@ function renderStellarJade() {
                 <span class="phase-label">Phase 2</span>
                 <div style="display:flex; align-items:center; gap:6px; white-space:nowrap; font-family:var(--font-mono);">
                     <span>${fmt(d.jade2,0)} SJ</span> <span style="opacity:0.3">|</span> 
-                    <span style="display:flex; align-items:center; gap:4px;">${fmt(d.pass2,0)} <img src="HSR%20Pulls.png" class="pass-icon"></span> <span style="opacity:0.3">|</span> 
+                    <span style="display:flex; align-items:center; gap:4px;">${fmt(d.pass2,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></span> <span style="opacity:0.3">|</span> 
                     <span>${fmt(pull2,1)} Pulls</span>
                 </div>
             </div>
@@ -1089,7 +1088,7 @@ function renderStellarJade() {
                 <span class="phase-label">Total</span>
                 <div style="display:flex; align-items:center; gap:6px; white-space:nowrap; font-family:var(--font-mono);">
                     <span>${fmt(tJade,0)} SJ</span> <span style="opacity:0.3">|</span> 
-                    <span style="display:flex; align-items:center; gap:4px;">${fmt(tPass,0)} <img src="HSR%20Pulls.png" class="pass-icon"></span> <span style="opacity:0.3">|</span> 
+                    <span style="display:flex; align-items:center; gap:4px;">${fmt(tPass,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></span> <span style="opacity:0.3">|</span> 
                     <span>${fmt(tPull,1)} Pulls</span>
                 </div>
             </div>
