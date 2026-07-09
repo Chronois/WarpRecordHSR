@@ -54,11 +54,10 @@ body{
   position: sticky;
   top: 0;
   z-index: 20;
-  display:flex;
-  align-items:center;
-  gap: 2px;
+  display: flex;
+  align-items: center;
+  width: 100%; /* Memastikan bar membentang layar penuh */
   overflow-x: auto;
-  padding: 0 16px;
   background: rgba(10,12,24,.92);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -68,9 +67,10 @@ body{
 .main-nav::-webkit-scrollbar{ display:none; }
 
 .nav-item{
-  flex-shrink:0;
-  display:flex;
-  align-items:center;
+  flex: 1 0 auto; /* Rahasianya di sini: Membagi rata ruang kosong ke semua tombol */
+  display: flex;
+  justify-content: center; /* Memastikan teks tombol ada di tengah */
+  align-items: center;
   gap: 6px;
   background: transparent;
   border: none;
@@ -79,20 +79,11 @@ body{
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 12.5px;
-  padding: 14px 14px 12px;
+  padding: 14px 10px 12px;
   cursor: pointer;
   transition: all .15s ease;
   white-space: nowrap;
 }
-.nav-item:hover{ color: var(--text); background: rgba(255,255,255,.03); }
-.nav-item.active{
-  color: var(--gold-soft);
-  background: var(--surface);
-  border-bottom-color: var(--gold);
-  border-radius: 6px 6px 0 0;
-}
-.nav-caret{ display: none; }
-
 /* UTILITY BAR */
 .util-bar{
   position: sticky;
