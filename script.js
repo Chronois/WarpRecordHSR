@@ -20,38 +20,17 @@ function initDateInputs() {
 
 // ============ Version schedule ============
 const HSR_VERSIONS = [
-  { v: '1.0', date: '2023-04-26' },
-  { v: '1.1', date: '2023-06-07' },
-  { v: '1.2', date: '2023-07-19' },
-  { v: '1.3', date: '2023-08-30' },
-  { v: '1.4', date: '2023-10-11' }, 
-  { v: '1.5', date: '2023-11-15' },
-  { v: '1.6', date: '2023-12-27' },
-  { v: '2.0', date: '2024-02-06' },
-  { v: '2.1', date: '2024-03-27' },
-  { v: '2.2', date: '2024-05-08' },
-  { v: '2.3', date: '2024-06-19' },
-  { v: '2.4', date: '2024-07-31' },
-  { v: '2.5', date: '2024-09-10' },
-  { v: '2.6', date: '2024-10-23' },
-  { v: '2.7', date: '2024-12-04' },
-  { v: '3.0', date: '2025-01-15' },
-  { v: '3.1', date: '2025-02-26' },
-  { v: '3.2', date: '2025-04-09' },
-  { v: '3.3', date: '2025-05-21' },
-  { v: '3.4', date: '2025-07-02' },
-  { v: '3.5', date: '2025-08-13' },
-  { v: '3.6', date: '2025-09-24' },
-  { v: '3.7', date: '2025-11-05' },
-  { v: '4.0', date: '2025-12-17' },
-  { v: '4.1', date: '2026-01-28' },
-  { v: '4.2', date: '2026-03-11' },
-  { v: '4.3', date: '2026-04-22' },
-  { v: '4.4', date: '2026-06-03' },
-  { v: '4.5', date: '2026-07-15' },
-  { v: '4.6', date: '2026-08-26' },
-  { v: '4.7', date: '2026-10-07' },
-  { v: '4.8', date: '2026-11-18' }
+  { v: '1.0', date: '2023-04-26' }, { v: '1.1', date: '2023-06-07' }, { v: '1.2', date: '2023-07-19' },
+  { v: '1.3', date: '2023-08-30' }, { v: '1.4', date: '2023-10-11' }, { v: '1.5', date: '2023-11-15' },
+  { v: '1.6', date: '2023-12-27' }, { v: '2.0', date: '2024-02-06' }, { v: '2.1', date: '2024-03-27' },
+  { v: '2.2', date: '2024-05-08' }, { v: '2.3', date: '2024-06-19' }, { v: '2.4', date: '2024-07-31' },
+  { v: '2.5', date: '2024-09-10' }, { v: '2.6', date: '2024-10-23' }, { v: '2.7', date: '2024-12-04' },
+  { v: '3.0', date: '2025-01-15' }, { v: '3.1', date: '2025-02-26' }, { v: '3.2', date: '2025-04-09' },
+  { v: '3.3', date: '2025-05-21' }, { v: '3.4', date: '2025-07-02' }, { v: '3.5', date: '2025-08-13' },
+  { v: '3.6', date: '2025-09-24' }, { v: '3.7', date: '2025-11-05' }, { v: '4.0', date: '2025-12-17' },
+  { v: '4.1', date: '2026-01-28' }, { v: '4.2', date: '2026-03-11' }, { v: '4.3', date: '2026-04-22' },
+  { v: '4.4', date: '2026-06-03' }, { v: '4.5', date: '2026-07-15' }, { v: '4.6', date: '2026-08-26' },
+  { v: '4.7', date: '2026-10-07' }, { v: '4.8', date: '2026-11-18' }
 ];
 
 function getVersionSchedule() {
@@ -113,7 +92,7 @@ function saveWorkingData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
     if (statusEl) { statusEl.textContent = 'Saved · ' + new Date().toLocaleTimeString('en-US'); statusEl.className = 'save-status ok'; }
   } catch (e) {
-    if (statusEl) { statusEl.textContent = 'Failed to save (private browsing?)'; statusEl.className = 'save-status err'; }
+    if (statusEl) { statusEl.textContent = 'Failed to save'; statusEl.className = 'save-status err'; }
   }
 }
 function recomputeDaysSince(rows) {
@@ -285,7 +264,7 @@ function computeRosterFromHistory() {
     const signCount = signMap[lowerName] || 0; 
     let obtained = obtainedMap[lowerName] || false;
     
-    const celestialChars = ["seele", "argenti", "silver wolf", "fu xuan", "yunli", "blade"];
+    const celestialChars = ["seele", "argenti", "silver wolf", "fu xuan", "yunli", "blade", "mortenax blade"];
     const goldenChars = ["ruan mei", "robin", "huohuo", "luocha", "topaz & numby"];
     
     if (celestialChars.includes(lowerName)) {
@@ -334,13 +313,11 @@ function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   const table = document.getElementById(tableId); if (!table) return;
   const thead = table.querySelector('thead'); const tbody = table.querySelector('tbody'); const rows = DATA[section] || [];
   
-  // Menambahkan kolom "Actions"
   thead.innerHTML = `<tr>${columnLabels.map(c => `<th>${c}</th>`).join('')}<th>Actions</th></tr>`;
   
   if (!rows || !rows.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="${columnLabels.length + 1}">No entries yet.</td></tr>`; return; }
   let indexed = rows.map((r, idx) => ({ r, idx })); if (sortFn) indexed = indexed.sort(sortFn);
   
-  // Memasukkan 3 Tombol: Duplicate, Edit, dan Delete
   tbody.innerHTML = indexed.map(({ r, idx }) => `<tr>${rowToCells(r).map(c => `<td>${c}</td>`).join('')}<td>
     <div style="display:flex; gap:6px;">
         <button type="button" class="btn-dup" onclick="dupEntry('${section}', ${idx})" title="Duplicate">⧉</button>
@@ -353,10 +330,7 @@ function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
 // FITUR DUPLIKASI DATA TABEL
 window.dupEntry = function(section, idx) {
   const item = DATA[section][idx];
-  
-  // Salin murni agar tidak terikat memori
   DATA[section].push(JSON.parse(JSON.stringify(item)));
-  
   if (section === 'priority') {
     DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority));
     DATA.priority.forEach((p, i) => { p.priority = String(i + 1); });
@@ -364,7 +338,6 @@ window.dupEntry = function(section, idx) {
     sortByDate(DATA[section]);
     recomputeDaysSince(DATA[section]);
   }
-  
   saveWorkingData();
   renderAll();
 };
@@ -372,7 +345,6 @@ window.dupEntry = function(section, idx) {
 // FITUR EDIT DATA TABEL
 window.editEntry = function(section, idx) {
   const item = DATA[section][idx];
-  
   let formId = 'form-' + section;
   
   // Deteksi khusus jika yang diedit adalah Stellar Jade (menggunakan sistem 2 form)
@@ -382,10 +354,12 @@ window.editEntry = function(section, idx) {
      
      formId = isSpend ? 'form-spend' : 'form-income';
      
-     // Jika masuk ke form Spend, konversi kembali minus jade/pass menjadi "Pulls"
      if (isSpend) {
          item.pulls = Math.abs(item.passes || 0) + (Math.abs(item.jade || 0) / 160);
          item.reason = act.replace('[SPEND]', '').trim();
+     } else {
+         item.jade = Math.abs(item.jade || 0);
+         item.passes = Math.abs(item.passes || 0);
      }
   }
 
@@ -397,7 +371,6 @@ window.editEntry = function(section, idx) {
     if (input) input.value = item[key];
   });
 
-  // Hapus data lama dari memori (Kalian harus menyimpannya ulang via form!)
   DATA[section].splice(idx, 1);
   
   if (section === 'priority') {
@@ -410,7 +383,6 @@ window.editEntry = function(section, idx) {
   saveWorkingData();
   renderAll();
 
-  // Memoles visual tombol saat sedang mengedit
   const btn = form.querySelector('button[type="submit"]');
   if (btn) {
       const originalText = btn.textContent;
@@ -423,6 +395,7 @@ window.editEntry = function(section, idx) {
 
   form.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
+
 // ============ Overview (Combined Char & LC) ============
 function buildOverview() {
   const limRows = DATA.limited || [];
@@ -562,42 +535,30 @@ function renderCalc() {
     { label: 'Combined (Total)', rows: DATA.limited||[], maxPity: 90 }
   ];
 
-  // Mencari nilai "Jumlah Pull" terbanyak untuk skala grafik Bar Chart
   const maxPulls = Math.max(...datasets.map(d => computeBannerStats(d.rows, d.maxPity).totalWarps)) || 1;
 
   document.getElementById('calcGrid').innerHTML = datasets.map(b => {
     const s = computeBannerStats(b.rows, b.maxPity);
-    
-    // Data Stacked Bar (Pull Distribution)
     const totalWLG = (s.wins + s.losses + s.guaranteed) || 1; 
     const wPct = (s.wins / totalWLG) * 100;
     const lPct = (s.losses / totalWLG) * 100;
     const gPct = (s.guaranteed / totalWLG) * 100;
-    
-    // Data 100% Stacked Bar (50/50 Win Rate)
     const winRateVal = s.winRate !== null ? s.winRate * 100 : 0;
     const lossRateVal = s.winRate !== null ? (1 - s.winRate) * 100 : 0;
-
-    // Data Bullet Chart (Average Pity)
     const pityPct = Math.min((s.avgPity / b.maxPity) * 100, 100);
-    // Menentukan zona warna (0-70% Hijau, 70-85% Kuning, 85%+ Merah)
     let markerColor = '#4ade80'; 
     if (pityPct > 85) markerColor = 'var(--loss)'; 
     else if (pityPct > 70) markerColor = 'var(--gold-soft)';
-
-    // Data Bar Chart (Jumlah Pull)
     const pullBarPct = (s.totalWarps / maxPulls) * 100;
 
     return `
       <div class="calc-col" style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:18px;">
-        
         <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;">
             <h3 style="margin:0; color:var(--nebula); font-size:16px; font-family:var(--font-display);">${b.label}</h3>
             <div style="text-align:right;">
                 <span style="color:var(--text); font-weight:bold; font-size:14px;">${fmt(s.total, 0)}</span> <span style="color:var(--text-dim); font-size:12px;">5★</span>
             </div>
         </div>
-
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
             <span style="color:var(--text-dim);">Total Pulls</span>
@@ -607,7 +568,6 @@ function renderCalc() {
             <div style="width:${pullBarPct}%; background:var(--cyan); height:100%; border-radius:4px; transition:width 1s ease;"></div>
           </div>
         </div>
-
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
             <span style="color:var(--text-dim);">Average Pity</span>
@@ -617,7 +577,6 @@ function renderCalc() {
              <div style="width:${pityPct}%; background:${markerColor}; height:6px; border-radius:0 3px 3px 0; z-index:2; transition:width 1s ease;"></div>
           </div>
         </div>
-
         ${s.winRate !== null ? `
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
@@ -630,7 +589,6 @@ function renderCalc() {
           </div>
         </div>
         ` : ''}
-
         <div>
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;">
             <span style="color:var(--text-dim);">Pull Distribution</span>
@@ -647,12 +605,10 @@ function renderCalc() {
               <span style="display:flex; align-items:center; gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold-soft);"></span> Guar.</span>
           </div>
         </div>
-
       </div>
     `;
   }).join('');
   
-  // Update Area Max Win Streak agar lebih estetik
   document.getElementById('streakGrid').innerHTML = [
       { label: 'Character', value: bestWinStreak(limChar) }, 
       { label: 'Light Cone', value: bestWinStreak(limLC) }, 
@@ -867,7 +823,6 @@ function renderTeam() {
     const subDps = Array.isArray(r.subDps) ? r.subDps.join(', ') : (r.subDps || '—'); const support = Array.isArray(r.support) ? r.support.join(', ') : (r.support || '—'); const pctVal = pct(limitedTotalWarps ? r.pullValue / limitedTotalWarps : 0, 2);
     let imgHtml = ''; if (r.members && r.members.length > 0) { imgHtml = r.members.map(m => `<div class="team-image-slot" title="${m.name}"><img src="${m.img}" onerror="this.src='${DEFAULT_AVATAR}'"></div>`).join(''); } else { imgHtml = `<div class="team-image-slot"><img src="${DEFAULT_AVATAR}"></div>`; }
     
-    // Deteksi jika tim tidak membawa Sustain
     const isSustainless = !r.sustain || r.sustain === '—';
     const sustainlessClass = isSustainless ? 'sustainless' : '';
 
@@ -933,26 +888,21 @@ function getRosterRows() {
   else if (rosterFilter === 'other') rows = rows.filter(r => r.source !== 'Limited' && r.source !== 'Standard');
   
   rows.sort((a, b) => {
-    // 1. Kunci karakter "Not Owned" agar selalu ada di bawah
     if (a.isOwned !== b.isOwned) {
         return a.isOwned ? -1 : 1;
     }
 
-    // 2. Lanjutkan sorting biasa
     if (rosterSortValue === 'nameAsc') return a.name.localeCompare(b.name); 
     if (rosterSortValue === 'nameDesc') return b.name.localeCompare(a.name);
     
-    // Kalkulasi nilai asli Eidolon dan Signature
     let ea = parseInt(a.eidolon.replace('E','').replace('No','0')) || 0; 
     let sa = parseInt(a.signature.replace('S','')) || 0; 
     let eb = parseInt(b.eidolon.replace('E','').replace('No','0')) || 0; 
     let sb = parseInt(b.signature.replace('S','')) || 0;
 
-    // LOGIKA KHUSUS: Abaikan Eidolon (Anggap E0) jika karakternya adalah Main Character
     if (a.source === 'Main Character') ea = 0;
     if (b.source === 'Main Character') eb = 0;
     
-    // Sorting Eidolon
     if (rosterSortValue === 'eidolonDesc') { 
         if (eb !== ea) return eb - ea; 
         return b.totalPullValue - a.totalPullValue; 
@@ -962,7 +912,6 @@ function getRosterRows() {
         return a.totalPullValue - b.totalPullValue; 
     }
     
-    // Sorting Cost
     if (rosterSortValue === 'costDesc') { 
         const costA = ea + sa; 
         const costB = eb + sb; 
@@ -976,12 +925,10 @@ function getRosterRows() {
         return a.totalPullValue - b.totalPullValue; 
     }
     
-    // Sorting Pull Value
     if (rosterSortValue === 'pullValueAsc') {
         return a.totalPullValue - b.totalPullValue;
     }
     
-    // Default (pullValueDesc)
     return b.totalPullValue - a.totalPullValue;
   }); 
   return rows;
@@ -1029,15 +976,35 @@ function renderStellarJade() {
   });
 
   rows.forEach(r => {
-      const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
-      if (matchedV) {
-          const fullV = matchedV.fullLabel;
-          if (matchedV.label.includes('1/2')) {
-              verMap[fullV].jade1 += r.jade || 0;
-              verMap[fullV].pass1 += r.passes || 0;
-          } else {
-              verMap[fullV].jade2 += r.jade || 0;
-              verMap[fullV].pass2 += r.passes || 0;
+      let j = parseFloat(r.jade) || 0;
+      let p = parseFloat(r.passes) || 0;
+      let act = (r.activity || '');
+      
+      let isSpend = j < 0 || p < 0 || act.includes('[SPEND]');
+      let isSaving = act.toLowerCase().includes('saving');
+
+      if (isSpend) {
+          j = -Math.abs(j);
+          p = -Math.abs(p);
+      } else {
+          j = Math.abs(j);
+          p = Math.abs(p);
+      }
+
+      currentJade += j;
+      currentPasses += p;
+
+      if (!isSaving && !isSpend) {
+          const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
+          if (matchedV) {
+              const fullV = matchedV.fullLabel;
+              if (matchedV.label.includes('1/2')) {
+                  verMap[fullV].jade1 += j;
+                  verMap[fullV].pass1 += p;
+              } else {
+                  verMap[fullV].jade2 += j;
+                  verMap[fullV].pass2 += p;
+              }
           }
       }
   });
@@ -1048,7 +1015,6 @@ function renderStellarJade() {
       return (d.jade1>0 || d.pass1>0 || d.jade2>0 || d.pass2>0) || (d.v1 && d.v1.start <= today);
   });
   
-  // Layout Kartu Baru (Sistem Grid Berlapis)
   document.getElementById('versionGrid').innerHTML = relevantVersions.length ? relevantVersions.map(fullV => { 
       const d = verMap[fullV];
       const pull1 = (d.jade1 / 160) + d.pass1;
@@ -1096,33 +1062,27 @@ function renderStellarJade() {
       </div>`; 
   }).join('') : `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`;
   
-  // Render Tabel Log
   renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','Stellar Jade','Star Rail Pass'], 
   r => {
       let j = parseFloat(r.jade) || 0;
       let p = parseFloat(r.passes) || 0;
-      let act = (r.activity || '').toLowerCase();
+      let act = (r.activity || '');
       
-      let isSpend = act.includes('spend') || j < 0 || p < 0;
-      let isSaving = act.includes('saving');
-      
-      // Tambahkan ke Saldo Utama
-      currentJade += j;
-      currentPasses += p;
+      let isSpend = j < 0 || p < 0 || act.includes('[SPEND]');
+      let isSaving = act.toLowerCase().includes('saving');
 
-      let jStr = fmt(isSpend ? -Math.abs(j) : j, 0);
-      let pStr = fmt(isSpend ? -Math.abs(p) : p, 0);
-      let actDisplay = r.activity;
+      let jStr = fmt(isSpend ? -Math.abs(j) : Math.abs(j), 0);
+      let pStr = fmt(isSpend ? -Math.abs(p) : Math.abs(p), 0);
+      let actDisplay = act.replace('[SPEND]', '').trim();
       
-      // Styling Visual untuk tabel
       if (isSpend) {
           jStr = `<span style="color:var(--loss)">${jStr}</span>`;
           pStr = `<span style="color:var(--loss)">${pStr}</span>`;
-          actDisplay = `<span style="color:var(--loss); font-weight:bold; font-size:10px; border:1px solid var(--loss); padding:2px 4px; border-radius:4px; margin-right:6px;">SPEND</span> ${r.activity}`;
+          actDisplay = `<span style="color:var(--loss); font-weight:bold; font-size:10px; border:1px solid var(--loss); padding:2px 4px; border-radius:4px; margin-right:6px;">SPEND</span> ${actDisplay}`;
       } else if (isSaving) {
           jStr = `<span style="color:var(--cyan)">+${jStr}</span>`;
           pStr = `<span style="color:var(--cyan)">+${pStr}</span>`;
-          actDisplay = `<span style="color:var(--cyan); font-weight:bold; font-size:10px; border:1px solid var(--cyan); padding:2px 4px; border-radius:4px; margin-right:6px;">SAVING</span> ${r.activity}`;
+          actDisplay = `<span style="color:var(--cyan); font-weight:bold; font-size:10px; border:1px solid var(--cyan); padding:2px 4px; border-radius:4px; margin-right:6px;">SAVING</span> ${actDisplay}`;
       } else {
           jStr = `+${jStr}`;
           pStr = `+${pStr}`;
@@ -1132,7 +1092,6 @@ function renderStellarJade() {
   }, 
   (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; });
 
-  // Update Top Stats (Hanya 3 kotak: Jade, Pass, dan Saving. Spend dihapus)
   const totalSavingPulls = (currentJade / 160) + currentPasses;
   document.getElementById('jadeStats').innerHTML = [
     { label: 'Current Stellar Jade', value: fmt(currentJade, 0) }, 
@@ -1141,33 +1100,19 @@ function renderStellarJade() {
   ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
 }
 
-// LOGIC BARU UNTUK FORM: Mendeteksi tombol mana yang ditekan
-document.getElementById('form-stellarjade').addEventListener('submit', (e) => { 
+// ============ LOGIC LISTENER UNTUK 2 FORM BARU ============
+
+// 1. FORM ADD INCOME
+document.getElementById('form-income').addEventListener('submit', (e) => { 
     e.preventDefault(); 
     const fd = new FormData(e.target); 
     if(!DATA.stellarJade) DATA.stellarJade = []; 
     
-    // Mengecek apakah yang ditekan tombol "+ Add" atau "- Spend"
-    const actionType = e.submitter ? e.submitter.value : 'add';
-    
-    let j = Number(fd.get('jade')) || 0;
-    let p = Number(fd.get('passes')) || 0;
-    let act = fd.get('activity').trim();
-
-    // Jika tombol Spend ditekan, paksa angkanya menjadi minus!
-    if (actionType === 'spend') {
-        j = j > 0 ? -j : j; 
-        p = p > 0 ? -p : p;
-    } else {
-        j = Math.abs(j); // Pastikan selalu positif jika tombol Add ditekan
-        p = Math.abs(p);
-    }
-
     DATA.stellarJade.push({ 
         date: fd.get('date'), 
-        activity: act, 
-        jade: j, 
-        passes: p 
+        activity: fd.get('activity').trim(), 
+        jade: Math.abs(Number(fd.get('jade')) || 0), 
+        passes: Math.abs(Number(fd.get('passes')) || 0) 
     }); 
     
     sortByDate(DATA.stellarJade); 
@@ -1177,7 +1122,52 @@ document.getElementById('form-stellarjade').addEventListener('submit', (e) => {
     initDateInputs(); 
 });
 
-document.getElementById('form-stellarjade').addEventListener('submit', (e) => { e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; DATA.stellarJade.push({ date: fd.get('date'), activity: fd.get('activity').trim(), jade: Number(fd.get('jade'))||0, passes: Number(fd.get('passes'))||0 }); sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs(); });
+// 2. FORM LOG SPEND (Potong Pass dulu, lalu Jade)
+document.getElementById('form-spend').addEventListener('submit', (e) => { 
+    e.preventDefault(); 
+    const fd = new FormData(e.target); 
+    if(!DATA.stellarJade) DATA.stellarJade = []; 
+    
+    let pullsToSpend = Math.abs(Number(fd.get('pulls')) || 0);
+    let reason = fd.get('reason').trim();
+    
+    // Hitung ketersediaan pass secara global saat ini
+    let availablePasses = DATA.stellarJade.reduce((s, r) => {
+        let p = Number(r.passes) || 0;
+        let j = Number(r.jade) || 0;
+        let act = (r.activity || '');
+        let isSpend = j < 0 || p < 0 || act.includes('[SPEND]');
+        return s + (isSpend ? -Math.abs(p) : Math.abs(p));
+    }, 0);
+    
+    availablePasses = Math.max(0, availablePasses);
+    
+    let pDeduct = 0;
+    let jDeduct = 0;
+
+    // Logika Pemotongan: Habiskan Pass dulu, sisa kurangnya potong dari Jade (x160)
+    if (pullsToSpend <= availablePasses) {
+        pDeduct = pullsToSpend;
+    } else {
+        pDeduct = availablePasses;
+        let remainingPulls = pullsToSpend - availablePasses;
+        jDeduct = remainingPulls * 160;
+    }
+
+    DATA.stellarJade.push({ 
+        date: fd.get('date'), 
+        activity: `[SPEND] ${reason}`, 
+        jade: -jDeduct, 
+        passes: -pDeduct 
+    }); 
+    
+    sortByDate(DATA.stellarJade); 
+    saveWorkingData(); 
+    renderAll(); 
+    e.target.reset(); 
+    initDateInputs(); 
+});
+
 document.querySelectorAll('.table-filter').forEach(input => { input.addEventListener('input', (e) => { const term = e.target.value.toLowerCase(); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return; if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } } else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } }); });
 document.addEventListener('click', (e) => { if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { const th = e.target; const table = th.closest('table'); const tbody = table.querySelector('tbody'); const idx = Array.from(th.parentNode.children).indexOf(th); const isAsc = th.classList.contains('asc'); table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); th.classList.add(isAsc ? 'desc' : 'asc'); const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); rows.sort((a, b) => { const aText = a.children[idx].textContent.trim(); const bText = b.children[idx].textContent.trim(); const aNum = parseFloat(aText.replace(/,/g, '')); const bNum = parseFloat(bText.replace(/,/g, '')); if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum; return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); }); tbody.append(...rows); } });
 document.getElementById('btnDownloadJson')?.addEventListener('click', () => { const content = JSON.stringify(DATA, null, 2); const blob = new Blob([content], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
