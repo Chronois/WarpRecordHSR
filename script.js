@@ -1019,15 +1019,14 @@ function renderStellarJade() {
   const totalPasses= rows.reduce((s, r) => s + (r.passes|| 0), 0); 
   const totalPulls = totalJade / 160 + totalPasses;
   
-  // Menggunakan icon HSR Pulls.png di Stats Atas
+  // Menggunakan HSR%20Pulls.png agar spasi pada nama file tidak error
   document.getElementById('jadeStats').innerHTML = [
     { label: 'Total Stellar Jade', value: fmt(totalJade, 0) }, 
-    { label: 'Total <img src="HSR Pulls.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(totalPasses, 0) }, 
+    { label: 'Total <img src="HSR%20Pulls.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(totalPasses, 0) }, 
     { label: 'Pulls Available', value: fmt(totalPulls, 1) }, 
     { label: 'Logged Entries', value: fmt(rows.length, 0) }
   ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
   
-  // Mengelompokkan berdasarkan FULL Version (1.0, 1.1, dst) tanpa memecah jadi dua kartu
   const verMap = {};
   VERSION_SCHEDULE.forEach(v => {
       if (!verMap[v.fullLabel]) verMap[v.fullLabel] = { v1:null, v2:null, jade1:0, pass1:0, jade2:0, pass2:0 };
@@ -1064,22 +1063,35 @@ function renderStellarJade() {
       const tPull = pull1 + pull2;
       const isActive = d.v1 && d.v2 && today >= d.v1.start && today < d.v2.end;
       
-      return `<div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:6px;">
+      // Menggunakan struktur flexbox baru agar teks tidak melompat ke baris baru
+      return `<div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:8px;">
         <div class="version-label" style="font-size:16px;">Version ${fullV}</div>
-        <div class="version-dates" style="margin-bottom:8px;">${formatDate(d.v1 ? d.v1.start : '')} – ${formatDate(d.v2 ? d.v2.end : '')}</div>
+        <div class="version-dates" style="margin-bottom:4px;">${formatDate(d.v1 ? d.v1.start : '')} – ${formatDate(d.v2 ? d.v2.end : '')}</div>
         
-        <div style="display:flex; flex-direction:column; gap:4px;">
-            <div class="phase-row">
+        <div style="display:flex; flex-direction:column; gap:6px;">
+            <div class="phase-row" style="display:flex; justify-content:space-between; align-items:center;">
                 <span class="phase-label">Phase 1</span>
-                <span class="phase-stats">${fmt(d.jade1,0)} SJ <span style="opacity:0.3">|</span> ${fmt(d.pass1,0)} <img src="HSR Pulls.png" class="pass-icon"> <span style="opacity:0.3">|</span> ${fmt(pull1,1)} Pulls</span>
+                <div style="display:flex; align-items:center; gap:6px; white-space:nowrap; font-family:var(--font-mono);">
+                    <span>${fmt(d.jade1,0)} SJ</span> <span style="opacity:0.3">|</span> 
+                    <span style="display:flex; align-items:center; gap:4px;">${fmt(d.pass1,0)} <img src="HSR%20Pulls.png" class="pass-icon"></span> <span style="opacity:0.3">|</span> 
+                    <span>${fmt(pull1,1)} Pulls</span>
+                </div>
             </div>
-            <div class="phase-row">
+            <div class="phase-row" style="display:flex; justify-content:space-between; align-items:center;">
                 <span class="phase-label">Phase 2</span>
-                <span class="phase-stats">${fmt(d.jade2,0)} SJ <span style="opacity:0.3">|</span> ${fmt(d.pass2,0)} <img src="HSR Pulls.png" class="pass-icon"> <span style="opacity:0.3">|</span> ${fmt(pull2,1)} Pulls</span>
+                <div style="display:flex; align-items:center; gap:6px; white-space:nowrap; font-family:var(--font-mono);">
+                    <span>${fmt(d.jade2,0)} SJ</span> <span style="opacity:0.3">|</span> 
+                    <span style="display:flex; align-items:center; gap:4px;">${fmt(d.pass2,0)} <img src="HSR%20Pulls.png" class="pass-icon"></span> <span style="opacity:0.3">|</span> 
+                    <span>${fmt(pull2,1)} Pulls</span>
+                </div>
             </div>
-            <div class="phase-row total-row">
+            <div class="phase-row total-row" style="display:flex; justify-content:space-between; align-items:center;">
                 <span class="phase-label">Total</span>
-                <span class="phase-stats">${fmt(tJade,0)} SJ <span style="opacity:0.3">|</span> ${fmt(tPass,0)} <img src="HSR Pulls.png" class="pass-icon"> <span style="opacity:0.3">|</span> ${fmt(tPull,1)} Pulls</span>
+                <div style="display:flex; align-items:center; gap:6px; white-space:nowrap; font-family:var(--font-mono);">
+                    <span>${fmt(tJade,0)} SJ</span> <span style="opacity:0.3">|</span> 
+                    <span style="display:flex; align-items:center; gap:4px;">${fmt(tPass,0)} <img src="HSR%20Pulls.png" class="pass-icon"></span> <span style="opacity:0.3">|</span> 
+                    <span>${fmt(tPull,1)} Pulls</span>
+                </div>
             </div>
         </div>
       </div>`; 
@@ -1089,6 +1101,7 @@ function renderStellarJade() {
   r => [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), r.activity, fmt(r.jade,0), fmt(r.passes,0)], 
   (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; });
 }
+
 document.getElementById('form-stellarjade').addEventListener('submit', (e) => { e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; DATA.stellarJade.push({ date: fd.get('date'), activity: fd.get('activity').trim(), jade: Number(fd.get('jade'))||0, passes: Number(fd.get('passes'))||0 }); sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs(); });
 document.querySelectorAll('.table-filter').forEach(input => { input.addEventListener('input', (e) => { const term = e.target.value.toLowerCase(); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return; if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } } else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } }); });
 document.addEventListener('click', (e) => { if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { const th = e.target; const table = th.closest('table'); const tbody = table.querySelector('tbody'); const idx = Array.from(th.parentNode.children).indexOf(th); const isAsc = th.classList.contains('asc'); table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); th.classList.add(isAsc ? 'desc' : 'asc'); const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); rows.sort((a, b) => { const aText = a.children[idx].textContent.trim(); const bText = b.children[idx].textContent.trim(); const aNum = parseFloat(aText.replace(/,/g, '')); const bNum = parseFloat(bText.replace(/,/g, '')); if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum; return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); }); tbody.append(...rows); } });
