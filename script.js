@@ -6,7 +6,7 @@ function fmt(n, d = 1) {
 function pct(n, d = 1) { return fmt(n * 100, d) + '%'; }
 function formatDate(iso) {
   if (!iso) return '—';
-  const parts = iso.split('-');
+  const parts = String(iso || '').split('-');
   if (parts.length === 3) return `${parts[0]}/${parts[1]}/${parts[2]}`;
   return iso;
 }
@@ -99,12 +99,12 @@ function recomputeDaysSince(rows) {
   const groups = {};
   rows.forEach(r => { (groups[r.category] = groups[r.category] || []).push(r); });
   Object.values(groups).forEach(group => {
-    group.sort((a, b) => a.date.localeCompare(b.date));
+    group.sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
     let prevDate = null;
     group.forEach(r => { r.daysSince = prevDate === null ? 0 : daysBetween(r.date, prevDate); prevDate = r.date; });
   });
 }
-function sortByDate(rows) { rows.sort((a, b) => a.date.localeCompare(b.date)); }
+function sortByDate(rows) { rows.sort((a, b) => String(a.date || '').localeCompare(String(b.date || ''))); }
 
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.btn-del');
@@ -213,27 +213,27 @@ function computeRosterFromHistory() {
   }
 
   for (let i = 0; i < charHistory.length; i++) {
-    const r = charHistory[i]; const name = normName(r.name); const win = (r.result || '').toUpperCase(); ensure(name);
+    const r = charHistory[i]; const name = normName(r.name); const win = String(r.result || '').toUpperCase(); ensure(name);
     if (win === 'W' || win === 'G') {
       eidoMap[name]++; obtainedMap[name] = true; eidoPullMap[name] += r.pity;
-      if (win !== 'W') { for (let j = i - 1; j >= 0; j--) { if ((charHistory[j].result || '').toUpperCase() === 'L') { eidoPullMap[name] += charHistory[j].pity; break; } } }
+      if (win !== 'W') { for (let j = i - 1; j >= 0; j--) { if (String(charHistory[j].result || '').toUpperCase() === 'L') { eidoPullMap[name] += charHistory[j].pity; break; } } }
     } else if (win === 'L') { eidoMap[name]++; obtainedMap[name] = true; eidoPullMap[name] += r.pity; }
   }
   for (let i = 0; i < lcHistory.length; i++) {
-    const r = lcHistory[i]; const name = normName(r.name); const win = (r.result || '').toUpperCase(); ensure(name);
+    const r = lcHistory[i]; const name = normName(r.name); const win = String(r.result || '').toUpperCase(); ensure(name);
     if (win === 'W' || win === 'G') {
-      signMap[name]++; if (win === 'W') { signPullMap[name] += r.pity; } else { signPullMap[name] += r.pity; for (let j = i - 1; j >= 0; j--) { if ((lcHistory[j].result || '').toUpperCase() === 'L') { signPullMap[name] += lcHistory[j].pity; break; } } }
+      signMap[name]++; if (win === 'W') { signPullMap[name] += r.pity; } else { signPullMap[name] += r.pity; for (let j = i - 1; j >= 0; j--) { if (String(lcHistory[j].result || '').toUpperCase() === 'L') { signPullMap[name] += lcHistory[j].pity; break; } } }
     } else if (win === 'L') { signMap[name]++; signPullMap[name] += r.pity; }
   }
   stdHistory.forEach(r => {
     const name = normName(r.name); ensure(name);
-    if ((r.category || '').trim() === 'Character' || (r.category || '').trim() === 'Character ') { eidoMap[name]++; obtainedMap[name] = true; eidoPullMap[name] += r.pity; } 
-    else if ((r.category || '').includes('Light Cone')) { signMap[name]++; signPullMap[name] += r.pity; }
+    if (String(r.category || '').trim() === 'Character' || String(r.category || '').trim() === 'Character ') { eidoMap[name]++; obtainedMap[name] = true; eidoPullMap[name] += r.pity; } 
+    else if (String(r.category || '').includes('Light Cone')) { signMap[name]++; signPullMap[name] += r.pity; }
   });
   freebiesData.forEach(r => {
     const name = normName(r.name); ensure(name);
-    if ((r.category || '').trim().includes('Character')) { eidoMap[name]++; obtainedMap[name] = true; } 
-    else if ((r.category || '').includes('Light Cone')) { signMap[name]++; }
+    if (String(r.category || '').trim().includes('Character')) { eidoMap[name]++; obtainedMap[name] = true; } 
+    else if (String(r.category || '').includes('Light Cone')) { signMap[name]++; }
   });
 
   const allNames = new Set([
@@ -252,7 +252,7 @@ function computeRosterFromHistory() {
     
     let source = existing ? existing.source : (baseInfo.source || 'Unknown');
     let imgData = null;
-    if (existing && existing.img && !existing.img.includes('viewBox')) {
+    if (existing && existing.img && !String(existing.img || '').includes('viewBox')) {
         imgData = existing.img; 
     } else {
         imgData = baseInfo.img || null; 
@@ -306,7 +306,7 @@ function computeBannerStats(rows, maxPity) {
 }
 function bestWinStreak(rows) {
   let best = 0, cur = 0;
-  [...rows].sort((a, b) => a.date.localeCompare(b.date)).forEach(r => { if (r.result === 'W') { cur++; best = Math.max(best, cur); } else if (r.result === 'L') { cur = 0; } });
+  [...rows].sort((a, b) => String(a.date || '').localeCompare(String(b.date || ''))).forEach(r => { if (r.result === 'W') { cur++; best = Math.max(best, cur); } else if (r.result === 'L') { cur = 0; } });
   return best;
 }
 function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
@@ -349,8 +349,8 @@ window.editEntry = function(section, idx) {
   
   // Deteksi khusus jika yang diedit adalah Stellar Jade (menggunakan sistem 2 form)
   if (section === 'stellarJade') {
-     const act = item.activity || '';
-     const isSpend = item.jade < 0 || item.passes < 0 || act.includes('[SPEND]');
+     const act = String(item.activity || '');
+     const isSpend = item.jade < 0 || item.passes < 0 || act.toUpperCase().includes('[SPEND]');
      
      formId = isSpend ? 'form-spend' : 'form-income';
      
@@ -428,7 +428,7 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
     const rosterEntry = (DATA.roster || []).find(char => normName(char.name) === lowerName);
     let imgSrc = DEFAULT_AVATAR;
     
-    if (rosterEntry && rosterEntry.img && !rosterEntry.img.includes('viewBox')) {
+    if (rosterEntry && rosterEntry.img && !String(rosterEntry.img || '').includes('viewBox')) {
         imgSrc = rosterEntry.img;
     } else if (MASTER_CHARACTERS[lowerName] && MASTER_CHARACTERS[lowerName].img) {
         imgSrc = MASTER_CHARACTERS[lowerName].img;
@@ -467,14 +467,14 @@ document.getElementById('limitedTabs').addEventListener('click', (e) => {
 function renderManageLimited() { 
   renderDeleteTable('manageTable-limited', 'limited', ['Date','Type','Name','Pity','Result','Days Since'], 
   r => [formatDate(r.date), r.category, r.name, r.pity, r.result === 'W' ? 'Win' : r.result === 'L' ? 'Loss' : 'Guaranteed', r.daysSince], 
-  (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; }); 
+  (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; }); 
 }
 
 function renderStandard() { const rows = DATA.standard || []; renderBannerStats('standardStats', computeBannerStats(rows, 80)); renderTrack('standardTrack', rows, 80, false); }
 function renderManageStandard() { 
   renderDeleteTable('manageTable-standard', 'standard', ['Date','Type','Name','Pity','Days Since'], 
   r => [formatDate(r.date), r.category, r.name, r.pity, r.daysSince], 
-  (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; }); 
+  (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; }); 
 }
 document.getElementById('form-standard').addEventListener('submit', (e) => {
   e.preventDefault(); const fd = new FormData(e.target); if (!DATA.standard) DATA.standard = [];
@@ -494,7 +494,7 @@ function renderFreebies() {
     const rosterEntry = (DATA.roster || []).find(char => normName(char.name) === lowerName);
     let imgSrc = DEFAULT_AVATAR;
     
-    if (rosterEntry && rosterEntry.img && !rosterEntry.img.includes('viewBox')) {
+    if (rosterEntry && rosterEntry.img && !String(rosterEntry.img || '').includes('viewBox')) {
         imgSrc = rosterEntry.img;
     } else if (MASTER_CHARACTERS[lowerName] && MASTER_CHARACTERS[lowerName].img) {
         imgSrc = MASTER_CHARACTERS[lowerName].img;
@@ -517,7 +517,7 @@ function renderFreebies() {
 function renderManageFreebies() { 
   renderDeleteTable('manageTable-freebies', 'freebies', ['Date','Version','Type','Name','Event'], 
   r => [formatDate(r.date), getFullVersionForDate(r.date, VERSION_SCHEDULE), r.category, r.name, r.event], 
-  (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; }); 
+  (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; }); 
 }
 document.getElementById('form-freebies').addEventListener('submit', (e) => {
   e.preventDefault(); const fd = new FormData(e.target); if (!DATA.freebies) DATA.freebies = [];
@@ -621,7 +621,7 @@ function renderCalc() {
   `).join('');
 }
 function renderPriority() {
-  if (DATA.priority) { DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority)); DATA.priority.forEach(r => { let avgPull = 85; let worstPull = 180; if ((r.type || '').toLowerCase().includes('light cone') || (r.type || '').toLowerCase().includes('lightcone')) { avgPull = 65; worstPull = 160; } r.averagePull = avgPull; r.worstPull = worstPull; }); }
+  if (DATA.priority) { DATA.priority.sort((a, b) => Number(a.priority) - Number(b.priority)); DATA.priority.forEach(r => { let avgPull = 85; let worstPull = 180; if (String(r.type || '').toLowerCase().includes('light cone') || String(r.type || '').toLowerCase().includes('lightcone')) { avgPull = 65; worstPull = 160; } r.averagePull = avgPull; r.worstPull = worstPull; }); }
   renderDeleteTable('manageTable-priority', 'priority', ['Priority','Name','Type','Archetype','Average Pull','Worst Scenario Pull','Patch (min-max)'], r => [r.priority, r.name, r.type, r.archetype, fmt(r.averagePull,0), fmt(r.worstPull,0), `${fmt(r.averagePull/100,2)}–${fmt(r.worstPull/100,2)}`], (a, b) => a.r.priority - b.r.priority);
 }
 document.getElementById('form-priority').addEventListener('submit', (e) => {
@@ -775,7 +775,7 @@ document.getElementById('form-team').addEventListener('click', (e) => {
 function getSlotMembers(role) {
   return [...document.querySelectorAll(`#slot-${role} .slot-row`)].map(row => {
     const name = row.querySelector('.slot-name')?.value || ''; const eido = row.querySelector('.slot-eidolon')?.value || 'E0'; const sign = row.querySelector('.slot-sign')?.value || 'S0';
-    const previewSrc = row.querySelector('.slot-preview')?.src; const img = (previewSrc && !previewSrc.includes('viewBox')) ? previewSrc : DEFAULT_AVATAR;
+    const previewSrc = row.querySelector('.slot-preview')?.src; const img = (previewSrc && !String(previewSrc || '').includes('viewBox')) ? previewSrc : DEFAULT_AVATAR;
     return name ? { name, eido, sign, img } : null;
   }).filter(Boolean);
 }
@@ -784,7 +784,7 @@ function computeTeamCostAndPV(members) {
   const freeMap = {}, stdMap = {}, loseMap = {};
   (DATA.freebies||[]).forEach(r => { const n = normName(r.name); freeMap[n] = (freeMap[n]||0)+1; });
   (DATA.standard||[]).forEach(r => { const n = normName(r.name); stdMap[n]  = (stdMap[n] ||0)+1; });
-  (DATA.limited||[]).filter(r => (r.result||'').toUpperCase() === 'L').forEach(r => { const n = normName(r.name); loseMap[n] = (loseMap[n]||0)+1; });
+  (DATA.limited||[]).filter(r => String(r.result||'').toUpperCase() === 'L').forEach(r => { const n = normName(r.name); loseMap[n] = (loseMap[n]||0)+1; });
   let totalPV = 0, limited = 0, standard = 0, freebies = 0;
   members.forEach(m => {
     if (isMC(m.name)) return;
@@ -812,10 +812,11 @@ function renderTeam() {
   if (!DATA.team || !DATA.team.length) { grid.innerHTML = '<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No teams built yet.</p>'; return; }
   let indexed = DATA.team.map((r, idx) => ({ ...r, _idx: idx }));
   indexed.sort((a, b) => {
-    if (teamSortValue === 'nameAsc') return a.archetype.localeCompare(b.archetype); if (teamSortValue === 'nameDesc') return b.archetype.localeCompare(a.archetype);
+    if (teamSortValue === 'nameAsc') return String(a.archetype || '').localeCompare(String(b.archetype || '')); if (teamSortValue === 'nameDesc') return String(b.archetype || '').localeCompare(String(a.archetype || ''));
     if (teamSortValue === 'pvAsc') return a.pullValue - b.pullValue; if (teamSortValue === 'pvDesc') return b.pullValue - a.pullValue;
-    const costA = parseInt(a.cost.match(/(\d+) Limited/) ? a.cost.match(/(\d+) Limited/)[1] : 0) * 1000 + a.pullValue;
-    const costB = parseInt(b.cost.match(/(\d+) Limited/) ? b.cost.match(/(\d+) Limited/)[1] : 0) * 1000 + b.pullValue;
+    const costStrA = String(a.cost || ''); const costStrB = String(b.cost || '');
+    const costA = parseInt(costStrA.match(/(\d+) Limited/) ? costStrA.match(/(\d+) Limited/)[1] : 0) * 1000 + (a.pullValue || 0);
+    const costB = parseInt(costStrB.match(/(\d+) Limited/) ? costStrB.match(/(\d+) Limited/)[1] : 0) * 1000 + (b.pullValue || 0);
     if (teamSortValue === 'costDesc') return costB - costA; if (teamSortValue === 'costAsc') return costA - costB;
     return b.pullValue - a.pullValue;
   });
@@ -860,7 +861,7 @@ document.getElementById('form-team').addEventListener('submit', (e) => {
 window.dupTeam = function(idx) { const team = DATA.team[idx]; DATA.team.push(JSON.parse(JSON.stringify(team))); saveWorkingData(); renderAll(); }
 window.editTeam = function(idx) {
   const team = DATA.team[idx];
-  const parseRole = (str) => str.split(', ').filter(Boolean).map(s => { const lastSpace = s.lastIndexOf(' E'); if (lastSpace !== -1) { return { name: s.substring(0, lastSpace), eido: s.substring(lastSpace + 1, lastSpace + 3), sign: s.substring(lastSpace + 3, lastSpace + 5) }; } return null; }).filter(Boolean);
+  const parseRole = (str) => String(str || '').split(', ').filter(Boolean).map(s => { const lastSpace = s.lastIndexOf(' E'); if (lastSpace !== -1) { return { name: s.substring(0, lastSpace), eido: s.substring(lastSpace + 1, lastSpace + 3), sign: s.substring(lastSpace + 3, lastSpace + 5) }; } return null; }).filter(Boolean);
   const populateRole = (roleName, parsedArr) => {
     const slotDiv = document.getElementById('slot-' + roleName); const rows = slotDiv.querySelectorAll('.slot-row'); rows.forEach((row, i) => { if (i > 0) row.remove(); }); 
     parsedArr.forEach((p, i) => {
@@ -892,44 +893,44 @@ function getRosterRows() {
         return a.isOwned ? -1 : 1;
     }
 
-    if (rosterSortValue === 'nameAsc') return a.name.localeCompare(b.name); 
-    if (rosterSortValue === 'nameDesc') return b.name.localeCompare(a.name);
+    if (rosterSortValue === 'nameAsc') return String(a.name||'').localeCompare(String(b.name||'')); 
+    if (rosterSortValue === 'nameDesc') return String(b.name||'').localeCompare(String(a.name||''));
     
-    let ea = parseInt(a.eidolon.replace('E','').replace('No','0')) || 0; 
-    let sa = parseInt(a.signature.replace('S','')) || 0; 
-    let eb = parseInt(b.eidolon.replace('E','').replace('No','0')) || 0; 
-    let sb = parseInt(b.signature.replace('S','')) || 0;
+    let ea = parseInt(String(a.eidolon||'').replace('E','').replace('No','0')) || 0; 
+    let sa = parseInt(String(a.signature||'').replace('S','')) || 0; 
+    let eb = parseInt(String(b.eidolon||'').replace('E','').replace('No','0')) || 0; 
+    let sb = parseInt(String(b.signature||'').replace('S','')) || 0;
 
     if (a.source === 'Main Character') ea = 0;
     if (b.source === 'Main Character') eb = 0;
     
     if (rosterSortValue === 'eidolonDesc') { 
         if (eb !== ea) return eb - ea; 
-        return b.totalPullValue - a.totalPullValue; 
+        return (b.totalPullValue||0) - (a.totalPullValue||0); 
     }
     if (rosterSortValue === 'eidolonAsc') { 
         if (ea !== eb) return ea - eb; 
-        return a.totalPullValue - b.totalPullValue; 
+        return (a.totalPullValue||0) - (b.totalPullValue||0); 
     }
     
     if (rosterSortValue === 'costDesc') { 
         const costA = ea + sa; 
         const costB = eb + sb; 
         if (costB !== costA) return costB - costA; 
-        return b.totalPullValue - a.totalPullValue; 
+        return (b.totalPullValue||0) - (a.totalPullValue||0); 
     }
     if (rosterSortValue === 'costAsc') { 
         const costA = ea + sa; 
         const costB = eb + sb; 
         if (costA !== costB) return costA - costB; 
-        return a.totalPullValue - b.totalPullValue; 
+        return (a.totalPullValue||0) - (b.totalPullValue||0); 
     }
     
     if (rosterSortValue === 'pullValueAsc') {
-        return a.totalPullValue - b.totalPullValue;
+        return (a.totalPullValue||0) - (b.totalPullValue||0);
     }
     
-    return b.totalPullValue - a.totalPullValue;
+    return (b.totalPullValue||0) - (a.totalPullValue||0);
   }); 
   return rows;
 }
@@ -943,7 +944,7 @@ function renderRoster() {
     const imgSrc = r.img || DEFAULT_AVATAR;
     const unownedCls = r.isOwned ? '' : 'unowned';
     const notOwnedBadge = r.isOwned ? '' : `<div class="unowned-tag">NOT OWNED</div>`;
-    const tagClass = r.source.replace(/\s+/g, '');
+    const tagClass = String(r.source||'').replace(/\s+/g, '');
     
     return `<div class="roster-card searchable-item ${unownedCls}" data-idx="${r._idx}">
         <div class="roster-img-wrap"><img src="${imgSrc}" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">${notOwnedBadge}<div class="tag ${tagClass} roster-type-tag">${r.source}</div><button class="roster-del-btn" onclick="deleteEntry('roster', ${r._idx})" title="Delete">✕</button></div>
@@ -955,7 +956,7 @@ function renderRoster() {
 document.getElementById('rosterTabs').addEventListener('click', (e) => { const btn = e.target.closest('.tab'); if (!btn) return; document.querySelectorAll('#rosterTabs .tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); rosterFilter = btn.dataset.filter; renderRoster(); });
 document.getElementById('form-character').addEventListener('submit', (e) => {
   e.preventDefault(); const fd = new FormData(e.target); const name = fd.get('name').trim(); const src = fd.get('source');
-  const imgSrc = document.getElementById('charFormImg').src; const isDefault = imgSrc.includes('viewBox'); 
+  const imgSrc = document.getElementById('charFormImg').src; const isDefault = String(imgSrc||'').includes('viewBox'); 
   const existing = (DATA.roster||[]).find(r => normName(r.name) === normName(name));
   if (existing) { existing.source = src; if (!isDefault) existing.img = imgSrc; } else { if(!DATA.roster) DATA.roster = []; DATA.roster.push({ name, source: src, img: isDefault ? null : imgSrc, eidolon: 'No', signature: 'S0', pullValueEidolon: 0, pullValueSignature: 0, totalPullValue: 0, pullPercent: 0, isOwned: true }); }
   recomputeRosterPercent(); saveWorkingData(); renderAll(); e.target.reset(); document.getElementById('charFormImg').src = DEFAULT_AVATAR; 
@@ -978,9 +979,9 @@ function renderStellarJade() {
   rows.forEach(r => {
       let j = parseFloat(r.jade) || 0;
       let p = parseFloat(r.passes) || 0;
-      let act = (r.activity || '');
+      let act = String(r.activity || '');
       
-      let isSpend = j < 0 || p < 0 || act.includes('[SPEND]');
+      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]');
       let isSaving = act.toLowerCase().includes('saving');
 
       if (isSpend) {
@@ -1066,14 +1067,14 @@ function renderStellarJade() {
   r => {
       let j = parseFloat(r.jade) || 0;
       let p = parseFloat(r.passes) || 0;
-      let act = (r.activity || '');
+      let act = String(r.activity || '');
       
-      let isSpend = j < 0 || p < 0 || act.includes('[SPEND]');
+      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]');
       let isSaving = act.toLowerCase().includes('saving');
 
       let jStr = fmt(isSpend ? -Math.abs(j) : Math.abs(j), 0);
       let pStr = fmt(isSpend ? -Math.abs(p) : Math.abs(p), 0);
-      let actDisplay = act.replace('[SPEND]', '').trim();
+      let actDisplay = act.replace(/\[SPEND\]/gi, '').trim();
       
       if (isSpend) {
           jStr = `<span style="color:var(--loss)">${jStr}</span>`;
@@ -1090,7 +1091,7 @@ function renderStellarJade() {
 
       return [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), actDisplay, jStr, pStr];
   }, 
-  (a, b) => { const cmp = b.r.date.localeCompare(a.r.date); return cmp !== 0 ? cmp : b.idx - a.idx; });
+  (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; });
 
   const totalSavingPulls = (currentJade / 160) + currentPasses;
   document.getElementById('jadeStats').innerHTML = [
@@ -1110,7 +1111,7 @@ document.getElementById('form-income').addEventListener('submit', (e) => {
     
     DATA.stellarJade.push({ 
         date: fd.get('date'), 
-        activity: fd.get('activity').trim(), 
+        activity: String(fd.get('activity') || '').trim(), 
         jade: Math.abs(Number(fd.get('jade')) || 0), 
         passes: Math.abs(Number(fd.get('passes')) || 0) 
     }); 
@@ -1129,14 +1130,13 @@ document.getElementById('form-spend').addEventListener('submit', (e) => {
     if(!DATA.stellarJade) DATA.stellarJade = []; 
     
     let pullsToSpend = Math.abs(Number(fd.get('pulls')) || 0);
-    let reason = fd.get('reason').trim();
+    let reason = String(fd.get('reason') || '').trim();
     
-    // Hitung ketersediaan pass secara global saat ini
     let availablePasses = DATA.stellarJade.reduce((s, r) => {
         let p = Number(r.passes) || 0;
         let j = Number(r.jade) || 0;
-        let act = (r.activity || '');
-        let isSpend = j < 0 || p < 0 || act.includes('[SPEND]');
+        let act = String(r.activity || '');
+        let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]');
         return s + (isSpend ? -Math.abs(p) : Math.abs(p));
     }, 0);
     
@@ -1145,7 +1145,6 @@ document.getElementById('form-spend').addEventListener('submit', (e) => {
     let pDeduct = 0;
     let jDeduct = 0;
 
-    // Logika Pemotongan: Habiskan Pass dulu, sisa kurangnya potong dari Jade (x160)
     if (pullsToSpend <= availablePasses) {
         pDeduct = pullsToSpend;
     } else {
