@@ -1073,7 +1073,7 @@ function renderStellarJade() {
           html += `
           <div style="grid-column: 1 / -1; margin-top: 12px; margin-bottom: 12px;">
               <button id="btnToggleOlderVersions" class="btn-ghost" style="width:100%; padding: 14px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.03); border-radius: 10px;">
-                  ⬇ Show Previous ${olderVersions.length} Versions
+                  Show Previous Versions
               </button>
           </div>
           <div id="olderVersionsContainer" style="display:none; grid-column: 1 / -1;">
