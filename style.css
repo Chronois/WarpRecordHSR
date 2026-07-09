@@ -358,6 +358,14 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cur
 .roster-card.unowned .roster-name { color: var(--text-dim); }
 .roster-card.unowned .roster-stats { opacity: 0.4; }
 .unowned-tag { position: absolute; top: 8px; left: 8px; background: rgba(226, 128, 125, 0.15); backdrop-filter: blur(4px); border: 1px solid var(--loss); color: var(--loss); font-family: var(--font-mono); font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: bold; z-index: 2; letter-spacing: 0.05em; }
+
+/* =========================================
+   HOVER EFFECT: VERSION CARDS (STELLAR JADE)
+   ========================================= */
+.version-card {transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;}
+.version-card:hover {background: var(--surface-2) !important;transform: translateY(-4px) !important;box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4) !important;border-color: var(--cyan) !important;}
+/* Khusus untuk kartu versi yang sedang aktif (Active Version) agar hover-nya berwarna emas */
+.version-card.version-active:hover {border-color: var(--gold-soft) !important;box-shadow: 0 12px 24px rgba(232, 184, 75, 0.2) !important;}
 .pass-icon { width: 14px !important; height: 14px !important; object-fit: contain !important; vertical-align: middle !important; margin-top: -2px !important; }
 
 /* CROPPER MODAL STYLES */
