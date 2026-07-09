@@ -1290,6 +1290,78 @@ function renderStellarJade() {
     { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
   ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
 }
+// ============ LOGIC LISTENER UNTUK 2 FORM BARU ============
+
+// 1. FORM ADD INCOME
+const formIncome = document.getElementById('form-income');
+if (formIncome) {
+    formIncome.addEventListener('submit', (e) => { 
+        e.preventDefault(); // Mencegah page refresh
+        const fd = new FormData(e.target); 
+        if(!DATA.stellarJade) DATA.stellarJade = []; 
+        
+        DATA.stellarJade.push({ 
+            date: fd.get('date'), 
+            activity: String(fd.get('activity') || '').trim(), 
+            jade: Math.abs(Number(fd.get('jade')) || 0), 
+            passes: Math.abs(Number(fd.get('passes')) || 0) 
+        }); 
+        
+        sortByDate(DATA.stellarJade); 
+        saveWorkingData(); 
+        renderAll(); 
+        e.target.reset(); 
+        initDateInputs(); 
+    });
+}
+
+// 2. FORM LOG SPEND (Potong Pass dulu, lalu Jade)
+const formSpend = document.getElementById('form-spend');
+if (formSpend) {
+    formSpend.addEventListener('submit', (e) => { 
+        e.preventDefault(); // Mencegah page refresh
+        const fd = new FormData(e.target); 
+        if(!DATA.stellarJade) DATA.stellarJade = []; 
+        
+        let pullsToSpend = Math.abs(Number(fd.get('pulls')) || 0);
+        let reason = String(fd.get('reason') || '').trim();
+        
+        let availablePasses = DATA.stellarJade.reduce((s, r) => {
+            let p = Number(r.passes) || 0;
+            let j = Number(r.jade) || 0;
+            let act = String(r.activity || '');
+            let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]');
+            return s + (isSpend ? -Math.abs(p) : Math.abs(p));
+        }, 0);
+        
+        availablePasses = Math.max(0, availablePasses);
+        
+        let pDeduct = 0;
+        let jDeduct = 0;
+
+        if (pullsToSpend <= availablePasses) {
+            pDeduct = pullsToSpend;
+        } else {
+            pDeduct = availablePasses;
+            let remainingPulls = pullsToSpend - availablePasses;
+            jDeduct = remainingPulls * 160;
+        }
+
+        DATA.stellarJade.push({ 
+            date: fd.get('date'), 
+            activity: `[SPEND] ${reason}`, 
+            jade: -jDeduct, 
+            passes: -pDeduct 
+        }); 
+        
+        sortByDate(DATA.stellarJade); 
+        saveWorkingData(); 
+        renderAll(); 
+        e.target.reset(); 
+        initDateInputs(); 
+    });
+}
+
 document.querySelectorAll('.table-filter').forEach(input => { input.addEventListener('input', (e) => { const term = e.target.value.toLowerCase(); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return; if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } } else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } }); });
 document.addEventListener('click', (e) => { if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { const th = e.target; const table = th.closest('table'); const tbody = table.querySelector('tbody'); const idx = Array.from(th.parentNode.children).indexOf(th); const isAsc = th.classList.contains('asc'); table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); th.classList.add(isAsc ? 'desc' : 'asc'); const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); rows.sort((a, b) => { const aText = a.children[idx].textContent.trim(); const bText = b.children[idx].textContent.trim(); const aNum = parseFloat(aText.replace(/,/g, '')); const bNum = parseFloat(bText.replace(/,/g, '')); if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum; return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); }); tbody.append(...rows); } });
 document.getElementById('btnDownloadJson')?.addEventListener('click', () => { const content = JSON.stringify(DATA, null, 2); const blob = new Blob([content], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
