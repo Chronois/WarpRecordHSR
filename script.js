@@ -1067,6 +1067,13 @@ document.getElementById('form-character').addEventListener('submit', (e) => {
 });
 
 // ============ STELLAR JADE & MANAGEMENT ============
+const F2P_ESTIMATES = {
+  '1.0': 213.7, '1.1': 93.7, '1.2': 94.1, '1.3': 115.7, '1.4': 77.2, '1.5': 106.0, '1.6': 103.7,
+  '2.0': 124.4, '2.1': 123.6, '2.2': 106.4, '2.3': 103.1, '2.4': 87.9, '2.5': 97.5, '2.6': 108.0, '2.7': 91.9,
+  '3.0': 120.7, '3.1': 111.3, '3.2': 123.8, '3.3': 103.8, '3.4': 92.4, '3.5': 92.2, '3.6': 94.0, '3.7': 125.7, '3.8': 104.3,
+  '4.0': 90.8, '4.1': 129.4, '4.2': 131.6, '4.3': 84.3
+};
+
 function renderStellarJade() {
   const rows = DATA.stellarJade || []; 
   
@@ -1119,8 +1126,13 @@ function renderStellarJade() {
       const d = verMap[fullV];
       return (d.jade1>0 || d.pass1>0 || d.jade2>0 || d.pass2>0) || (d.v1 && d.v1.start <= today);
   });
-  
-  document.getElementById('versionGrid').innerHTML = relevantVersions.length ? relevantVersions.map(fullV => { 
+
+  // Pemisahan 5 versi terbaru dan versi sebelumnya
+  const cutoff = Math.max(0, relevantVersions.length - 5);
+  const olderVersions = relevantVersions.slice(0, cutoff);
+  const recentVersions = relevantVersions.slice(cutoff);
+
+  const renderCard = (fullV, isOlder) => {
       const d = verMap[fullV];
       const pull1 = (d.jade1 / 160) + d.pass1;
       const pull2 = (d.jade2 / 160) + d.pass2;
@@ -1128,6 +1140,23 @@ function renderStellarJade() {
       const tPass = d.pass1 + d.pass2;
       const tPull = pull1 + pull2;
       const isActive = d.v1 && d.v2 && today >= d.v1.start && today < d.v2.end;
+      
+      // Menggunakan estimasi kasar F2P untuk versi lama jika user tidak punya data
+      if (isOlder && tPull === 0 && F2P_ESTIMATES[fullV]) {
+          return `
+          <div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
+            <div>
+                <div class="version-label" style="font-size:16px; color:var(--text);">Version ${fullV}</div>
+                <div class="version-dates" style="font-size:11px; color:var(--text-dim); margin-top:2px;">${formatDate(d.v1 ? d.v1.start : '')} – ${formatDate(d.v2 ? d.v2.end : '')}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.02); padding:16px 12px; border-radius:8px; text-align:center; border: 1px dashed rgba(255,255,255,0.1); flex:1; display:flex; flex-direction:column; justify-content:center;">
+                <div style="font-size:11px; color:var(--text-dim); margin-bottom:6px;">Estimated F2P Income</div>
+                <div style="display:flex; justify-content:center; align-items:center; gap:6px; font-family:var(--font-mono); font-size:18px; font-weight:bold; color:var(--gold-soft);">
+                    ~${F2P_ESTIMATES[fullV]} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:16px;height:16px;margin-top:0;">
+                </div>
+            </div>
+          </div>`;
+      }
       
       return `
       <div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
@@ -1165,8 +1194,46 @@ function renderStellarJade() {
             </div>
         </div>
       </div>`; 
-  }).join('') : `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`;
+  };
+
+  let html = '';
+  if (relevantVersions.length === 0) {
+      html = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">No data yet.</p>`;
+  } else {
+      let olderHtml = olderVersions.map(v => renderCard(v, true)).join('');
+      let recentHtml = recentVersions.map(v => renderCard(v, false)).join('');
+      
+      html = `
+        ${olderVersions.length > 0 ? `
+          <div id="olderVersionsContainer" style="display:none; grid-column: 1 / -1; margin-bottom: 8px;">
+             <div class="version-grid" style="opacity:0.85;">${olderHtml}</div>
+          </div>
+          <div style="grid-column: 1 / -1; margin-bottom: 16px;">
+              <button id="btnToggleOlderVersions" class="btn-ghost" style="width:100%; border-style:dashed;">⬇ Show Previous ${olderVersions.length} Versions</button>
+          </div>
+        ` : ''}
+        ${recentHtml}
+      `;
+  }
   
+  document.getElementById('versionGrid').innerHTML = html;
+
+  // Event listener untuk tombol Toggle
+  const toggleBtn = document.getElementById('btnToggleOlderVersions');
+  if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+          const container = document.getElementById('olderVersionsContainer');
+          if (container.style.display === 'none') {
+              container.style.display = 'block';
+              this.innerHTML = '⬆ Hide Previous Versions';
+          } else {
+              container.style.display = 'none';
+              this.innerHTML = '⬇ Show Previous ' + olderVersions.length + ' Versions';
+          }
+      });
+  }
+
+  // --- Bagian tabel delete tidak dirubah ---
   renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','Stellar Jade','Star Rail Pass'], 
   r => {
       let j = parseFloat(r.jade) || 0;
@@ -1204,72 +1271,6 @@ function renderStellarJade() {
     { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
   ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
 }
-
-// ============ LOGIC LISTENER UNTUK 2 FORM BARU ============
-
-// 1. FORM ADD INCOME
-document.getElementById('form-income').addEventListener('submit', (e) => { 
-    e.preventDefault(); 
-    const fd = new FormData(e.target); 
-    if(!DATA.stellarJade) DATA.stellarJade = []; 
-    
-    DATA.stellarJade.push({ 
-        date: fd.get('date'), 
-        activity: String(fd.get('activity') || '').trim(), 
-        jade: Math.abs(Number(fd.get('jade')) || 0), 
-        passes: Math.abs(Number(fd.get('passes')) || 0) 
-    }); 
-    
-    sortByDate(DATA.stellarJade); 
-    saveWorkingData(); 
-    renderAll(); 
-    e.target.reset(); 
-    initDateInputs(); 
-});
-
-// 2. FORM LOG SPEND (Potong Pass dulu, lalu Jade)
-document.getElementById('form-spend').addEventListener('submit', (e) => { 
-    e.preventDefault(); 
-    const fd = new FormData(e.target); 
-    if(!DATA.stellarJade) DATA.stellarJade = []; 
-    
-    let pullsToSpend = Math.abs(Number(fd.get('pulls')) || 0);
-    let reason = String(fd.get('reason') || '').trim();
-    
-    let availablePasses = DATA.stellarJade.reduce((s, r) => {
-        let p = Number(r.passes) || 0;
-        let j = Number(r.jade) || 0;
-        let act = String(r.activity || '');
-        let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]');
-        return s + (isSpend ? -Math.abs(p) : Math.abs(p));
-    }, 0);
-    
-    availablePasses = Math.max(0, availablePasses);
-    
-    let pDeduct = 0;
-    let jDeduct = 0;
-
-    if (pullsToSpend <= availablePasses) {
-        pDeduct = pullsToSpend;
-    } else {
-        pDeduct = availablePasses;
-        let remainingPulls = pullsToSpend - availablePasses;
-        jDeduct = remainingPulls * 160;
-    }
-
-    DATA.stellarJade.push({ 
-        date: fd.get('date'), 
-        activity: `[SPEND] ${reason}`, 
-        jade: -jDeduct, 
-        passes: -pDeduct 
-    }); 
-    
-    sortByDate(DATA.stellarJade); 
-    saveWorkingData(); 
-    renderAll(); 
-    e.target.reset(); 
-    initDateInputs(); 
-});
 
 document.querySelectorAll('.table-filter').forEach(input => { input.addEventListener('input', (e) => { const term = e.target.value.toLowerCase(); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return; if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } } else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } }); });
 document.addEventListener('click', (e) => { if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { const th = e.target; const table = th.closest('table'); const tbody = table.querySelector('tbody'); const idx = Array.from(th.parentNode.children).indexOf(th); const isAsc = th.classList.contains('asc'); table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); th.classList.add(isAsc ? 'desc' : 'asc'); const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); rows.sort((a, b) => { const aText = a.children[idx].textContent.trim(); const bText = b.children[idx].textContent.trim(); const aNum = parseFloat(aText.replace(/,/g, '')); const bNum = parseFloat(bText.replace(/,/g, '')); if (!isNaN(aNum) && !isNaN(bNum)) return isAsc ? bNum - aNum : aNum - bNum; return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); }); tbody.append(...rows); } });
