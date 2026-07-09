@@ -652,52 +652,67 @@
       <div class="version-grid" id="versionGrid"></div>
     </section>
 
-    <section class="section">
-      <div class="section-head">
-        <span class="eyebrow">Log Income</span>
-        <h2>Add a Transaction</h2>
+    <div class="section-head">
+        <span class="eyebrow">Log Data</span>
+        <h2>Income & Spend</h2>
       </div>
-      <form class="manage-form" id="form-stellarjade" data-section="stellarJade">
-        <div class="field">
-          <label>Date</label>
-          <input type="date" name="date" required>
-        </div>
-        <div class="field field-grow">
-          <label>Activity / Event</label>
-          <input type="text" name="activity" required placeholder="e.g. Daily + Express" list="activityOptions">
-          <datalist id="activityOptions">
-            <option value="Daily + Express">
-            <option value="Weekly CW/DU Reset">
-            <option value="Character Dialog">
-            <option value="Character Trial">
-            <option value="Event">
-            <option value="Memory of Chaos">
-            <option value="Pure Fiction">
-            <option value="Apocalyptic Shadow">
-            <option value="Nameless Glory">
-            <option value="Birthday Gift">
-            <option value="Gift of Odysses">
-            <option value="Hoyolab Login">
-            <option value="Maintenance">
-            <option value="Maps">
-            <option value="Missions">
-            <option value="Shop Reset">
-            <option value="Special Program Redeem Code">
-          </datalist>
-        </div>
-        <div class="field field-narrow">
-          <label>Stellar Jade</label>
-          <input type="number" name="jade" min="0" step="1" value="0">
-        </div>
-        <div class="field field-narrow">
-          <label>Star Rail Pass</label>
-          <input type="number" name="passes" min="0" step="1" value="0">
-        </div>
-        <div style="display: flex; gap: 8px; align-items: flex-end;">
-          <button type="submit" name="actionType" value="add" class="btn-add" style="flex: 1;">+ Add</button>
-          <button type="submit" name="actionType" value="spend" class="btn-add" style="flex: 1; background: var(--loss); border-color: var(--loss); color: #fff;">- Spend</button>
-        </div>
-      </form>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
+        
+        <!-- BAGAN 1: FORM INCOME -->
+        <form class="manage-form" id="form-income" data-section="stellarJade" style="margin: 0;">
+          <h3 style="margin-top:0; font-size:16px; color:var(--cyan); margin-bottom:16px;">+ Log Income</h3>
+          <div class="field">
+            <label>Date</label>
+            <input type="date" name="date" required>
+          </div>
+          <div class="field field-grow">
+            <label>Activity / Event</label>
+            <input type="text" name="activity" required placeholder="e.g. Daily + Express" list="activityOptions">
+            <datalist id="activityOptions">
+              <option value="Daily + Express"></option>
+              <option value="Weekly CW/DU Reset"></option>
+              <option value="Character Trial"></option>
+              <option value="Event"></option>
+              <option value="Memory of Chaos"></option>
+              <option value="Pure Fiction"></option>
+              <option value="Apocalyptic Shadow"></option>
+              <option value="Maintenance"></option>
+              <option value="Missions"></option>
+            </datalist>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top:12px;">
+              <div class="field field-grow">
+                <label>Stellar Jade</label>
+                <input type="number" name="jade" min="0" step="1" value="0">
+              </div>
+              <div class="field field-grow">
+                <label>Star Rail Pass</label>
+                <input type="number" name="passes" min="0" step="1" value="0">
+              </div>
+          </div>
+          <button type="submit" class="btn-add" style="width: 100%; margin-top: 12px;">+ Add Income</button>
+        </form>
+
+        <!-- BAGAN 2: FORM SPEND -->
+        <form class="manage-form" id="form-spend" data-section="stellarJade" style="margin: 0; border-color: rgba(226, 128, 125, 0.3); background: rgba(226, 128, 125, 0.02);">
+          <h3 style="margin-top:0; font-size:16px; color:var(--loss); margin-bottom:16px;">- Log Spend</h3>
+          <div class="field">
+            <label>Date</label>
+            <input type="date" name="date" required>
+          </div>
+          <div class="field field-grow">
+            <label>Banner / Reason</label>
+            <input type="text" name="reason" required placeholder="e.g. Feixiao Banner">
+          </div>
+          <div class="field field-grow" style="margin-top:12px;">
+            <label>Pulls Used (Tickets)</label>
+            <input type="number" name="pulls" min="1" step="1" required placeholder="e.g. 10">
+          </div>
+          <button type="submit" class="btn-add" style="width: 100%; margin-top: auto; background: var(--loss); border-color: var(--loss); color: #fff;">- Spend Pulls</button>
+        </form>
+
+      </div>
       <div class="filter-wrap"><input type="text" class="table-filter" data-table="manageTable-stellarjade" placeholder="Filter records..."></div>
       <div class="manage-table-wrap">
         <table class="manage-table" id="manageTable-stellarjade"><thead></thead><tbody></tbody></table>
