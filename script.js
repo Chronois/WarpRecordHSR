@@ -1197,7 +1197,7 @@ function renderStellarJade() {
             <div style="background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px;">
                 <div style="font-size:11px; font-weight:bold; color:var(--text-dim); margin-bottom:6px;">Phase 1</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px;">
-                    <div>${fmt(d.jade1,0)} SJ</div>
+                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.jade1,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
                     <div style="display:flex; align-items:center; gap:4px;">${fmt(d.pass1,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
                     <div>${fmt(pull1,1)} Pulls</div>
                 </div>
@@ -1206,7 +1206,7 @@ function renderStellarJade() {
             <div style="background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px;">
                 <div style="font-size:11px; font-weight:bold; color:var(--text-dim); margin-bottom:6px;">Phase 2</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px;">
-                    <div>${fmt(d.jade2,0)} SJ</div>
+                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.jade2,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
                     <div style="display:flex; align-items:center; gap:4px;">${fmt(d.pass2,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
                     <div>${fmt(pull2,1)} Pulls</div>
                 </div>
@@ -1215,7 +1215,7 @@ function renderStellarJade() {
             <div style="background:rgba(232, 184, 75, 0.1); border:1px solid rgba(232, 184, 75, 0.2); padding:8px 12px; border-radius:8px;">
                 <div style="font-size:11px; font-weight:bold; color:var(--gold-soft); margin-bottom:6px;">Total</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px; font-weight:bold; color:var(--gold-soft);">
-                    <div>${fmt(tJade,0)} SJ</div>
+                    <div style="display:flex; align-items:center; gap:4px;">${fmt(tJade,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
                     <div style="display:flex; align-items:center; gap:4px;">${fmt(tPass,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
                     <div>${fmt(tPull,1)} Pulls</div>
                 </div>
@@ -1266,7 +1266,7 @@ function renderStellarJade() {
   }
 
   // --- Bagian tabel delete ---
-  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','Stellar Jade','Star Rail Pass'], 
+  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">','<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Star Rail Pass" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">'], 
   r => {
       let j = parseFloat(r.jade) || 0;
       let p = parseFloat(r.passes) || 0;
@@ -1298,7 +1298,7 @@ function renderStellarJade() {
 
   const totalSavingPulls = (currentJade / 160) + currentPasses;
   document.getElementById('jadeStats').innerHTML = [
-    { label: 'Current Stellar Jade', value: fmt(currentJade, 0) }, 
+    { label: 'Current <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">', value: fmt(currentJade, 0) }, 
     { label: 'Current <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(currentPasses, 0) }, 
     { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
   ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
