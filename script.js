@@ -866,7 +866,7 @@ function renderTeam() {
     return `<div class="team-card searchable-item ${sustainlessClass}" data-idx="${r._idx}">
         <div class="team-image-row">${imgHtml}</div>
         <div class="team-card-content">
-            <div class="tc-arch">${r.archetype} ${isSustainless ? '<span style="font-size:10px; padding:2px 6px; background:var(--loss); color:#fff; border-radius:4px; margin-left:6px; vertical-align:middle;">0 SUSTAIN</span>' : ''}</div>
+            <div class="tc-arch">${r.archetype} ${isSustainless ? '<span style="font-size:10px; padding:2px 6px; background:var(--loss); color:#fff; border-radius:4px; margin-left:6px; vertical-align:middle;">SUSTAINLESS</span>' : ''}</div>
             <div class="tc-row"><span>Main DPS:</span><span class="tc-val">${r.mainDps || '—'}</span></div>
             <div class="tc-row"><span>Sub DPS:</span><span class="tc-val">${subDps}</span></div>
             <div class="tc-row"><span>Support:</span><span class="tc-val">${support}</span></div>
