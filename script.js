@@ -286,7 +286,7 @@ function computeRosterFromHistory() {
     const signCount = signMap[lowerName] || 0; 
     let obtained = obtainedMap[lowerName] || false;
     
-    const celestialChars = ["seele", "argenti", "silver wolf", "fu xuan", "yunli", "blade", "mortenax blade"];
+    const celestialChars = ["seele", "argenti", "silver wolf", "fu xuan", "yunli", "blade"];
     const goldenChars = ["ruan mei", "robin", "huohuo", "luocha", "topaz & numby"];
     
     if (celestialChars.includes(lowerName)) {
