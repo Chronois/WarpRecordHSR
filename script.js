@@ -167,7 +167,7 @@ const MASTER_CHARACTERS = {
   "archer": { name: "Archer", source: "Other", img: "./assets/characters/splash%20art/Archer%20Splash%20Art.png" },
   "argenti": { name: "Argenti", source: "Limited", img: "./assets/characters/splash%20art/Argenti%20Splash%20Art.png" },
   "ashveil": { name: "Ashveil", source: "Limited", img: "./assets/characters/splash%20art/Ashveil%20Splash%20Art.png" },
-  "aventurine": { name: "Aventurine", source: "Limited", img: "./assets/characters/splash%20art/Aventurine%20Splash%20Art.png" },
+  "aventurine": { name: "Aventurine", source: "Limited", img: "./assets/characters/splash%20art/Aventurine%20Splash%20Art_full.png" },
   "black swan": { name: "Black Swan", source: "Limited", img: "./assets/characters/splash%20art/Black%20Swan%20Splash%20Art.png" },
   "blade": { name: "Blade", source: "Limited", img: "./assets/characters/splash%20art/Blade%20Splash%20Art.png" },
   "mortenax blade": { name: "Mortenax Blade", source: "Limited", img: "./assets/characters/splash%20art/Mortenax%20Blade%20Splash%20Art.png" },
@@ -198,7 +198,7 @@ const MASTER_CHARACTERS = {
   "mydei": { name: "Mydei", source: "Limited", img: "./assets/characters/splash%20art/Mydei%20Splash%20Art.png" },
   "phainon": { name: "Phainon", source: "Limited", img: "./assets/characters/splash%20art/Phainon%20Splash%20Art.png" },
   "rappa": { name: "Rappa", source: "Limited", img: "./assets/characters/splash%20art/Rappa%20Splash%20Art.png" },
-  "robin": { name: "Robin", source: "Limited", img: "./assets/characters/splash%20art/Robin%20Splash%20Art.png" },
+  "robin": { name: "Robin", source: "Limited", img: "./assets/characters/splash%20art/Robin%20Splash%20Art_full.png" },
   "ruan mei": { name: "Ruan Mei", source: "Limited", img: "./assets/characters/splash%20art/Ruan%20Mei%20Splash%20Art.png" },
   "saber": { name: "Saber", source: "Other", img: "./assets/characters/splash%20art/Saber%20Splash%20Art.png" },
   "seele": { name: "Seele", source: "Limited", img: "./assets/characters/splash%20art/Seele%20Splash%20Art.png" },
@@ -216,9 +216,9 @@ const MASTER_CHARACTERS = {
 
   // --- Trailblazer ---
   // (Pastikan ekstensi di GitHub-mu benar-benar .gif ya! Jika ternyata kamu uploadnya .png, silakan ubah .gif di bawah menjadi .png)
-  "trailblazer • destruction": { name: "Trailblazer • Destruction", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Destruction%20Splash%20Art.gif" },
+  "trailblazer • destruction": { name: "Trailblazer • Destruction", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Destruction.gif" },
   "trailblazer • preservation": { name: "Trailblazer • Preservation", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Preservation%20Splash%20Art.gif" },
-  "trailblazer • harmony": { name: "Trailblazer • Harmony", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20The%20Harmony%20Splash%20Art.gif" },
+  "trailblazer • harmony": { name: "Trailblazer • Harmony", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20The%20Harmony.gif" },
   "trailblazer • remembrance": { name: "Trailblazer • Remembrance", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Remembrance%20Splash%20Art.gif"  },
   "trailblazer • elation": { name: "Trailblazer • Elation", source: "Other", img: "./assets/characters/splash%20art/Trailblazer%20-%20the%20Elation%20Splash%20Art.gif"  }
 };
