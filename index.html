@@ -498,7 +498,7 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
         
         <form class="manage-form" id="form-income" data-section="stellarJade" style="margin: 0;">
-          <h3 style="margin-top:0; font-size:16px; color:var(--cyan); margin-bottom:16px;">Log Income</h3>
+          <h3 style="margin-top:0; font-size:16px; color:var(--cyan); margin-bottom:16px;">Income</h3>
           <div class="field">
             <label>Date</label>
             <input type="date" name="date" required>
@@ -540,17 +540,17 @@
         </form>
 
         <form class="manage-form" id="form-spend" data-section="stellarJade" style="margin: 0; border-color: rgba(226, 128, 125, 0.3); background: rgba(226, 128, 125, 0.02);">
-          <h3 style="margin-top:0; font-size:16px; color:var(--loss); margin-bottom:16px;">Log Spend</h3>
+          <h3 style="margin-top:0; font-size:16px; color:var(--loss); margin-bottom:16px;">Spend</h3>
           <div class="field">
             <label>Date</label>
             <input type="date" name="date" required>
           </div>
           <div class="field field-grow">
-            <label>Banner / Reason</label>
-            <input type="text" name="reason" required placeholder="e.g. Feixiao Banner">
+            <label>Banner</label>
+            <input type="text" name="reason" required placeholder="e.g. Phainon">
           </div>
           <div class="field field-grow" style="margin-top:12px;">
-            <label>Pulls Used (Tickets)</label>
+            <label>Pulls Used</label>
             <input type="number" name="pulls" min="1" step="1" required placeholder="e.g. 10">
           </div>
           <button type="submit" class="btn-add" style="width: 100%; margin-top: auto; background: var(--loss); border-color: var(--loss); color: #fff;">Spend Pulls</button>
