@@ -398,7 +398,12 @@ function buildOverview() {
   const stats = computeBannerStats(limRows, null); 
   const total5star = limRows.length + stdRows.length + freebies.length;
 
-  const cards = [    { label: `Total Warps Spent`, value: fmt(stats.totalWarps, 0), sub: 'character + light cone (limited)' },    { label: `Total 5★ Obtained`, value: fmt(total5star, 0), sub: `${limRows.length} lim · ${stdRows.length} std · ${freebies.length} free` },    { label: '50/50 Win Rate', value: stats.winRate !== null ? pct(stats.winRate) : '—', sub: `${stats.wins}W / ${stats.losses}L` },    { label: `Average Pity`, value: fmt(stats.avgPity, 1), sub: `combined avg pity` }  ];
+  const cards = [
+    { label: `Total Warps Spent`, value: fmt(stats.totalWarps, 0), sub: 'character + light cone (limited)' },
+    { label: `Total 5★ Obtained`, value: fmt(total5star, 0), sub: `${limRows.length} lim · ${stdRows.length} std · ${freebies.length} free` },
+    { label: '50/50 Win Rate', value: stats.winRate !== null ? pct(stats.winRate) : '—', sub: `${stats.wins}W / ${stats.losses}L` },
+    { label: `Average Pity`, value: fmt(stats.avgPity, 1), sub: `combined avg pity` }
+  ];
 
   document.getElementById('statGrid').innerHTML = cards.map(c => `<div class="stat-card"><div class="stat-label">${c.label}</div><div class="stat-value ${c.value.length > 6 ? 'small' : ''}">${c.value}</div><div class="stat-sub">${c.sub}</div></div>`).join('');
   const elMetaLim = document.getElementById('metaLimitedWarps'); if(elMetaLim) elMetaLim.textContent = fmt((DATA.limited||[]).filter(r => r.category === 'Character').reduce((s, r) => s + r.pity, 0) + (DATA.limited||[]).filter(r => r.category === 'Light Cone').reduce((s, r) => s + r.pity, 0), 0);
@@ -411,7 +416,6 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
   const container = document.getElementById(containerId);
   if (!rows || !rows.length) { container.innerHTML = `<p style="color:var(--text-dim);font-family:var(--font-mono);font-size:13px;padding:20px;">No data yet.</p>`; return; }
   
-  // Balik urutan agar tarikan terbaru ada di sebelah kiri
   const displayRows = [...rows].reverse();
   const gaps = displayRows.map((r, i) => {
     if (i === 0) return 24; 
@@ -458,10 +462,8 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
         hoverAura = `0 0 ${hoverSpread}px rgba(226, 128, 125, ${alphaHover})`;
     }
 
-    // Ukuran titik (dot) yang semakin membesar seiring naiknya pity
     const dotSize = 10 + (r.pity / maxPity) * 16;
 
-    // Menyuntikkan variabel aura ke CSS lewat style attribute
     return `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px; --aura-base: ${baseAura}; --aura-hover: ${hoverAura};">
       <div class="station-label-name">${r.name}</div>
       <img src="${imgSrc}" class="station-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
@@ -566,7 +568,10 @@ function renderCalc() {
   const limChar = (DATA.limited||[]).filter(r => r.category === 'Character'); 
   const limLC   = (DATA.limited||[]).filter(r => r.category === 'Light Cone');
   
-  const datasets = [    { label: 'Character Banner', rows: limChar, maxPity: 90 },     { label: 'Light Cone Banner', rows: limLC, maxPity: 80 },     { label: 'Combined (Total)', rows: DATA.limited||[], maxPity: 90 }
+  const datasets = [
+    { label: 'Character Banner', rows: limChar, maxPity: 90 }, 
+    { label: 'Light Cone Banner', rows: limLC, maxPity: 80 }, 
+    { label: 'Combined (Total)', rows: DATA.limited||[], maxPity: 90 }
   ];
 
   const maxPulls = Math.max(...datasets.map(d => computeBannerStats(d.rows, d.maxPity).totalWarps)) || 1;
@@ -666,7 +671,10 @@ function renderCalc() {
       </div>`;
   }).join('');
   
-  document.getElementById('streakGrid').innerHTML = [      { label: 'Character', value: bestWinStreak(limChar) },       { label: 'Light Cone', value: bestWinStreak(limLC) },       { label: 'Combined', value: bestWinStreak(DATA.limited||[]) }
+  document.getElementById('streakGrid').innerHTML = [
+      { label: 'Character', value: bestWinStreak(limChar) }, 
+      { label: 'Light Cone', value: bestWinStreak(limLC) }, 
+      { label: 'Combined', value: bestWinStreak(DATA.limited||[]) }
   ].map(s => `<div class="bstat" style="text-align:center; padding: 20px;"><div class="stat-label" style="margin-bottom:8px; letter-spacing:1px;">MAX ${s.label.toUpperCase()} WIN STREAK</div><div class="stat-value" style="color:var(--cyan); font-size:32px; font-family:var(--font-display);">${fmt(s.value, 0)}</div></div>`).join('');
 }
 
@@ -966,7 +974,7 @@ const F2P_ESTIMATES = {
   '1.0': 213.7, '1.1': 93.7, '1.2': 94.1, '1.3': 115.7, '1.4': 77.2, '1.5': 106.0, '1.6': 103.7,
   '2.0': 124.4, '2.1': 123.6, '2.2': 106.4, '2.3': 103.1, '2.4': 87.9, '2.5': 97.5, '2.6': 108.0, '2.7': 91.9,
   '3.0': 120.7, '3.1': 111.3, '3.2': 123.8, '3.3': 103.8, '3.4': 92.4, '3.5': 92.2, '3.6': 94.0, '3.7': 125.7, '3.8': 104.3,
-  '4.0': 90.8, '4.1': 129.4, '4.2': 131.6, '4.3': 84.5, '4.4': 85.3
+  '4.0': 90.8, '4.1': 129.4, '4.2': 131.6, '4.3': 84.3
 };
 
 function renderStellarJade() {
@@ -978,40 +986,18 @@ function renderStellarJade() {
   });
 
   rows.forEach(r => {
-      let j = parseFloat(r.jade) || 0; 
-      let p = parseFloat(r.passes) || 0; 
-      let act = String(r.activity || '');
-      
-      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); 
-      let isSaving = act.toLowerCase().includes('saving');
-      
-      // Tambahkan variabel ini untuk mendeteksi Starlight Exchange
-      let isStarlight = act.toLowerCase().includes('starlight exchange');
+      let j = parseFloat(r.jade) || 0; let p = parseFloat(r.passes) || 0; let act = String(r.activity || '');
+      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); let isSaving = act.toLowerCase().includes('saving');
 
-      if (isSpend) { 
-          j = -Math.abs(j); 
-          p = -Math.abs(p); 
-      } else { 
-          j = Math.abs(j); 
-          p = Math.abs(p); 
-      }
-      
-      // 1. Data SELALU ditambahkan ke total atas (Stellar Jade & Passes)
-      currentJade += j; 
-      currentPasses += p;
+      if (isSpend) { j = -Math.abs(j); p = -Math.abs(p); } else { j = Math.abs(j); p = Math.abs(p); }
+      currentJade += j; currentPasses += p;
 
-      // 2. Data HANYA masuk ke Version Income Records JIKA BUKAN saving, spend, dan starlight exchange
-      if (!isSaving && !isSpend && !isStarlight) {
+      if (!isSaving && !isSpend) {
           const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
           if (matchedV) {
               const fullV = matchedV.fullLabel;
-              if (matchedV.label.includes('1/2')) { 
-                  verMap[fullV].jade1 += j; 
-                  verMap[fullV].pass1 += p; 
-              } else { 
-                  verMap[fullV].jade2 += j; 
-                  verMap[fullV].pass2 += p; 
-              }
+              if (matchedV.label.includes('1/2')) { verMap[fullV].jade1 += j; verMap[fullV].pass1 += p; } 
+              else { verMap[fullV].jade2 += j; verMap[fullV].pass2 += p; }
           }
       }
   });
@@ -1091,13 +1077,11 @@ function renderStellarJade() {
   else {
       let recentHtml = recentVersions.map(v => renderCard(v, false)).join(''); let olderHtml = olderVersions.map(v => renderCard(v, true)).join('');
       html = recentHtml;
-      
-      // === Perubahan Teks Tombol (Awal & Toggle) ===
       if (olderVersions.length > 0) {
           html += `
           <div style="grid-column: 1 / -1; margin-top: 12px; margin-bottom: 12px;">
               <button id="btnToggleOlderVersions" class="btn-ghost" style="width:100%; padding: 14px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.03); border-radius: 10px;">
-                  Show Previous Versions
+                  ⬇ Show Previous ${olderVersions.length} Versions
               </button>
           </div>
           <div id="olderVersionsContainer" style="display:none; grid-column: 1 / -1;">
@@ -1111,18 +1095,12 @@ function renderStellarJade() {
   if (toggleBtn) {
       toggleBtn.addEventListener('click', function() {
           const container = document.getElementById('olderVersionsContainer');
-          // === Perubahan Teks Saat Tombol Diklik ===
-          if (container.style.display === 'none') { 
-              container.style.display = 'block'; 
-              this.innerHTML = 'Hide Previous Versions'; 
-          } else { 
-              container.style.display = 'none'; 
-              this.innerHTML = 'Show Previous Versions'; 
-          }
+          if (container.style.display === 'none') { container.style.display = 'block'; this.innerHTML = '⬆ Hide Previous Versions'; } 
+          else { container.style.display = 'none'; this.innerHTML = '⬇ Show Previous ' + olderVersions.length + ' Versions'; }
       });
   }
 
-  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity','<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">','<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Star Rail Pass" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">'], 
+  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">','<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Star Rail Pass" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">'], 
   r => {
       let j = parseFloat(r.jade) || 0; let p = parseFloat(r.passes) || 0; let act = String(r.activity || '');
       let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); let isSaving = act.toLowerCase().includes('saving');
