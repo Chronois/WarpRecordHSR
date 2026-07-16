@@ -691,8 +691,8 @@ main, header, footer, .page {
 
 .btn-add:hover { transform: translateY(-1px); }
 
-input[type="date"] { color-scheme: dark; }
-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
+input[type="date"], input[type="datetime-local"] { color-scheme: dark; }
+input[type="date"]::-webkit-calendar-picker-indicator, input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
 
 /* =========================================
    TABLES
