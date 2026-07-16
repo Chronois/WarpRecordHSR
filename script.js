@@ -6,16 +6,21 @@ function fmt(n, d = 1) {
 function pct(n, d = 1) { return fmt(n * 100, d) + '%'; }
 function formatDate(iso) {
   if (!iso) return '—';
-  const parts = String(iso || '').split('-');
+  const parts = String(iso || '').split('T')[0].split('-');
   if (parts.length === 3) return `${parts[0]}/${parts[1]}/${parts[2]}`;
-  return iso;
+  return String(iso || '').split('T')[0];
 }
 function daysBetween(a, b) {
-  return Math.max(0, Math.round((new Date(a + 'T00:00:00') - new Date(b + 'T00:00:00')) / 86400000));
+  const d1 = String(a).includes('T') ? a : a + 'T00:00:00';
+  const d2 = String(b).includes('T') ? b : b + 'T00:00:00';
+  return Math.max(0, Math.round((new Date(d1) - new Date(d2)) / 86400000));
 }
 function initDateInputs() {
-  const today = new Date().toISOString().split('T')[0];
-  document.querySelectorAll('input[type="date"]').forEach(el => { if (!el.value) el.value = today; });
+  const now = new Date();
+  const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  document.querySelectorAll('input[type="datetime-local"], input[type="date"]').forEach(el => { 
+      if (!el.value) el.value = el.type === 'date' ? localISO.split('T')[0] : localISO; 
+  });
 }
 
 // ============ Version schedule ============
@@ -362,9 +367,15 @@ window.editEntry = function(section, idx) {
   const form = document.getElementById(formId);
   if (!form) return;
 
-  Object.keys(item).forEach(key => {
+ Object.keys(item).forEach(key => {
     const input = form.elements[key];
-    if (input) input.value = item[key];
+    if (input) {
+        if (input.type === 'datetime-local' && key === 'date' && item[key] && !item[key].includes('T')) {
+            input.value = item[key] + 'T12:00'; // Pasang jam default untuk data lama
+        } else {
+            input.value = item[key];
+        }
+    }
   });
 
   DATA[section].splice(idx, 1);
