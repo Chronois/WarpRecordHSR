@@ -152,6 +152,7 @@ const MASTER_CHARACTERS = {
   "argenti": { name: "Argenti", source: "Limited", img: "./assets/characters/icon/1302.png" },
   "ashveil": { name: "Ashveil", source: "Limited", img: "./assets/characters/icon/1504.png" },
   "aventurine": { name: "Aventurine", source: "Limited", img: "./assets/characters/icon/1304.png" },
+  "aventurine • waveflair": { name: "Aventurine • Waveflair", source: "Limited", img: "./assets/characters/icon/1510.png" },
   "black swan": { name: "Black Swan", source: "Limited", img: "./assets/characters/icon/1307.png" },
   "blade": { name: "Blade", source: "Limited", img: "./assets/characters/icon/1205.png" },
   "mortenax blade": { name: "Mortenax Blade", source: "Limited", img: "./assets/characters/icon/1507.png" },
@@ -169,6 +170,7 @@ const MASTER_CHARACTERS = {
   "firefly": { name: "Firefly", source: "Limited", img: "./assets/characters/icon/1310.png" },
   "fu xuan": { name: "Fu Xuan", source: "Limited", img: "./assets/characters/icon/1208.png" },
   "fugue": { name: "Fugue", source: "Limited", img: "./assets/characters/icon/1225.png" },
+  "himeko • nova": { name: "Himeko • Nova", source: "Limited", img: "./assets/characters/icon/1508.png" },
   "huohuo": { name: "Huohuo", source: "Limited", img: "./assets/characters/icon/1217.png" },
   "hyacine": { name: "Hyacine", source: "Limited", img: "./assets/characters/icon/1409.png" },
   "hysilens": { name: "Hysilens", source: "Limited", img: "./assets/characters/icon/1410.png" },
@@ -183,6 +185,7 @@ const MASTER_CHARACTERS = {
   "phainon": { name: "Phainon", source: "Limited", img: "./assets/characters/icon/1408.png" },
   "rappa": { name: "Rappa", source: "Limited", img: "./assets/characters/icon/1317.png" },
   "robin": { name: "Robin", source: "Limited", img: "./assets/characters/icon/1309.png" },
+  "robin • summeretto": { name: "Robin • Summeretto", source: "Limited", img: "./assets/characters/icon/1509.png" },
   "ruan mei": { name: "Ruan Mei", source: "Limited", img: "./assets/characters/icon/1303.png" },
   "saber": { name: "Saber", source: "Other", img: "./assets/characters/icon/1014.png" },
   "seele": { name: "Seele", source: "Limited", img: "./assets/characters/icon/1102.png" },
@@ -1004,11 +1007,14 @@ function renderStellarJade() {
   rows.forEach(r => {
       let j = parseFloat(r.jade) || 0; let p = parseFloat(r.passes) || 0; let act = String(r.activity || '');
       let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); let isSaving = act.toLowerCase().includes('saving');
+      
+      let isStarlight = act.toLowerCase().includes('starlight exchange');
 
       if (isSpend) { j = -Math.abs(j); p = -Math.abs(p); } else { j = Math.abs(j); p = Math.abs(p); }
+      
       currentJade += j; currentPasses += p;
 
-      if (!isSaving && !isSpend) {
+      if (!isSaving && !isSpend && !isStarlight) {
           const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
           if (matchedV) {
               const fullV = matchedV.fullLabel;
@@ -1116,7 +1122,7 @@ function renderStellarJade() {
       });
   }
 
-  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">','<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Star Rail Pass" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">'], 
+  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity','<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">','<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Star Rail Pass" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">'], 
   r => {
       let j = parseFloat(r.jade) || 0; let p = parseFloat(r.passes) || 0; let act = String(r.activity || '');
       let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); let isSaving = act.toLowerCase().includes('saving');
