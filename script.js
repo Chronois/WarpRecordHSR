@@ -437,7 +437,8 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
   
   const displayRows = [...rows].reverse();
   const gaps = displayRows.map((r, i) => {
-    if (i === 0) return 24; 
+  
+    if (i === 0) return 75; 
     const newerPull = displayRows[i - 1]; 
     return Math.max(Math.sqrt(newerPull.daysSince || 0.5) * 22, 46);
   });
@@ -456,21 +457,18 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
     // === LOGIKA DINAMIKA WARNA PITY & AURA ===
     let pityColor = 'var(--gold-soft)';
     let fontWeight = 'normal';
-    let baseAura = '0 0 10px rgba(232, 184, 75, 0.3)'; // Kuning (Average Pity)
+    let baseAura = '0 0 10px rgba(232, 184, 75, 0.3)'; 
     let hoverAura = '0 0 25px rgba(232, 184, 75, 0.8)';
 
     if (r.pity <= 35) { 
-        // Early Pity (Sangat Beruntung) -> Hijau
         pityColor = 'var(--win)'; 
         fontWeight = 'bold';
         baseAura = '0 0 10px rgba(111, 207, 151, 0.3)';
         hoverAura = '0 0 25px rgba(111, 207, 151, 0.8)';
     } else if (r.pity >= 74) { 
-        // Hard Pity -> Merah yang makin menyala seiring tingginya pity
         pityColor = 'var(--loss)'; 
         fontWeight = 'bold';
         
-        // Kalkulasi intensitas pekatnya merah (0.0 sampai 1.0)
         const redIntensity = Math.min(1, (r.pity - 73) / (maxPity - 73)); 
         const baseSpread = 10 + (redIntensity * 15);  
         const hoverSpread = 25 + (redIntensity * 25); 
@@ -483,7 +481,7 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
 
     const dotSize = 10 + (r.pity / maxPity) * 16;
 
-    return `<div class="station" style="margin-left:${i === 0 ? 24 : gaps[i]}px; --aura-base: ${baseAura}; --aura-hover: ${hoverAura};">
+    return `<div class="station" style="margin-left:${gaps[i]}px; --aura-base: ${baseAura}; --aura-hover: ${hoverAura};">
       <div class="station-label-name">${r.name}</div>
       <img src="${imgSrc}" class="station-icon" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR}'">
       <div class="station-tooltip">
@@ -495,7 +493,7 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
     </div>`;
   }).join('');
   
-  container.innerHTML = `<div class="track-line"><div class="track-rail"></div>${stations}<div style="margin-left:24px"></div></div>`;
+  container.innerHTML = `<div class="track-line"><div class="track-rail"></div>${stations}<div style="margin-left:40px"></div></div>`;
 }
 
 function renderBannerStats(containerId, stats) {
