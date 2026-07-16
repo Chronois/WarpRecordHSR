@@ -966,7 +966,7 @@ const F2P_ESTIMATES = {
   '1.0': 213.7, '1.1': 93.7, '1.2': 94.1, '1.3': 115.7, '1.4': 77.2, '1.5': 106.0, '1.6': 103.7,
   '2.0': 124.4, '2.1': 123.6, '2.2': 106.4, '2.3': 103.1, '2.4': 87.9, '2.5': 97.5, '2.6': 108.0, '2.7': 91.9,
   '3.0': 120.7, '3.1': 111.3, '3.2': 123.8, '3.3': 103.8, '3.4': 92.4, '3.5': 92.2, '3.6': 94.0, '3.7': 125.7, '3.8': 104.3,
-  '4.0': 90.8, '4.1': 129.4, '4.2': 131.6, '4.3': 84.3
+  '4.0': 90.8, '4.1': 129.4, '4.2': 131.6, '4.3': 84.5, '4.4': 85.3
 };
 
 function renderStellarJade() {
@@ -978,18 +978,40 @@ function renderStellarJade() {
   });
 
   rows.forEach(r => {
-      let j = parseFloat(r.jade) || 0; let p = parseFloat(r.passes) || 0; let act = String(r.activity || '');
-      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); let isSaving = act.toLowerCase().includes('saving');
+      let j = parseFloat(r.jade) || 0; 
+      let p = parseFloat(r.passes) || 0; 
+      let act = String(r.activity || '');
+      
+      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); 
+      let isSaving = act.toLowerCase().includes('saving');
+      
+      // Tambahkan variabel ini untuk mendeteksi Starlight Exchange
+      let isStarlight = act.toLowerCase().includes('starlight exchange');
 
-      if (isSpend) { j = -Math.abs(j); p = -Math.abs(p); } else { j = Math.abs(j); p = Math.abs(p); }
-      currentJade += j; currentPasses += p;
+      if (isSpend) { 
+          j = -Math.abs(j); 
+          p = -Math.abs(p); 
+      } else { 
+          j = Math.abs(j); 
+          p = Math.abs(p); 
+      }
+      
+      // 1. Data SELALU ditambahkan ke total atas (Stellar Jade & Passes)
+      currentJade += j; 
+      currentPasses += p;
 
-      if (!isSaving && !isSpend) {
+      // 2. Data HANYA masuk ke Version Income Records JIKA BUKAN saving, spend, dan starlight exchange
+      if (!isSaving && !isSpend && !isStarlight) {
           const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
           if (matchedV) {
               const fullV = matchedV.fullLabel;
-              if (matchedV.label.includes('1/2')) { verMap[fullV].jade1 += j; verMap[fullV].pass1 += p; } 
-              else { verMap[fullV].jade2 += j; verMap[fullV].pass2 += p; }
+              if (matchedV.label.includes('1/2')) { 
+                  verMap[fullV].jade1 += j; 
+                  verMap[fullV].pass1 += p; 
+              } else { 
+                  verMap[fullV].jade2 += j; 
+                  verMap[fullV].pass2 += p; 
+              }
           }
       }
   });
@@ -1100,7 +1122,7 @@ function renderStellarJade() {
       });
   }
 
-  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity / Event','<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">','<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Star Rail Pass" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">'], 
+  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity','<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">','<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Star Rail Pass" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">'], 
   r => {
       let j = parseFloat(r.jade) || 0; let p = parseFloat(r.passes) || 0; let act = String(r.activity || '');
       let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); let isSaving = act.toLowerCase().includes('saving');
