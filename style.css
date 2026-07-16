@@ -1484,3 +1484,18 @@ button { cursor: pointer; }
   .section { padding: 48px 16px; } 
   .team-grid-2x2 { grid-template-columns: 1fr; } 
 }
+
+input[type="datetime-local"] {
+  font-family: var(--font-mono); /* Font bergaya data */
+  font-size: 13px;
+  color: var(--cyan) !important; /* Warna teks lebih menonjol */
+  letter-spacing: -0.5px;
+  min-width: 175px; /* Mengatasi input yang terhimpit */
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) sepia(1) hue-rotate(180deg) saturate(100%);
+  cursor: pointer;
+  transform: scale(1.3); /* Membesarkan ikon kalender */
+  margin-left: 8px;
+}
