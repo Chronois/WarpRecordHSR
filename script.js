@@ -6,9 +6,10 @@ function fmt(n, d = 1) {
 function pct(n, d = 1) { return fmt(n * 100, d) + '%'; }
 function formatDate(iso) {
   if (!iso) return '—';
-  const parts = String(iso || '').split('T')[0].split('-');
+  const onlyDate = String(iso).split('T')[0]; 
+  const parts = onlyDate.split('-');
   if (parts.length === 3) return `${parts[0]}/${parts[1]}/${parts[2]}`;
-  return String(iso || '').split('T')[0];
+  return onlyDate.replace(/-/g, '/');
 }
 function daysBetween(a, b) {
   const d1 = String(a).includes('T') ? a : a + 'T00:00:00';
@@ -325,15 +326,19 @@ function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   if (!rows || !rows.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="${columnLabels.length + 1}">No entries yet.</td></tr>`; return; }
   let indexed = rows.map((r, idx) => ({ r, idx })); if (sortFn) indexed = indexed.sort(sortFn);
   
-  tbody.innerHTML = indexed.map(({ r, idx }) => `<tr>${rowToCells(r).map(c => `<td>${c}</td>`).join('')}<td>
-    <div style="display:flex; gap:6px;">
-        <button type="button" class="btn-dup" onclick="dupEntry('${section}', ${idx})" title="Duplicate">⧉</button>
-        <button type="button" class="btn-edit" onclick="editEntry('${section}', ${idx})" title="Edit">✎</button>
-        <button type="button" class="btn-del" onclick="deleteEntry('${section}', ${idx})" title="Delete">✕</button>
-    </div>
-  </td></tr>`).join('');
+  tbody.innerHTML = indexed.map(({ r, idx }) => {
+    const cells = rowToCells(r);
+    // Menyuntikkan 'data-raw' (berisi jam lengkap) ke kolom Date (kolom index 0) secara tersembunyi
+    const cellsHtml = cells.map((c, i) => i === 0 ? `<td data-raw="${r.date}">${c}</td>` : `<td>${c}</td>`).join('');
+    return `<tr>${cellsHtml}<td>
+      <div style="display:flex; gap:6px;">
+          <button type="button" class="btn-dup" onclick="dupEntry('${section}', ${idx})" title="Duplicate">⧉</button>
+          <button type="button" class="btn-edit" onclick="editEntry('${section}', ${idx})" title="Edit">✎</button>
+          <button type="button" class="btn-del" onclick="deleteEntry('${section}', ${idx})" title="Delete">✕</button>
+      </div>
+    </td></tr>`;
+  }).join('');
 }
-
 window.dupEntry = function(section, idx) {
   const item = DATA[section][idx];
   DATA[section].push(JSON.parse(JSON.stringify(item)));
@@ -1168,7 +1173,38 @@ if (formSpend) {
 
 // ============ Global Helpers ============
 document.querySelectorAll('.table-filter').forEach(input => { input.addEventListener('input', (e) => { const term = e.target.value.toLowerCase().replace(/-/g, '/'); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return; if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; const rowText = tr.textContent.toLowerCase().replace(/-/g, '/'); tr.style.display = rowText.includes(term) ? '' : 'none'; }); } } else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } }); });
-document.addEventListener('click', (e) => { if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { const th = e.target; const table = th.closest('table'); const tbody = table.querySelector('tbody'); const idx = Array.from(th.parentNode.children).indexOf(th); const isAsc = th.classList.contains('asc'); table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); th.classList.add(isAsc ? 'desc' : 'asc'); const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); rows.sort((a, b) => { const aText = a.children[idx].textContent.trim(); const bText = b.children[idx].textContent.trim(); const aClean = aText.replace(/,/g, '').replace(/\+/g, ''); const bClean = bText.replace(/,/g, '').replace(/\+/g, ''); const aNum = Number(aClean); const bNum = Number(bClean); if (aClean !== '' && bClean !== '' && !isNaN(aNum) && !isNaN(bNum)) { return isAsc ? bNum - aNum : aNum - bNum; } return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); }); tbody.append(...rows); } });
+document.addEventListener('click', (e) => { 
+    if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { 
+        const th = e.target; 
+        const table = th.closest('table'); 
+        const tbody = table.querySelector('tbody'); 
+        const idx = Array.from(th.parentNode.children).indexOf(th); 
+        const isAsc = th.classList.contains('asc'); 
+        table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); 
+        th.classList.add(isAsc ? 'desc' : 'asc'); 
+        
+        const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); 
+        rows.sort((a, b) => { 
+            const aCell = a.children[idx]; 
+            const bCell = b.children[idx];
+            
+            // Baca jam tersembunyi (data-raw) jika mengklik kolom Date, jika tidak baca teks biasa
+            const aText = (idx === 0) ? (aCell.getAttribute('data-raw') || aCell.textContent.trim()) : aCell.textContent.trim(); 
+            const bText = (idx === 0) ? (bCell.getAttribute('data-raw') || bCell.textContent.trim()) : bCell.textContent.trim(); 
+            
+            const aClean = aText.replace(/,/g, '').replace(/\+/g, '');
+            const bClean = bText.replace(/,/g, '').replace(/\+/g, '');
+            const aNum = Number(aClean); 
+            const bNum = Number(bClean); 
+            
+            if (aClean !== '' && bClean !== '' && !isNaN(aNum) && !isNaN(bNum)) { 
+                return isAsc ? bNum - aNum : aNum - bNum; 
+            } 
+            return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); 
+        }); 
+        tbody.append(...rows); 
+    } 
+});
 document.getElementById('btnDownloadJson')?.addEventListener('click', () => { const content = JSON.stringify(DATA, null, 2); const blob = new Blob([content], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
 document.getElementById('uploadJsonFile')?.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { try { const text = reader.result.trim(); let parsed; if (text.startsWith('{')) { parsed = JSON.parse(text); } else { const m = text.match(/const\s+HSR_DATA\s*=\s*(\{[\s\S]*\})\s*;?\s*$/); if (!m) throw new Error('Unrecognized file format.'); parsed = JSON.parse(m[1]); } ['limited','standard','freebies','roster','priority','team','stellarJade'].forEach(k => { if (!parsed[k]) parsed[k] = []; }); DATA = parsed; saveWorkingData(); renderAll(); alert('Data loaded successfully from file!'); } catch (err) { alert('Failed to load file.\nError: ' + err.message); } finally { e.target.value = ''; } }; reader.readAsText(file); });
 document.getElementById('btnResetData')?.addEventListener('click', () => { if (!confirm('Clear all data? This action cannot be undone.')) return; localStorage.removeItem(STORAGE_KEY); DATA = { limited: [], standard: [], freebies: [], roster: [], priority: [], team: [], stellarJade: [] }; saveWorkingData(); renderAll(); alert('Data cleared.'); });
