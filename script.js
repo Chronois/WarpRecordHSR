@@ -1054,11 +1054,13 @@ function renderStellarJade() {
 
   const renderCard = (fullV, isOlder) => {
       const d = verMap[fullV]; 
-      const pull1 = ((d.jade1 + d.shard1) / 160) + d.pass1; 
-      const pull2 = ((d.jade2 + d.shard2) / 160) + d.pass2;
+      
+      // Hapus shard dari perhitungan Pulls pada Version Card
+      const pull1 = (d.jade1 / 160) + d.pass1; 
+      const pull2 = (d.jade2 / 160) + d.pass2;
+      
       const tJade = d.jade1 + d.jade2; 
       const tPass = d.pass1 + d.pass2; 
-      const tShard = d.shard1 + d.shard2;
       const tStd = d.std1 + d.std2;
       const tPull = pull1 + pull2;
       const isActive = d.v1 && d.v2 && today >= d.v1.start && today < d.v2.end;
@@ -1066,8 +1068,7 @@ function renderStellarJade() {
       let daysCount = 0; if (d.v1 && d.v2) { daysCount = daysBetween(d.v2.end, d.v1.start); }
       const durationHtml = daysCount > 0 ? `<div style="text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--text-dim); margin-top:6px; background:rgba(255,255,255,0.03); padding:4px; border-radius:4px; letter-spacing:0.05em;">${daysCount} Days</div>` : '';
 
-      // Tampilkan F2P Estimates untuk versi apapun yang Pulls-nya = 0 (Termasuk versi saat ini yang belum diisi datanya)
-      if (tPull === 0 && F2P_ESTIMATES[fullV]) {
+      if (isOlder && tPull === 0 && F2P_ESTIMATES[fullV]) {
           return `
           <div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
             <div>
@@ -1084,12 +1085,12 @@ function renderStellarJade() {
           </div>`;
       }
       
-      const gridHtml = (jade, shard, pass, std, pulls, label, color) => `
+      // Template Grid Card dikembalikan ke 3 kolom tanpa Oneiric Shard
+      const gridHtml = (jade, pass, std, pulls, label, color) => `
           <div style="background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px; border: ${label==='Total'?'1px solid rgba(232, 184, 75, 0.2)':'none'}; background: ${label==='Total'?'rgba(232, 184, 75, 0.1)':'rgba(255,255,255,0.03)'};">
               <div style="font-size:11px; font-weight:bold; color:${color}; margin-bottom:8px; text-align:center;">${label}</div>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 4px; font-family:var(--font-mono); font-size:11px; color:${label==='Total'?'var(--gold-soft)':'var(--text)'}; font-weight:${label==='Total'?'bold':'normal'};">
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px; color:${label==='Total'?'var(--gold-soft)':'var(--text)'}; font-weight:${label==='Total'?'bold':'normal'};">
                   <div style="display:flex; align-items:center; gap:4px; justify-content:center;">${fmt(jade,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
-                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">${fmt(shard,0)} <img src="./assets/Items/Oneiric%20Shard.png" class="pass-icon"></div>
                   <div style="display:flex; align-items:center; gap:4px; justify-content:center;">${fmt(pass,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
                   <div style="display:flex; align-items:center; gap:4px; justify-content:center;">${fmt(std,0)} <img src="./assets/Items/Star%20Rail%20Pass.png" class="pass-icon"></div>
               </div>
@@ -1104,9 +1105,9 @@ function renderStellarJade() {
             ${durationHtml}
         </div>
         <div style="display:flex; flex-direction:column; gap:8px;">
-            ${gridHtml(d.jade1, d.shard1, d.pass1, d.std1, pull1, 'Phase 1', 'var(--text-dim)')}
-            ${gridHtml(d.jade2, d.shard2, d.pass2, d.std2, pull2, 'Phase 2', 'var(--text-dim)')}
-            ${gridHtml(tJade, tShard, tPass, tStd, tPull, 'Total', 'var(--gold-soft)')}
+            ${gridHtml(d.jade1, d.pass1, d.std1, pull1, 'Phase 1', 'var(--text-dim)')}
+            ${gridHtml(d.jade2, d.pass2, d.std2, pull2, 'Phase 2', 'var(--text-dim)')}
+            ${gridHtml(tJade, tPass, tStd, tPull, 'Total', 'var(--gold-soft)')}
         </div>
       </div>`; 
   };
@@ -1196,7 +1197,6 @@ function renderStellarJade() {
     { label: 'Lim. Saving', value: fmt(totalLimPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
   ].map(s => `<div class="bstat" style="padding: 12px 10px;"><div class="stat-label" style="font-size:10px; display:flex; align-items:center; gap:4px; justify-content:center; margin-bottom:4px;">${s.label}</div><div class="stat-value" style="font-size:18px;">${s.value}</div></div>`).join('');
 }
-
 // ============ Form Listeners (Income & Spend) ============
 const formIncome = document.getElementById('form-income');
 if (formIncome) {
