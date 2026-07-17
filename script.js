@@ -993,6 +993,13 @@ document.getElementById('form-character')?.addEventListener('submit', (e) => {
 });
 
 // ============ STELLAR JADE & MANAGEMENT ============
+const F2P_ESTIMATES = {
+  '1.0': 213.7, '1.1': 94.1, '1.2': 94.1, '1.3': 115.7, '1.4': 77.2, '1.5': 106.0, '1.6': 103.7,
+  '2.0': 124.4, '2.1': 123.6, '2.2': 106.4, '2.3': 103.1, '2.4': 87.9, '2.5': 97.5, '2.6': 108.0, '2.7': 91.9,
+  '3.0': 120.7, '3.1': 111.3, '3.2': 123.8, '3.3': 103.8, '3.4': 92.6, '3.5': 92.2, '3.6': 94.0, '3.7': 125.7, '3.8': 129.4,
+  '4.0': 131.6, '4.1': 90.8, '4.2': 84.5, '4.3': 85.3, '4.4': 85.3
+};
+
 function renderStellarJade() {
   const rows = DATA.stellarJade || []; 
   let currentJade = 0; let currentPasses = 0; let currentShards = 0; let currentStandard = 0;
@@ -1012,6 +1019,7 @@ function renderStellarJade() {
       let isSpend = j < 0 || p < 0 || sh < 0 || std < 0 || act.toUpperCase().includes('[SPEND]'); 
       let isSaving = act.toLowerCase().includes('saving');
       let isStarlight = act.toLowerCase().includes('starlight exchange');
+      let isTopUp = act.toLowerCase().includes('top up');
 
       if (isSpend) { 
           j = -Math.abs(j); p = -Math.abs(p); sh = -Math.abs(sh); std = -Math.abs(std);
@@ -1019,9 +1027,11 @@ function renderStellarJade() {
           j = Math.abs(j); p = Math.abs(p); sh = Math.abs(sh); std = Math.abs(std);
       }
       
+      // 1. TETAP MASUK ke perhitungan Total di paling atas
       currentJade += j; currentPasses += p; currentShards += sh; currentStandard += std;
 
-      if (!isSaving && !isSpend && !isStarlight) {
+      // 2. TIDAK MASUK ke perhitungan kotak Version Income Records
+      if (!isSaving && !isSpend && !isStarlight && !isTopUp) {
           const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
           if (matchedV) {
               const fullV = matchedV.fullLabel;
@@ -1056,6 +1066,24 @@ function renderStellarJade() {
       let daysCount = 0; if (d.v1 && d.v2) { daysCount = daysBetween(d.v2.end, d.v1.start); }
       const durationHtml = daysCount > 0 ? `<div style="text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--text-dim); margin-top:6px; background:rgba(255,255,255,0.03); padding:4px; border-radius:4px; letter-spacing:0.05em;">${daysCount} Days</div>` : '';
 
+      // Tampilkan F2P Estimates untuk versi apapun yang Pulls-nya = 0 (Termasuk versi saat ini yang belum diisi datanya)
+      if (tPull === 0 && F2P_ESTIMATES[fullV]) {
+          return `
+          <div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
+            <div>
+                <div class="version-label" style="font-size:16px; color:var(--text);">Version ${fullV}</div>
+                <div class="version-dates" style="font-size:11px; color:var(--text-dim); margin-top:2px;">${formatDate(d.v1 ? d.v1.start : '')} – ${formatDate(d.v2 ? d.v2.end : '')}</div>
+                ${durationHtml}
+            </div>
+            <div style="background:rgba(255,255,255,0.02); padding:16px 12px; border-radius:8px; text-align:center; border: 1px dashed rgba(255,255,255,0.1); flex:1; display:flex; flex-direction:column; justify-content:center;">
+                <div style="font-size:11px; color:var(--text-dim); margin-bottom:6px;">Estimated F2P Income</div>
+                <div style="display:flex; justify-content:center; align-items:center; gap:6px; font-family:var(--font-mono); font-size:18px; font-weight:bold; color:var(--gold-soft);">
+                    ~${F2P_ESTIMATES[fullV]} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:16px;height:16px;margin-top:0;">
+                </div>
+            </div>
+          </div>`;
+      }
+      
       const gridHtml = (jade, shard, pass, std, pulls, label, color) => `
           <div style="background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px; border: ${label==='Total'?'1px solid rgba(232, 184, 75, 0.2)':'none'}; background: ${label==='Total'?'rgba(232, 184, 75, 0.1)':'rgba(255,255,255,0.03)'};">
               <div style="font-size:11px; font-weight:bold; color:${color}; margin-bottom:8px; text-align:center;">${label}</div>
@@ -1132,19 +1160,23 @@ function renderStellarJade() {
       
       let isSpend = j < 0 || p < 0 || sh < 0 || std < 0 || act.toUpperCase().includes('[SPEND]'); 
       let isSaving = act.toLowerCase().includes('saving');
+      let isTopUp = act.toLowerCase().includes('top up');
       
       let formatVal = (v) => {
           if (v === 0) return `<span style="opacity:0.3">0</span>`;
           if (isSpend) return `<span style="color:var(--loss)">${fmt(-Math.abs(v), 0)}</span>`;
-          if (isSaving) return `<span style="color:var(--cyan)">+${fmt(Math.abs(v), 0)}</span>`;
+          if (isSaving || isTopUp) return `<span style="color:var(--cyan)">+${fmt(Math.abs(v), 0)}</span>`;
           return `+${fmt(Math.abs(v), 0)}`;
       };
 
       let actDisplay = act.replace(/\[SPEND\]/gi, '').trim();
+      
       if (isSpend) {
           actDisplay = `<span style="color:var(--loss); font-weight:bold; font-size:10px; border:1px solid var(--loss); padding:2px 4px; border-radius:4px; margin-right:6px;">SPEND</span> ${actDisplay}`;
       } else if (isSaving) {
           actDisplay = `<span style="color:var(--cyan); font-weight:bold; font-size:10px; border:1px solid var(--cyan); padding:2px 4px; border-radius:4px; margin-right:6px;">SAVING</span> ${actDisplay}`;
+      } else if (isTopUp) {
+          actDisplay = `<span style="color:#d2a8ff; font-weight:bold; font-size:10px; border:1px solid #d2a8ff; padding:2px 4px; border-radius:4px; margin-right:6px;">TOP UP</span> ${actDisplay}`;
       }
 
       return [
