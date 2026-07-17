@@ -476,7 +476,7 @@
     <section class="section">
       <div class="section-head">
         <span class="eyebrow">Income Ledger</span>
-        <h2>Stellar Jade &amp; Passes</h2>
+        <h2>Currency</h2>
       </div>
       <div class="banner-stats" id="jadeStats"></div>
     </section>
@@ -532,15 +532,11 @@
               <option value="Saving"></option>
             </datalist>
           </div>
-          <div style="display: flex; gap: 12px; margin-top:12px;">
-              <div class="field field-grow">
-                <label>Stellar Jade</label>
-                <input type="number" name="jade" min="0" step="1" value="0">
-              </div>
-              <div class="field field-grow">
-                <label>Star Rail Pass</label>
-                <input type="number" name="passes" min="0" step="1" value="0">
-              </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top:12px; width: 100%;">
+              <div class="field"><label>Stellar Jade</label><input type="number" name="jade" min="0" step="1" value="0"></div>
+              <div class="field"><label>Oneiric Shard</label><input type="number" name="shards" min="0" step="1" value="0"></div>
+              <div class="field"><label>Special Pass</label><input type="number" name="passes" min="0" step="1" value="0"></div>
+              <div class="field"><label>Standard Pass</label><input type="number" name="standardPasses" min="0" step="1" value="0"></div>
           </div>
           <button type="submit" class="btn-add" style="width: 100%; margin-top: 12px;">Add Income</button>
         </form>
@@ -555,9 +551,18 @@
             <label>Banner</label>
             <input type="text" name="reason" required placeholder="e.g. Phainon">
           </div>
-          <div class="field field-grow" style="margin-top:12px;">
-            <label>Pulls Used</label>
-            <input type="number" name="pulls" min="1" step="1" required placeholder="e.g. 10">
+          <div style="display: flex; gap: 12px; margin-top:12px; width:100%;">
+              <div class="field field-grow">
+                <label>Banner Type</label>
+                <select name="bannerType" required>
+                    <option value="limited">Limited / Light Cone</option>
+                    <option value="standard">Standard</option>
+                </select>
+              </div>
+              <div class="field field-grow">
+                <label>Pulls Used</label>
+                <input type="number" name="pulls" min="1" step="1" required placeholder="e.g. 10">
+              </div>
           </div>
           <button type="submit" class="btn-add" style="width: 100%; margin-top: auto; background: var(--loss); border-color: var(--loss); color: #fff;">Spend Pulls</button>
         </form>
