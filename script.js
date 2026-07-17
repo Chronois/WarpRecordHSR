@@ -361,25 +361,32 @@ window.editEntry = function(section, idx) {
   
   if (section === 'stellarJade') {
      const act = String(item.activity || '');
-     const isSpend = item.jade < 0 || item.passes < 0 || act.toUpperCase().includes('[SPEND]');
+     const isSpend = (item.jade < 0) || (item.passes < 0) || (item.shards < 0) || (item.standardPasses < 0) || act.toUpperCase().includes('[SPEND]');
      formId = isSpend ? 'form-spend' : 'form-income';
      if (isSpend) {
-         item.pulls = Math.abs(item.passes || 0) + (Math.abs(item.jade || 0) / 160);
+         let spentPasses = Math.abs(item.passes || 0);
+         let spentStd = Math.abs(item.standardPasses || 0);
+         let spentJadeShard = Math.abs(item.jade || 0) + Math.abs(item.shards || 0);
+         
+         item.bannerType = spentStd > 0 ? 'standard' : 'limited';
+         item.pulls = (spentStd > 0 ? spentStd : spentPasses) + (spentJadeShard / 160);
          item.reason = act.replace('[SPEND]', '').trim();
      } else {
          item.jade = Math.abs(item.jade || 0);
+         item.shards = Math.abs(item.shards || 0);
          item.passes = Math.abs(item.passes || 0);
+         item.standardPasses = Math.abs(item.standardPasses || 0);
      }
   }
 
   const form = document.getElementById(formId);
   if (!form) return;
 
- Object.keys(item).forEach(key => {
+  Object.keys(item).forEach(key => {
     const input = form.elements[key];
     if (input) {
         if (input.type === 'datetime-local' && key === 'date' && item[key] && !item[key].includes('T')) {
-            input.value = item[key] + 'T12:00'; // Pasang jam default untuk data lama
+            input.value = item[key] + 'T12:00'; 
         } else {
             input.value = item[key];
         }
@@ -996,43 +1003,64 @@ const F2P_ESTIMATES = {
 
 function renderStellarJade() {
   const rows = DATA.stellarJade || []; 
-  let currentJade = 0; let currentPasses = 0; const verMap = {};
+  let currentJade = 0; let currentPasses = 0; let currentShards = 0; let currentStandard = 0;
+  const verMap = {};
   VERSION_SCHEDULE.forEach(v => {
-      if (!verMap[v.fullLabel]) verMap[v.fullLabel] = { v1:null, v2:null, jade1:0, pass1:0, jade2:0, pass2:0 };
+      if (!verMap[v.fullLabel]) verMap[v.fullLabel] = { v1:null, v2:null, jade1:0, pass1:0, shard1:0, std1:0, jade2:0, pass2:0, shard2:0, std2:0 };
       if (v.label.includes('1/2')) verMap[v.fullLabel].v1 = v; else verMap[v.fullLabel].v2 = v;
   });
 
   rows.forEach(r => {
-      let j = parseFloat(r.jade) || 0; let p = parseFloat(r.passes) || 0; let act = String(r.activity || '');
-      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); let isSaving = act.toLowerCase().includes('saving');
+      let j = parseFloat(r.jade) || 0; 
+      let p = parseFloat(r.passes) || 0; 
+      let sh = parseFloat(r.shards) || 0;
+      let std = parseFloat(r.standardPasses) || 0;
+      let act = String(r.activity || '');
       
+      let isSpend = j < 0 || p < 0 || sh < 0 || std < 0 || act.toUpperCase().includes('[SPEND]'); 
+      let isSaving = act.toLowerCase().includes('saving');
       let isStarlight = act.toLowerCase().includes('starlight exchange');
 
-      if (isSpend) { j = -Math.abs(j); p = -Math.abs(p); } else { j = Math.abs(j); p = Math.abs(p); }
+      if (isSpend) { 
+          j = -Math.abs(j); p = -Math.abs(p); sh = -Math.abs(sh); std = -Math.abs(std);
+      } else { 
+          j = Math.abs(j); p = Math.abs(p); sh = Math.abs(sh); std = Math.abs(std);
+      }
       
-      currentJade += j; currentPasses += p;
+      // 1. TETAP MASUK ke perhitungan Total di paling atas
+      currentJade += j; currentPasses += p; currentShards += sh; currentStandard += std;
 
+      // 2. TIDAK MASUK ke perhitungan kotak Version Income Records
       if (!isSaving && !isSpend && !isStarlight) {
           const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
           if (matchedV) {
               const fullV = matchedV.fullLabel;
-              if (matchedV.label.includes('1/2')) { verMap[fullV].jade1 += j; verMap[fullV].pass1 += p; } 
-              else { verMap[fullV].jade2 += j; verMap[fullV].pass2 += p; }
+              if (matchedV.label.includes('1/2')) { 
+                  verMap[fullV].jade1 += j; verMap[fullV].pass1 += p; verMap[fullV].shard1 += sh; verMap[fullV].std1 += std;
+              } else { 
+                  verMap[fullV].jade2 += j; verMap[fullV].pass2 += p; verMap[fullV].shard2 += sh; verMap[fullV].std2 += std;
+              }
           }
       }
   });
   
   const today = new Date().toISOString().split('T')[0]; 
   let relevantVersions = Object.keys(verMap).filter(fullV => {
-      const d = verMap[fullV]; return (d.jade1>0 || d.pass1>0 || d.jade2>0 || d.pass2>0) || (d.v1 && d.v1.start <= today);
+      const d = verMap[fullV]; return (d.jade1>0 || d.pass1>0 || d.jade2>0 || d.pass2>0 || d.shard1>0 || d.std1>0 || d.shard2>0 || d.std2>0) || (d.v1 && d.v1.start <= today);
   });
   relevantVersions.sort((a, b) => parseFloat(b) - parseFloat(a));
 
   const recentVersions = relevantVersions.slice(0, 5); const olderVersions = relevantVersions.slice(5);
 
   const renderCard = (fullV, isOlder) => {
-      const d = verMap[fullV]; const pull1 = (d.jade1 / 160) + d.pass1; const pull2 = (d.jade2 / 160) + d.pass2;
-      const tJade = d.jade1 + d.jade2; const tPass = d.pass1 + d.pass2; const tPull = pull1 + pull2;
+      const d = verMap[fullV]; 
+      const pull1 = ((d.jade1 + d.shard1) / 160) + d.pass1; 
+      const pull2 = ((d.jade2 + d.shard2) / 160) + d.pass2;
+      const tJade = d.jade1 + d.jade2; 
+      const tPass = d.pass1 + d.pass2; 
+      const tShard = d.shard1 + d.shard2;
+      const tStd = d.std1 + d.std2;
+      const tPull = pull1 + pull2;
       const isActive = d.v1 && d.v2 && today >= d.v1.start && today < d.v2.end;
       
       let daysCount = 0; if (d.v1 && d.v2) { daysCount = daysBetween(d.v2.end, d.v1.start); }
@@ -1055,6 +1083,18 @@ function renderStellarJade() {
           </div>`;
       }
       
+      const gridHtml = (jade, shard, pass, std, pulls, label, color) => `
+          <div style="background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px; border: ${label==='Total'?'1px solid rgba(232, 184, 75, 0.2)':'none'}; background: ${label==='Total'?'rgba(232, 184, 75, 0.1)':'rgba(255,255,255,0.03)'};">
+              <div style="font-size:11px; font-weight:bold; color:${color}; margin-bottom:8px; text-align:center;">${label}</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 4px; font-family:var(--font-mono); font-size:11px; color:${label==='Total'?'var(--gold-soft)':'var(--text)'}; font-weight:${label==='Total'?'bold':'normal'};">
+                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">${fmt(jade,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
+                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">${fmt(shard,0)} <img src="./assets/Items/Oneiric%20Shard.png" class="pass-icon"></div>
+                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">${fmt(pass,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
+                  <div style="display:flex; align-items:center; gap:4px; justify-content:center;">${fmt(std,0)} <img src="./assets/Items/Star%20Rail%20Pass.png" class="pass-icon"></div>
+              </div>
+              <div style="text-align:center; font-family:var(--font-mono); font-size:11px; font-weight:bold; margin-top:8px; color:${label==='Total'?'var(--gold-soft)':'var(--cyan)'}; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.1);">${fmt(pulls,1)} Limited Pulls</div>
+          </div>`;
+
       return `
       <div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
         <div>
@@ -1062,32 +1102,10 @@ function renderStellarJade() {
             <div class="version-dates" style="font-size:11px; color:var(--text-dim); margin-top:2px;">${formatDate(d.v1 ? d.v1.start : '')} – ${formatDate(d.v2 ? d.v2.end : '')}</div>
             ${durationHtml}
         </div>
-        
         <div style="display:flex; flex-direction:column; gap:8px;">
-            <div style="background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px;">
-                <div style="font-size:11px; font-weight:bold; color:var(--text-dim); margin-bottom:6px;">Phase 1</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px;">
-                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.jade1,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
-                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.pass1,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
-                    <div>${fmt(pull1,1)} Pulls</div>
-                </div>
-            </div>
-            <div style="background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px;">
-                <div style="font-size:11px; font-weight:bold; color:var(--text-dim); margin-bottom:6px;">Phase 2</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px;">
-                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.jade2,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
-                    <div style="display:flex; align-items:center; gap:4px;">${fmt(d.pass2,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
-                    <div>${fmt(pull2,1)} Pulls</div>
-                </div>
-            </div>
-            <div style="background:rgba(232, 184, 75, 0.1); border:1px solid rgba(232, 184, 75, 0.2); padding:8px 12px; border-radius:8px;">
-                <div style="font-size:11px; font-weight:bold; color:var(--gold-soft); margin-bottom:6px;">Total</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; font-family:var(--font-mono); font-size:11px; font-weight:bold; color:var(--gold-soft);">
-                    <div style="display:flex; align-items:center; gap:4px;">${fmt(tJade,0)} <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon"></div>
-                    <div style="display:flex; align-items:center; gap:4px;">${fmt(tPass,0)} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon"></div>
-                    <div>${fmt(tPull,1)} Pulls</div>
-                </div>
-            </div>
+            ${gridHtml(d.jade1, d.shard1, d.pass1, d.std1, pull1, 'Phase 1', 'var(--text-dim)')}
+            ${gridHtml(d.jade2, d.shard2, d.pass2, d.std2, pull2, 'Phase 2', 'var(--text-dim)')}
+            ${gridHtml(tJade, tShard, tPass, tStd, tPull, 'Total', 'var(--gold-soft)')}
         </div>
       </div>`; 
   };
@@ -1097,11 +1115,13 @@ function renderStellarJade() {
   else {
       let recentHtml = recentVersions.map(v => renderCard(v, false)).join(''); let olderHtml = olderVersions.map(v => renderCard(v, true)).join('');
       html = recentHtml;
+      
+      // Tombol Toggle tanpa emoji panah dan tanpa angka
       if (olderVersions.length > 0) {
           html += `
           <div style="grid-column: 1 / -1; margin-top: 12px; margin-bottom: 12px;">
               <button id="btnToggleOlderVersions" class="btn-ghost" style="width:100%; padding: 14px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.03); border-radius: 10px;">
-                  ⬇ Show Previous ${olderVersions.length} Versions
+                  Show Previous Versions
               </button>
           </div>
           <div id="olderVersionsContainer" style="display:none; grid-column: 1 / -1;">
@@ -1115,10 +1135,134 @@ function renderStellarJade() {
   if (toggleBtn) {
       toggleBtn.addEventListener('click', function() {
           const container = document.getElementById('olderVersionsContainer');
-          if (container.style.display === 'none') { container.style.display = 'block'; this.innerHTML = '⬆ Hide Previous Versions'; } 
-          else { container.style.display = 'none'; this.innerHTML = '⬇ Show Previous ' + olderVersions.length + ' Versions'; }
+          if (container.style.display === 'none') { 
+              container.style.display = 'block'; 
+              this.innerHTML = 'Hide Previous Versions'; 
+          } else { 
+              container.style.display = 'none'; 
+              this.innerHTML = 'Show Previous Versions'; 
+          }
       });
   }
+
+  renderDeleteTable('manageTable-stellarjade','stellarJade', 
+      ['Date','Version','Activity',
+       '<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;">',
+       '<img src="./assets/Items/Oneiric%20Shard.png" title="Oneiric Shard" class="pass-icon" style="width:16px;height:16px;">',
+       '<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Special Pass" class="pass-icon" style="width:16px;height:16px;">',
+       '<img src="./assets/Items/Star%20Rail%20Pass.png" title="Standard Pass" class="pass-icon" style="width:16px;height:16px;">'], 
+  r => {
+      let j = parseFloat(r.jade) || 0; 
+      let p = parseFloat(r.passes) || 0; 
+      let sh = parseFloat(r.shards) || 0;
+      let std = parseFloat(r.standardPasses) || 0;
+      let act = String(r.activity || '');
+      
+      let isSpend = j < 0 || p < 0 || sh < 0 || std < 0 || act.toUpperCase().includes('[SPEND]'); 
+      let isSaving = act.toLowerCase().includes('saving');
+      
+      let formatVal = (v) => {
+          if (v === 0) return `<span style="opacity:0.3">0</span>`;
+          if (isSpend) return `<span style="color:var(--loss)">${fmt(-Math.abs(v), 0)}</span>`;
+          if (isSaving) return `<span style="color:var(--cyan)">+${fmt(Math.abs(v), 0)}</span>`;
+          return `+${fmt(Math.abs(v), 0)}`;
+      };
+
+      let actDisplay = act.replace(/\[SPEND\]/gi, '').trim();
+      if (isSpend) {
+          actDisplay = `<span style="color:var(--loss); font-weight:bold; font-size:10px; border:1px solid var(--loss); padding:2px 4px; border-radius:4px; margin-right:6px;">SPEND</span> ${actDisplay}`;
+      } else if (isSaving) {
+          actDisplay = `<span style="color:var(--cyan); font-weight:bold; font-size:10px; border:1px solid var(--cyan); padding:2px 4px; border-radius:4px; margin-right:6px;">SAVING</span> ${actDisplay}`;
+      }
+
+      return [
+          formatDate(r.date), 
+          getVersionForDate(r.date, VERSION_SCHEDULE), 
+          actDisplay, 
+          formatVal(j), formatVal(sh), formatVal(p), formatVal(std)
+      ];
+  }, (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; });
+
+  const totalLimPulls = ((currentJade + currentShards) / 160) + currentPasses;
+  document.getElementById('jadeStats').innerHTML = [
+    { label: '<img src="./assets/Items/Stellar%20Jade.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;"> Jade', value: fmt(currentJade, 0) }, 
+    { label: '<img src="./assets/Items/Oneiric%20Shard.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;"> Shard', value: fmt(currentShards, 0) }, 
+    { label: '<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;"> Special', value: fmt(currentPasses, 0) }, 
+    { label: '<img src="./assets/Items/Star%20Rail%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;"> Standard', value: fmt(currentStandard, 0) }, 
+    { label: 'Lim. Saving', value: fmt(totalLimPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
+  ].map(s => `<div class="bstat" style="padding: 12px 10px;"><div class="stat-label" style="font-size:10px; display:flex; align-items:center; gap:4px; justify-content:center; margin-bottom:4px;">${s.label}</div><div class="stat-value" style="font-size:18px;">${s.value}</div></div>`).join('');
+}
+
+// ============ Form Listeners (Income & Spend) ============
+const formIncome = document.getElementById('form-income');
+if (formIncome) {
+    formIncome.addEventListener('submit', (e) => { 
+        e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; 
+        DATA.stellarJade.push({ 
+            date: fd.get('date'), 
+            activity: String(fd.get('activity') || '').trim(), 
+            jade: Math.abs(Number(fd.get('jade')) || 0), 
+            shards: Math.abs(Number(fd.get('shards')) || 0), 
+            passes: Math.abs(Number(fd.get('passes')) || 0),
+            standardPasses: Math.abs(Number(fd.get('standardPasses')) || 0)
+        }); 
+        sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs(); 
+    });
+}
+
+const formSpend = document.getElementById('form-spend');
+if (formSpend) {
+    formSpend.addEventListener('submit', (e) => { 
+        e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; 
+        let pullsToSpend = Math.abs(Number(fd.get('pulls')) || 0); 
+        let reason = String(fd.get('reason') || '').trim();
+        let bannerType = fd.get('bannerType'); // 'limited' atau 'standard'
+
+        let passKey = bannerType === 'standard' ? 'standardPasses' : 'passes';
+        
+        let availablePasses = DATA.stellarJade.reduce((s, r) => {
+            let p = Number(r[passKey]) || 0; 
+            let isSpend = (Number(r.jade)||0) < 0 || (Number(r.passes)||0) < 0 || (Number(r.shards)||0) < 0 || (Number(r.standardPasses)||0) < 0 || String(r.activity || '').toUpperCase().includes('[SPEND]'); 
+            return s + (isSpend ? -Math.abs(p) : Math.abs(p));
+        }, 0);
+        availablePasses = Math.max(0, availablePasses); 
+        
+        let pDeduct = 0; let jDeduct = 0; let sDeduct = 0;
+
+        if (pullsToSpend <= availablePasses) { 
+            pDeduct = pullsToSpend; 
+        } else { 
+            pDeduct = availablePasses; 
+            let remainingPulls = pullsToSpend - availablePasses; 
+            let jadeCost = remainingPulls * 160; 
+            
+            let availableJade = DATA.stellarJade.reduce((s, r) => {
+                let j = Number(r.jade) || 0; 
+                let isSpend = (Number(r.jade)||0) < 0 || (Number(r.passes)||0) < 0 || (Number(r.shards)||0) < 0 || (Number(r.standardPasses)||0) < 0 || String(r.activity || '').toUpperCase().includes('[SPEND]'); 
+                return s + (isSpend ? -Math.abs(j) : Math.abs(j));
+            }, 0);
+            availableJade = Math.max(0, availableJade);
+
+            if (jadeCost <= availableJade) {
+                jDeduct = jadeCost;
+            } else {
+                jDeduct = availableJade;
+                let remainingCost = jadeCost - jDeduct;
+                sDeduct = remainingCost; // Shards akan menutupi sisa kekurangan Jade (Rasio 1:1)
+            }
+        }
+
+        DATA.stellarJade.push({ 
+            date: fd.get('date'), 
+            activity: `[SPEND] ${reason}`, 
+            jade: -jDeduct, 
+            shards: -sDeduct,
+            passes: bannerType === 'limited' ? -pDeduct : 0,
+            standardPasses: bannerType === 'standard' ? -pDeduct : 0
+        }); 
+        sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs(); 
+    });
+}
 
   renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity','<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">','<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Star Rail Pass" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">'], 
   r => {
