@@ -331,10 +331,10 @@ function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
   
   tbody.innerHTML = indexed.map(({ r, idx }) => {
     const cells = rowToCells(r);
-    // Menyuntikkan 'data-raw' (berisi jam lengkap) ke kolom Date (kolom index 0) secara tersembunyi
+    // Menyuntikkan 'data-raw' ke kolom Date (kolom index 0)
     const cellsHtml = cells.map((c, i) => i === 0 ? `<td data-raw="${r.date}">${c}</td>` : `<td>${c}</td>`).join('');
     return `<tr>${cellsHtml}<td>
-      <div style="display:flex; gap:6px;">
+      <div style="display:flex; gap:6px; justify-content:center;">
           <button type="button" class="btn-dup" onclick="dupEntry('${section}', ${idx})" title="Duplicate">⧉</button>
           <button type="button" class="btn-edit" onclick="editEntry('${section}', ${idx})" title="Edit">✎</button>
           <button type="button" class="btn-del" onclick="deleteEntry('${section}', ${idx})" title="Delete">✕</button>
@@ -342,6 +342,7 @@ function renderDeleteTable(tableId, section, columnLabels, rowToCells, sortFn) {
     </td></tr>`;
   }).join('');
 }
+
 window.dupEntry = function(section, idx) {
   const item = DATA[section][idx];
   DATA[section].push(JSON.parse(JSON.stringify(item)));
@@ -444,7 +445,6 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
   
   const displayRows = [...rows].reverse();
   const gaps = displayRows.map((r, i) => {
-  
     if (i === 0) return 75; 
     const newerPull = displayRows[i - 1]; 
     return Math.max(Math.sqrt(newerPull.daysSince || 0.5) * 22, 46);
@@ -461,7 +461,6 @@ function renderTrack(containerId, rows, maxPity, hasResult) {
         imgSrc = MASTER_CHARACTERS[lowerName].img;
     }
 
-    // === LOGIKA DINAMIKA WARNA PITY & AURA ===
     let pityColor = 'var(--gold-soft)';
     let fontWeight = 'normal';
     let baseAura = '0 0 10px rgba(232, 184, 75, 0.3)'; 
@@ -994,13 +993,6 @@ document.getElementById('form-character')?.addEventListener('submit', (e) => {
 });
 
 // ============ STELLAR JADE & MANAGEMENT ============
-const F2P_ESTIMATES = {
-  '1.0': 213.7, '1.1': 93.7, '1.2': 94.1, '1.3': 115.7, '1.4': 77.2, '1.5': 106.0, '1.6': 103.7,
-  '2.0': 124.4, '2.1': 123.6, '2.2': 106.4, '2.3': 103.1, '2.4': 87.9, '2.5': 97.5, '2.6': 108.0, '2.7': 91.9,
-  '3.0': 120.7, '3.1': 111.3, '3.2': 123.8, '3.3': 103.8, '3.4': 92.4, '3.5': 92.2, '3.6': 94.0, '3.7': 125.7, '3.8': 104.3,
-  '4.0': 90.8, '4.1': 129.4, '4.2': 131.6, '4.3': 84.3
-};
-
 function renderStellarJade() {
   const rows = DATA.stellarJade || []; 
   let currentJade = 0; let currentPasses = 0; let currentShards = 0; let currentStandard = 0;
@@ -1027,10 +1019,8 @@ function renderStellarJade() {
           j = Math.abs(j); p = Math.abs(p); sh = Math.abs(sh); std = Math.abs(std);
       }
       
-      // 1. TETAP MASUK ke perhitungan Total di paling atas
       currentJade += j; currentPasses += p; currentShards += sh; currentStandard += std;
 
-      // 2. TIDAK MASUK ke perhitungan kotak Version Income Records
       if (!isSaving && !isSpend && !isStarlight) {
           const matchedV = VERSION_SCHEDULE.find(v => r.date >= v.start && r.date < v.end);
           if (matchedV) {
@@ -1066,23 +1056,6 @@ function renderStellarJade() {
       let daysCount = 0; if (d.v1 && d.v2) { daysCount = daysBetween(d.v2.end, d.v1.start); }
       const durationHtml = daysCount > 0 ? `<div style="text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--text-dim); margin-top:6px; background:rgba(255,255,255,0.03); padding:4px; border-radius:4px; letter-spacing:0.05em;">${daysCount} Days</div>` : '';
 
-      if (isOlder && tPull === 0 && F2P_ESTIMATES[fullV]) {
-          return `
-          <div class="version-card ${isActive ? 'version-active' : ''}" style="padding:16px; display:flex; flex-direction:column; gap:12px;">
-            <div>
-                <div class="version-label" style="font-size:16px; color:var(--text);">Version ${fullV}</div>
-                <div class="version-dates" style="font-size:11px; color:var(--text-dim); margin-top:2px;">${formatDate(d.v1 ? d.v1.start : '')} – ${formatDate(d.v2 ? d.v2.end : '')}</div>
-                ${durationHtml}
-            </div>
-            <div style="background:rgba(255,255,255,0.02); padding:16px 12px; border-radius:8px; text-align:center; border: 1px dashed rgba(255,255,255,0.1); flex:1; display:flex; flex-direction:column; justify-content:center;">
-                <div style="font-size:11px; color:var(--text-dim); margin-bottom:6px;">Estimated F2P Income</div>
-                <div style="display:flex; justify-content:center; align-items:center; gap:6px; font-family:var(--font-mono); font-size:18px; font-weight:bold; color:var(--gold-soft);">
-                    ~${F2P_ESTIMATES[fullV]} <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:16px;height:16px;margin-top:0;">
-                </div>
-            </div>
-          </div>`;
-      }
-      
       const gridHtml = (jade, shard, pass, std, pulls, label, color) => `
           <div style="background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px; border: ${label==='Total'?'1px solid rgba(232, 184, 75, 0.2)':'none'}; background: ${label==='Total'?'rgba(232, 184, 75, 0.1)':'rgba(255,255,255,0.03)'};">
               <div style="font-size:11px; font-weight:bold; color:${color}; margin-bottom:8px; text-align:center;">${label}</div>
@@ -1116,7 +1089,6 @@ function renderStellarJade() {
       let recentHtml = recentVersions.map(v => renderCard(v, false)).join(''); let olderHtml = olderVersions.map(v => renderCard(v, true)).join('');
       html = recentHtml;
       
-      // Tombol Toggle tanpa emoji panah dan tanpa angka
       if (olderVersions.length > 0) {
           html += `
           <div style="grid-column: 1 / -1; margin-top: 12px; margin-bottom: 12px;">
@@ -1216,7 +1188,7 @@ if (formSpend) {
         e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; 
         let pullsToSpend = Math.abs(Number(fd.get('pulls')) || 0); 
         let reason = String(fd.get('reason') || '').trim();
-        let bannerType = fd.get('bannerType'); // 'limited' atau 'standard'
+        let bannerType = fd.get('bannerType') || 'limited'; 
 
         let passKey = bannerType === 'standard' ? 'standardPasses' : 'passes';
         
@@ -1248,7 +1220,7 @@ if (formSpend) {
             } else {
                 jDeduct = availableJade;
                 let remainingCost = jadeCost - jDeduct;
-                sDeduct = remainingCost; // Shards akan menutupi sisa kekurangan Jade (Rasio 1:1)
+                sDeduct = remainingCost; 
             }
         }
 
@@ -1264,95 +1236,9 @@ if (formSpend) {
     });
 }
 
-  renderDeleteTable('manageTable-stellarjade','stellarJade', ['Date','Version','Activity','<img src="./assets/Items/Stellar%20Jade.png" title="Stellar Jade" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">','<img src="./assets/Items/Star%20Rail%20Special%20Pass.png" title="Star Rail Pass" class="pass-icon" style="width:16px;height:16px;vertical-align:middle;">'], 
-  r => {
-      let j = parseFloat(r.jade) || 0; let p = parseFloat(r.passes) || 0; let act = String(r.activity || '');
-      let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); let isSaving = act.toLowerCase().includes('saving');
-      let jStr = fmt(isSpend ? -Math.abs(j) : Math.abs(j), 0); let pStr = fmt(isSpend ? -Math.abs(p) : Math.abs(p), 0);
-      let actDisplay = act.replace(/\[SPEND\]/gi, '').trim();
-      
-      if (isSpend) {
-          jStr = `<span style="color:var(--loss)">${jStr}</span>`; pStr = `<span style="color:var(--loss)">${pStr}</span>`;
-          actDisplay = `<span style="color:var(--loss); font-weight:bold; font-size:10px; border:1px solid var(--loss); padding:2px 4px; border-radius:4px; margin-right:6px;">SPEND</span> ${actDisplay}`;
-      } else if (isSaving) {
-          jStr = `<span style="color:var(--cyan)">+${jStr}</span>`; pStr = `<span style="color:var(--cyan)">+${pStr}</span>`;
-          actDisplay = `<span style="color:var(--cyan); font-weight:bold; font-size:10px; border:1px solid var(--cyan); padding:2px 4px; border-radius:4px; margin-right:6px;">SAVING</span> ${actDisplay}`;
-      } else { jStr = `+${jStr}`; pStr = `+${pStr}`; }
-
-      return [formatDate(r.date), getVersionForDate(r.date, VERSION_SCHEDULE), actDisplay, jStr, pStr];
-  }, (a, b) => { const cmp = String(b.r.date || '').localeCompare(String(a.r.date || '')); return cmp !== 0 ? cmp : b.idx - a.idx; });
-
-  const totalSavingPulls = (currentJade / 160) + currentPasses;
-  document.getElementById('jadeStats').innerHTML = [
-    { label: 'Current <img src="./assets/Items/Stellar%20Jade.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">', value: fmt(currentJade, 0) }, 
-    { label: 'Current <img src="./assets/Items/Star%20Rail%20Special%20Pass.png" class="pass-icon" style="width:18px;height:18px;margin-bottom:2px;">',value: fmt(currentPasses, 0) }, 
-    { label: 'Total Saving', value: fmt(totalSavingPulls, 1) + ' <span style="font-size:14px; color:var(--text-dim); font-weight:normal;">Pulls</span>' }
-  ].map(s => `<div class="bstat"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
-}
-
-// ============ Form Listeners (Income & Spend) ============
-const formIncome = document.getElementById('form-income');
-if (formIncome) {
-    formIncome.addEventListener('submit', (e) => { 
-        e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; 
-        DATA.stellarJade.push({ date: fd.get('date'), activity: String(fd.get('activity') || '').trim(), jade: Math.abs(Number(fd.get('jade')) || 0), passes: Math.abs(Number(fd.get('passes')) || 0) }); 
-        sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs(); 
-    });
-}
-
-const formSpend = document.getElementById('form-spend');
-if (formSpend) {
-    formSpend.addEventListener('submit', (e) => { 
-        e.preventDefault(); const fd = new FormData(e.target); if(!DATA.stellarJade) DATA.stellarJade = []; 
-        let pullsToSpend = Math.abs(Number(fd.get('pulls')) || 0); let reason = String(fd.get('reason') || '').trim();
-        let availablePasses = DATA.stellarJade.reduce((s, r) => {
-            let p = Number(r.passes) || 0; let j = Number(r.jade) || 0; let act = String(r.activity || '');
-            let isSpend = j < 0 || p < 0 || act.toUpperCase().includes('[SPEND]'); return s + (isSpend ? -Math.abs(p) : Math.abs(p));
-        }, 0);
-        availablePasses = Math.max(0, availablePasses); let pDeduct = 0; let jDeduct = 0;
-
-        if (pullsToSpend <= availablePasses) { pDeduct = pullsToSpend; } 
-        else { pDeduct = availablePasses; let remainingPulls = pullsToSpend - availablePasses; jDeduct = remainingPulls * 160; }
-
-        DATA.stellarJade.push({ date: fd.get('date'), activity: `[SPEND] ${reason}`, jade: -jDeduct, passes: -pDeduct }); 
-        sortByDate(DATA.stellarJade); saveWorkingData(); renderAll(); e.target.reset(); initDateInputs(); 
-    });
-}
-
-// ============ Global Helpers ============
+// ============ Global Helpers (Search & Sort Tabel) ============
 document.querySelectorAll('.table-filter').forEach(input => { input.addEventListener('input', (e) => { const term = e.target.value.toLowerCase().replace(/-/g, '/'); const targetId = e.target.getAttribute('data-table'); const container = document.getElementById(targetId); if (!container) return; if (container.tagName === 'TABLE') { const tbody = container.querySelector('tbody'); if (tbody) { tbody.querySelectorAll('tr').forEach(tr => { if (tr.classList.contains('empty-row')) return; const rowText = tr.textContent.toLowerCase().replace(/-/g, '/'); tr.style.display = rowText.includes(term) ? '' : 'none'; }); } } else { container.querySelectorAll('.searchable-item, .roster-card, .team-card').forEach(card => { card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none'; }); } }); });
-document.addEventListener('click', (e) => { 
-    if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { 
-        const th = e.target; 
-        const table = th.closest('table'); 
-        const tbody = table.querySelector('tbody'); 
-        const idx = Array.from(th.parentNode.children).indexOf(th); 
-        const isAsc = th.classList.contains('asc'); 
-        table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); 
-        th.classList.add(isAsc ? 'desc' : 'asc'); 
-        
-        const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); 
-        rows.sort((a, b) => { 
-            const aCell = a.children[idx]; 
-            const bCell = b.children[idx];
-            
-            // Baca jam tersembunyi (data-raw) jika mengklik kolom Date, jika tidak baca teks biasa
-            const aText = (idx === 0) ? (aCell.getAttribute('data-raw') || aCell.textContent.trim()) : aCell.textContent.trim(); 
-            const bText = (idx === 0) ? (bCell.getAttribute('data-raw') || bCell.textContent.trim()) : bCell.textContent.trim(); 
-            
-            const aClean = aText.replace(/,/g, '').replace(/\+/g, '');
-            const bClean = bText.replace(/,/g, '').replace(/\+/g, '');
-            const aNum = Number(aClean); 
-            const bNum = Number(bClean); 
-            
-            if (aClean !== '' && bClean !== '' && !isNaN(aNum) && !isNaN(bNum)) { 
-                return isAsc ? bNum - aNum : aNum - bNum; 
-            } 
-            return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); 
-        }); 
-        tbody.append(...rows); 
-    } 
-});
+document.addEventListener('click', (e) => { if (e.target.tagName === 'TH' && e.target.closest('.manage-table')) { const th = e.target; const table = th.closest('table'); const tbody = table.querySelector('tbody'); const idx = Array.from(th.parentNode.children).indexOf(th); const isAsc = th.classList.contains('asc'); table.querySelectorAll('th').forEach(h => h.classList.remove('asc', 'desc')); th.classList.add(isAsc ? 'desc' : 'asc'); const rows = Array.from(tbody.querySelectorAll('tr:not(.empty-row)')); rows.sort((a, b) => { const aCell = a.children[idx]; const bCell = b.children[idx]; const aText = (idx === 0) ? (aCell.getAttribute('data-raw') || aCell.textContent.trim()) : aCell.textContent.trim(); const bText = (idx === 0) ? (bCell.getAttribute('data-raw') || bCell.textContent.trim()) : bCell.textContent.trim(); const aClean = aText.replace(/,/g, '').replace(/\+/g, ''); const bClean = bText.replace(/,/g, '').replace(/\+/g, ''); const aNum = Number(aClean); const bNum = Number(bClean); if (aClean !== '' && bClean !== '' && !isNaN(aNum) && !isNaN(bNum)) { return isAsc ? bNum - aNum : aNum - bNum; } return isAsc ? bText.localeCompare(aText) : aText.localeCompare(bText); }); tbody.append(...rows); } });
 document.getElementById('btnDownloadJson')?.addEventListener('click', () => { const content = JSON.stringify(DATA, null, 2); const blob = new Blob([content], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `hsr_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
 document.getElementById('uploadJsonFile')?.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { try { const text = reader.result.trim(); let parsed; if (text.startsWith('{')) { parsed = JSON.parse(text); } else { const m = text.match(/const\s+HSR_DATA\s*=\s*(\{[\s\S]*\})\s*;?\s*$/); if (!m) throw new Error('Unrecognized file format.'); parsed = JSON.parse(m[1]); } ['limited','standard','freebies','roster','priority','team','stellarJade'].forEach(k => { if (!parsed[k]) parsed[k] = []; }); DATA = parsed; saveWorkingData(); renderAll(); alert('Data loaded successfully from file!'); } catch (err) { alert('Failed to load file.\nError: ' + err.message); } finally { e.target.value = ''; } }; reader.readAsText(file); });
 document.getElementById('btnResetData')?.addEventListener('click', () => { if (!confirm('Clear all data? This action cannot be undone.')) return; localStorage.removeItem(STORAGE_KEY); DATA = { limited: [], standard: [], freebies: [], roster: [], priority: [], team: [], stellarJade: [] }; saveWorkingData(); renderAll(); alert('Data cleared.'); });
